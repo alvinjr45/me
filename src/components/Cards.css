@@ -1,0 +1,117 @@
+.cards {
+  padding: 4rem 2rem;
+  background: var(--color-background);
+}
+
+.cards > h1 {
+  text-align: center;
+  color: var(--color-main);
+  margin-bottom: 2rem;
+  font-size: 2.5rem;
+  letter-spacing: 0.02em;
+}
+
+.cards__container {
+  display: flex;
+  flex-flow: column;
+  align-items: center;
+  max-width: 1120px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.cards__wrapper {
+  position: relative;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.cards__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.cards__item {
+  flex: 1;
+  min-width: 280px;
+}
+
+.cards__item__link {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  text-decoration: none;
+  background: var(--color-surface);
+  border: 1px solid rgba(51, 175, 251, 0.25);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+  transition: transform 0.3s ease, border 0.3s ease;
+}
+
+.cards__item__link:hover {
+  transform: translateY(-6px);
+  border-color: var(--color-main);
+}
+
+.cards__item__pic-wrap {
+  position: relative;
+  width: 100%;
+  padding-top: 62%;
+  overflow: hidden;
+}
+
+.cards__item__pic-wrap::after {
+  content: attr(data-category);
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--color-ink);
+  background: var(--color-main);
+  border-radius: 6px;
+  letter-spacing: 0.05em;
+}
+
+.cards__item__img {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.cards__item__img:hover {
+  transform: scale(1.08);
+}
+
+.cards__item__info {
+  padding: 20px 30px 30px;
+}
+
+.cards__item__text {
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.8;
+}
+
+@media only screen and (min-width: 1024px) {
+  .cards__items {
+    flex-wrap: nowrap;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .cards__items {
+    flex-direction: column;
+  }
+}

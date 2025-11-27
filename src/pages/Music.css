@@ -1,0 +1,125 @@
+.music-page {
+  min-height: 100vh;
+  padding: 4rem 1.5rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 2.5rem;
+  align-items: start;
+  background: radial-gradient(circle at 20% 20%, rgba(51, 175, 251, 0.35), transparent 40%),
+    radial-gradient(circle at 80% 30%, rgba(255, 127, 51, 0.3), transparent 45%),
+    linear-gradient(160deg, rgba(0, 20, 60, 1), rgba(3, 6, 32, 1));
+  color: var(--color-text);
+}
+
+.music-page__copy {
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  padding-top: 12rem;
+  padding-left: 8rem;
+}
+
+.music-page__copy p {
+  margin: 0;
+  color: rgba(249, 249, 249, 0.9);
+}
+
+.music-page__copy h1 {
+  margin: 0;
+  font-size: clamp(3rem, 5vw, 4.4rem);
+  color: var(--color-main);
+}
+
+.music-page__embed-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+  width: 100%;
+  max-width: 660px;
+}
+
+.music-page__playlist-nav {
+  display: inline-flex;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 0.9rem;
+  border-radius: 999px;
+  background: rgba(251, 127, 51, 0.25);
+  border: 1px solid rgba(251, 127, 51, 0.7);
+  box-shadow: 0 20px 40px rgba(251, 127, 51, 0.2);
+}
+
+.music-page__page-button {
+  min-width: 120px;
+  height: 50px;
+  border-radius: 25px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--color-text);
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: all 0.25s ease;
+  cursor: inherit;
+}
+
+.music-page__page-button--active,
+.music-page__page-button:hover {
+  background: rgba(51, 175, 251, 0.3);
+  border-color: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+}
+.music-page__embed {
+  width: 100%;
+  height: 820px;
+  max-height: 820px;
+  min-height: 820px;
+  border-radius: 0;
+  overflow: hidden;
+  position: relative;
+  box-sizing: border-box;
+  transition: none;
+}
+
+.music-page__iframe {
+  border: 0;
+  width: 100% !important;
+  height: 820px !important;
+  min-height: 820px;
+  max-height: 820px;
+  display: block;
+  border-radius: 10px;
+  cursor: inherit;
+}
+
+@media (max-width: 900px) {
+  .music-page {
+    grid-template-columns: 1fr;
+  }
+
+  .music-page__playlist-nav {
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 768px) {
+  .music-page__copy {
+    padding-left: 1.5rem;
+    padding-top: 6rem;
+    align-items: flex-start;
+  }
+
+  .music-page__embed-layout {
+    max-width: 100%;
+    padding: 0 1rem;
+  }
+
+  .music-page__embed {
+    height: 680px;
+    min-height: 680px;
+  }
+}

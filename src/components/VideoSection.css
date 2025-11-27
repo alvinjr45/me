@@ -1,0 +1,68 @@
+.video-container {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+    background: var(--color-background);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 1.5rem;
+}
+
+.video-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.7));
+    pointer-events: none;
+    z-index: 1;
+}
+
+.video-container video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+}
+
+.video-container h1 {
+    z-index: 2;
+    color: var(--color-main);
+    font-size: clamp(2.5rem, 5vw, 5rem);
+    margin: 0;
+}
+
+.video-container p {
+    z-index: 2;
+    color: var(--color-accent);
+    font-size: clamp(1.5rem, 2vw, 2.2rem);
+    margin-top: 0.75rem;
+}
+
+.video-btns {
+    z-index: 2;
+    margin-top: 2rem;
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.video-btns .btn {
+    min-width: 180px;
+}
+
+.fa-play-circle {
+    margin-left: 4px;
+}
+
+@media screen and (max-width: 768px) {
+    .video-btns {
+        flex-direction: column;
+    }
+}

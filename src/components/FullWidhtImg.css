@@ -1,0 +1,22 @@
+.img-container {
+    width: 100%;
+    min-height: 100vh;
+    height: 100vh;
+    background-color: var(--color-surface);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1px solid rgba(251, 127, 51, 0.5);
+}
+
+.img-container::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(5, 5, 5, 0.75), rgba(5, 5, 5, 0.35));
+    pointer-events: none;
+}

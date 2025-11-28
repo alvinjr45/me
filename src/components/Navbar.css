@@ -37,6 +37,11 @@
 .brand-icon {
     color: var(--color-main);
     font-size: 1.3rem;
+    font-family: 'Source Code Pro', monospace;
+    letter-spacing: 0.2em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .navbar-toggle {

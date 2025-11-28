@@ -7,8 +7,7 @@ function Navbar() {
   const [click, setClick] = useState(false);
 
   const navLinks = [
-    { to: '/', label: '.home( )' },
-    { to: '/aboutme', label: '.aboutMe( )' },
+    { to: '/', label: '.me( )' },
     { to: '/dogs', label: '.meetDrakeAndJosh( )' },
     { to: '/techstuff', label: '.techStuff( )' },
     { to: '/music', label: '.music( )' },
@@ -32,9 +31,9 @@ function Navbar() {
     <nav className="navbar">
       <div className="navbar-container">
         <Link to="/" className="navbar-logo" onClick={closeMobileMenu}>
-          <i className="fa-solid fa-code brand-icon" />
+          <span className="brand-icon brand-icon--opening">&lt;&gt;</span>
           <span>AJT3.Me</span>
-          <i className="fa-solid fa-code brand-icon" />
+          <span className="brand-icon brand-icon--closing">&lt;/&gt;</span>
         </Link>
         <button className="navbar-toggle" onClick={handleClick} aria-label="Toggle navigation">
           <i className={click ? 'fas fa-times' : 'fas fa-bars'} />

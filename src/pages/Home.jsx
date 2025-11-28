@@ -17,9 +17,7 @@ function Home() {
       <div className="home-hero__overlay"></div>
       <div className="home-hero__content">
         <p className="home-hero__eyebrow">AJT3.Me</p>
-        <h1 className="home-hero__heading">
-          I build software by daylight and chase curiosity through neon nights.
-        </h1>
+        <h1 className="home-hero__heading">.me( )</h1>
         <p className="home-hero__subtitle">
           I’m A.J., a 27-year-old software developer who loves reviewing the latest tech, trying new things,
           and channeling piano energy into every project. If you like playful experimentation with a

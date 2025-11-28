@@ -64,6 +64,24 @@
   cursor: pointer;
 }
 
+.music-page__fold-cue--secondary {
+  position: relative;
+  bottom: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: -0.5rem;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.music-page__fold-cue--secondary.music-page__fold-cue--visible {
+  opacity: 0.95;
+  visibility: visible;
+  transform: translateX(-50%);
+}
+
 .music-page__primary section {
   margin: 0;
 }
@@ -110,13 +128,16 @@
 
 .music-page__section-fade {
   opacity: 0;
+  visibility: hidden;
   transform: translateY(24px);
-  transition: opacity 1s ease, transform 1s ease;
+  transition: opacity 1s ease, transform 1s ease, visibility 0s linear 1s;
 }
 
 .music-page__section-fade--visible {
   opacity: 1;
+  visibility: visible;
   transform: translateY(0);
+  transition: opacity 1s ease, transform 1s ease;
 }
 
 .music-page__artist-frames {
@@ -131,6 +152,41 @@
 
 .music-page__artist-copy {
   padding-top: 12rem;
+}
+
+.music-page__songs-section {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(400px, 1.2fr);
+  gap: 2rem;
+  align-items: stretch;
+  justify-items: stretch;
+  margin: 0;
+  margin-top: -6.25rem;
+}
+
+.music-page__songs-copy {
+  padding-top: 10rem;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-left: 8rem;
+  padding-top: 12rem;
+}
+
+.music-page__songs-embed {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: min(660px, 100%);
+  box-sizing: border-box;
+  align-items: center;
+}
+
+.music-page__songs-embed .music-page__playlist-nav {
+  width: fit-content;
+  justify-content: center;
 }
 
 .music-page__artist-copy,
@@ -171,7 +227,7 @@
   border: 1px solid rgba(255, 255, 255, 0.25);
   background: rgba(255, 255, 255, 0.05);
   color: var(--color-text);
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   transition: all 0.25s ease;
@@ -217,6 +273,10 @@
   pointer-events: auto;
   z-index: 1;
   transform: translateY(0);
+}
+
+.music-page__iframe--initial {
+  transition: opacity 1s ease, transform 1s ease;
 }
 
 .music-page__copy {

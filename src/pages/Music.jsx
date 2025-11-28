@@ -15,25 +15,42 @@ const playlists = {
     embed: 'https://embed.music.apple.com/us/playlist/gospel/pl.u-b6y8t39yJv8',
   },
 };
-
 const artistPages = [
+  { key: 'drizzy', title: 'Drizzy', src: 'https://embed.music.apple.com/us/playlist/drake/pl.u-lx4JTP2ja3D' },
   { key: 'wunna', title: 'Wunna', src: 'https://embed.music.apple.com/us/playlist/gunna/pl.u-RgV5TeP3q1a' },
   { key: 'pluto', title: 'Pluto', src: 'https://embed.music.apple.com/us/playlist/pluto/pl.u-le6AcP2ja3D' },
-  { key: 'drizzy', title: 'Drizzy', src: 'https://embed.music.apple.com/us/playlist/drake/pl.u-lx4JTP2ja3D' },
   { key: 'weeknd', title: 'The Weeknd', src: 'https://embed.music.apple.com/us/playlist/the-weeknd/pl.u-BpJesRv1kPN' },
   { key: 'cole', title: 'Cole', src: 'https://embed.music.apple.com/us/playlist/carolinas-finest/pl.u-vvdMt8YzK6p' },
 ];
 
+const songsPages = [
+  { key: 'top10', title: 'Top 10', src: 'https://embed.music.apple.com/us/playlist/top-10-songs-of-all-time/pl.u-AZ5aTlm28oZ' },
+  { key: 'songofday', title: 'Song of the day', src: 'https://embed.music.apple.com/us/album/cpr/1438765128?i=1438765140' },
+];
+
+const navOrder = {
+  wunna: 1,
+  pluto: 2,
+  drizzy: 3,
+  weeknd: 4,
+  cole: 5,
+};
+
 function Music() {
   const [activePlaylist, setActivePlaylist] = useState('hm');
   const [activeArtist, setActiveArtist] = useState('drizzy');
+  const [activeSongs, setActiveSongs] = useState('top10');
   const [isReady, setIsReady] = useState(false);
   const [copyVisible, setCopyVisible] = useState(false);
   const [artistVisible, setArtistVisible] = useState(false);
-  const [showCue, setShowCue] = useState(true);
+  const [showFirstCue, setShowFirstCue] = useState(true);
+  const [framesInitial, setFramesInitial] = useState(false);
   const artistRef = useRef(null);
+  const songsRef = useRef(null);
   const artistDelay = useRef(null);
   const artistVisibleRef = useRef(artistVisible);
+  const songsVisibleRef = useRef(false);
+  const [showSecondCue, setShowSecondCue] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsReady(true), 1450);
@@ -41,9 +58,26 @@ function Music() {
   }, []);
 
   useEffect(() => {
+    if (!isReady) {
+      return undefined;
+    }
+    setFramesInitial(true);
+    const timer = setTimeout(() => setFramesInitial(false), 1200);
+    return () => clearTimeout(timer);
+  }, [isReady]);
+
+  useEffect(() => {
     const timer = setTimeout(() => setCopyVisible(true), 450);
     return () => clearTimeout(timer);
   }, []);
+
+  const evaluateSongsCue = () => {
+    if (!songsRef.current) {
+      return false;
+    }
+    const songsTop = songsRef.current.getBoundingClientRect().top + window.scrollY;
+    return artistVisibleRef.current && window.scrollY + window.innerHeight < songsTop - 50;
+  };
 
   const scrollToArtistButtons = () => {
     if (!artistRef.current) {
@@ -70,8 +104,38 @@ function Music() {
     });
   };
 
+  const scrollToSongsButtons = () => {
+    if (!songsRef.current) {
+      return;
+    }
+
+    if (typeof window === 'undefined' || typeof document === 'undefined') {
+      return;
+    }
+
+    const nav = songsRef.current?.querySelector('.music-page__playlist-nav');
+    if (!nav) {
+      return;
+    }
+
+    const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    const desiredGap = 9 * rootFontSize;
+    const navTop = nav.getBoundingClientRect().top + window.scrollY;
+    const scrollLimit = document.documentElement.scrollHeight - window.innerHeight;
+
+    window.scrollTo({
+      top: Math.min(Math.max(navTop - desiredGap, 0), scrollLimit),
+      behavior: 'smooth',
+    });
+  };
+
   const handleCueClick = () => {
     scrollToArtistButtons();
+    setShowSecondCue(true);
+  };
+
+  const handleSecondCueClick = () => {
+    scrollToSongsButtons();
   };
 
   useEffect(() => {
@@ -81,16 +145,18 @@ function Music() {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        setShowCue(!entry.isIntersecting);
-        if (entry.isIntersecting && !artistVisibleRef.current) {
+        const inView = entry.isIntersecting;
+        setShowFirstCue(!inView);
+        if (inView && !artistVisibleRef.current) {
           if (artistDelay.current) {
             clearTimeout(artistDelay.current);
           }
-          artistDelay.current = setTimeout(() => {
-            setArtistVisible(true);
-            artistVisibleRef.current = true;
-            artistDelay.current = null;
-          }, 500);
+            artistDelay.current = setTimeout(() => {
+              setArtistVisible(true);
+              artistVisibleRef.current = true;
+              artistDelay.current = null;
+              setShowSecondCue(evaluateSongsCue());
+            }, 500);
         }
       },
       { rootMargin: '-20% 0px 0px 0px', threshold: 0 }
@@ -103,6 +169,21 @@ function Music() {
         clearTimeout(artistDelay.current);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    if (!songsRef.current) {
+      return undefined;
+    }
+
+    const handleScroll = () => {
+      setShowSecondCue(evaluateSongsCue());
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   return (
@@ -127,6 +208,7 @@ function Music() {
                 }`}
                 onClick={() => setActivePlaylist(key)}
                 type="button"
+                style={{ order: navOrder[key] ?? 0 }}
               >
                 {playlist.title}
               </button>
@@ -142,7 +224,7 @@ function Music() {
                   frameBorder="0"
                   width="100%"
                   height="820"
-                  className={`music-page__iframe ${shouldShow ? 'music-page__iframe--active' : ''}`}
+                className={`music-page__iframe ${shouldShow ? 'music-page__iframe--active' : ''} ${framesInitial ? 'music-page__iframe--initial' : ''}`}
                   src={playlist.embed}
                   sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
                   title={`${playlist.title} Playlist`}
@@ -155,7 +237,7 @@ function Music() {
       </div>
       <div
         className={`music-page__fold-cue ${
-          showCue ? 'music-page__fold-cue--visible' : 'music-page__fold-cue--hidden'
+          showFirstCue ? 'music-page__fold-cue--visible' : 'music-page__fold-cue--hidden'
         }`}
         onClick={handleCueClick}
       >
@@ -178,6 +260,7 @@ function Music() {
                 }`}
                 onClick={() => setActiveArtist(page.key)}
                 type="button"
+                style={{ order: navOrder[page.key] }}
               >
                 {page.title}
               </button>
@@ -193,7 +276,7 @@ function Music() {
                   frameBorder="0"
                   width="100%"
                   height="820"
-                  className={`music-page__iframe ${shouldShow ? 'music-page__iframe--active' : ''}`}
+                  className={`music-page__iframe ${shouldShow ? 'music-page__iframe--active' : ''} ${framesInitial ? 'music-page__iframe--initial' : ''}`}
                   src={page.src}
                   sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
                   title={`${page.title} Playlist`}
@@ -211,6 +294,66 @@ function Music() {
             the artists who can kick start any day.
           </p>
         </div>
+      </section>
+
+      <div
+        className={`music-page__fold-cue music-page__fold-cue--secondary ${
+          showSecondCue ? 'music-page__fold-cue--visible' : 'music-page__fold-cue--hidden'
+        }`}
+        onClick={handleSecondCueClick}
+      >
+        <span>Scroll for more</span>
+        <span aria-hidden="true">⌄</span>
+      </div>
+
+      <section
+        className={`music-page__songs-section music-page__section-fade ${
+          artistVisible ? 'music-page__section-fade--visible' : ''
+        }`}
+        ref={songsRef}
+      >
+        <div className={`music-page__copy music-page__songs-copy${copyVisible ? ' music-page__copy--visible' : ''}`}>
+          <p>Curated cuts</p>
+          <h1>.songs( )</h1>
+          <p>These are tracks that played through the late-night lab sessions.</p>
+        </div>
+        <section className="music-page__songs-embed">
+          <div className={`music-page__playlist-nav ${isReady ? 'music-page__playlist-nav--visible' : 'music-page__playlist-nav--hidden'}`}>
+            {songsPages.map((page) => (
+              <button
+                key={`${page.key}-songs`}
+                className={`music-page__page-button ${
+                  activeSongs === page.key ? 'music-page__page-button--active' : ''
+                }`}
+                type="button"
+                onClick={() => setActiveSongs(page.key)}
+              >
+                {page.title}
+              </button>
+            ))}
+          </div>
+          <div className="music-page__embed">
+            {songsPages.map((page) => {
+              const shouldShow = isReady && activeSongs === page.key;
+              return (
+                <iframe
+                  key={`${page.key}-songs-frame`}
+                  allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+                  frameBorder="0"
+                  width="100%"
+                  height="820"
+                  className={`music-page__iframe ${shouldShow ? 'music-page__iframe--active' : ''} ${
+                    framesInitial ? 'music-page__iframe--initial' : ''
+                  }`}
+                  src={page.src}
+                  sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                  title={`${page.title} songs playlist`}
+                  loading="eager"
+                />
+              );
+            })}
+          </div>
+        </section>
       </section>
     </main>
   );

@@ -20,7 +20,7 @@ body {
   color: var(--color-text);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='32'%3E%3Ctext x='3' y='22' font-size='18' font-family='monospace' fill='%23fb7f33'%3E&lt;/&gt;%3C/text%3E%3C/svg%3E"), crosshair;
+  cursor: default;
 }
 
 button,
@@ -28,7 +28,7 @@ a,
 input,
 textarea,
 select {
-  cursor: inherit;
+  cursor: default;
 }
 
 #root {

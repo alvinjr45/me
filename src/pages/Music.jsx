@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Music.css';
 
 const playlists = {
@@ -17,12 +17,19 @@ const playlists = {
 };
 function Music() {
   const [active, setActive] = useState('hm');
-
-  const current = playlists[active];
-
+  const [isReady, setIsReady] = useState(false);
+  const [copyVisible, setCopyVisible] = useState(false);
+  useEffect(() => {
+    const timer = setTimeout(() => setIsReady(true), 1450);
+    return () => clearTimeout(timer);
+  }, []);
+  useEffect(() => {
+    const timer = setTimeout(() => setCopyVisible(true), 450);
+    return () => clearTimeout(timer);
+  }, []);
   return (
     <main className="music-page">
-      <section className="music-page__copy">
+      <section className={`music-page__copy${copyVisible ? ' music-page__copy--visible' : ''}`}>
         <p>Favorite tracks</p>
         <h1>.music()</h1>
         <p>
@@ -33,7 +40,7 @@ function Music() {
         </p>
       </section>
       <section className="music-page__embed-layout">
-        <div className="music-page__playlist-nav">
+        <div className={`music-page__playlist-nav ${isReady ? 'music-page__playlist-nav--visible' : 'music-page__playlist-nav--hidden'}`}>
           {Object.entries(playlists).map(([key, playlist]) => (
             <button
               key={key}
@@ -48,18 +55,23 @@ function Music() {
           ))}
         </div>
         <div className="music-page__embed">
-          <iframe
-            key={`${active}-${current.title}`}
-            allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-            frameBorder="0"
-            width="100%"
-            height="820"
-            className="music-page__iframe"
-            src={current.embed}
-            sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-            title={`${current.title} Playlist`}
-            loading="eager"
-          />
+          {Object.entries(playlists).map(([key, playlist]) => {
+            const shouldShow = isReady && active === key;
+            return (
+              <iframe
+                key={key}
+                allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+                frameBorder="0"
+                width="100%"
+                height="820"
+                className={`music-page__iframe ${shouldShow ? 'music-page__iframe--active' : ''}`}
+                src={playlist.embed}
+                sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                title={`${playlist.title} Playlist`}
+                loading="eager"
+              />
+            );
+          })}
         </div>
       </section>
     </main>

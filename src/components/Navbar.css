@@ -31,10 +31,11 @@
     text-transform: uppercase;
     text-decoration: none;
     margin-left: 0.5rem;
+    cursor: default;
 }
 
 .brand-icon {
-    color: var(--color-accent);
+    color: var(--color-main);
     font-size: 1.3rem;
 }
 
@@ -44,7 +45,7 @@
     border: none;
     color: var(--color-text);
     font-size: 1.6rem;
-    cursor: pointer;
+    cursor: default;
     margin-right: 0.5rem;
 }
 

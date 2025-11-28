@@ -26,6 +26,10 @@
   color: rgba(249, 249, 249, 0.9);
 }
 
+.music-page__copy--hidden {
+  opacity: 0;
+}
+
 .music-page__copy h1 {
   margin: 0;
   font-size: clamp(3rem, 5vw, 4.4rem);
@@ -50,6 +54,17 @@
   background: rgba(251, 127, 51, 0.25);
   border: 1px solid rgba(251, 127, 51, 0.7);
   box-shadow: 0 20px 40px rgba(251, 127, 51, 0.2);
+}
+
+.music-page__playlist-nav--hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.music-page__playlist-nav--visible {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.4s ease, visibility 0.4s ease;
 }
 
 .music-page__page-button {
@@ -82,18 +97,40 @@
   overflow: hidden;
   position: relative;
   box-sizing: border-box;
-  transition: none;
 }
 
 .music-page__iframe {
   border: 0;
-  width: 100% !important;
-  height: 820px !important;
+  width: 100%;
+  height: 820px;
   min-height: 820px;
   max-height: 820px;
-  display: block;
+  position: absolute;
+  inset: 0;
   border-radius: 10px;
   cursor: inherit;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 1s ease, transform 1s ease;
+  pointer-events: none;
+}
+
+.music-page__iframe--active {
+  opacity: 1;
+  pointer-events: auto;
+  z-index: 1;
+  transform: translateY(0);
+}
+
+.music-page__copy {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.music-page__copy--visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 @media (max-width: 900px) {

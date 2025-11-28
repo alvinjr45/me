@@ -3,7 +3,7 @@
     border-radius: 50px;
     outline: none;
     border: 1px solid transparent;
-    cursor: pointer;
+    cursor: default;
     font-weight: 600;
     transition: all 0.3s ease;
     background: transparent;

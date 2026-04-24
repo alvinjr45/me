@@ -4,7 +4,7 @@ import LetterGlitch from '../components/LetterGlitch';
 import './Home.css';
 
 const homeGlitchColors = ['#fb7f33', '#33affb', '#f9f9f9'];
-const WEBSITE_URL = 'https://ajt3.website';
+const WEBSITE_URL = 'http://localhost:5173';
 const homeHighlights = [
   {
     title: '.blog( )',

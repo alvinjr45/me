@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-route
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Blog from './pages/Blog';
+import BlogPost from './pages/BlogPost';
 import Dogs from './pages/Dogs';
 import Music from './pages/Music';
 import ScrollToTop from './components/ScrollToTop';
@@ -22,6 +23,7 @@ function AppShell() {
         <Routes>
           <Route path="/" exact element={<Home />} />
           <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/dogs" element={<Dogs />} />
           <Route path="/music" element={<Music />} />
         </Routes>

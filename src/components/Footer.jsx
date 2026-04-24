@@ -1,6 +1,7 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import './Footer.css';
+
+const WEBSITE_URL = 'https://ajt3.website';
 
 export default function Footer() {
   return (
@@ -14,9 +15,9 @@ export default function Footer() {
             I&apos;m in the lab and always listening.
           </p>
         </div>
-        <Link className="footer-cta__button" to="/contactme">
+        <a className="footer-cta__button" href={WEBSITE_URL}>
           Contact AJ
-        </Link>
+        </a>
       </div>
       <div className="footer-meta">
         <span>© {new Date().getFullYear()} AJ Thompson</span>

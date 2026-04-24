@@ -3,14 +3,16 @@ import { React, useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './Navbar.css'; // Optional: For custom styles
 
+const WEBSITE_URL = 'https://ajt3.website';
+
 function Navbar() {
   const [click, setClick] = useState(false);
 
   const navLinks = [
     { to: '/', label: '.me( )' },
+    { to: '/blog', label: '.blog( )' },
     { to: '/dogs', label: '.meetDrakeAndJosh( )' },
-    { to: '/techstuff', label: '.techStuff( )' },
-    { to: '/music', label: '.music( )' },
+    { to: '/music', label: '.music( )' }
   ];
 
   const handleClick = () => setClick((prev) => !prev);
@@ -44,12 +46,13 @@ function Navbar() {
               {link.label}
             </Link>
           ))}
-          <Link to="/contactme" className="nav-links nav-links-contact" onClick={closeMobileMenu}>
+          <a href={WEBSITE_URL} className="nav-links nav-links-contact" onClick={closeMobileMenu}>
             .contactMe( )
-          </Link>
+          </a>
         </div>
       </div>
     </nav>
   );
 }
+
 export default Navbar;

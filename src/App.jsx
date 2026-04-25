@@ -1,7 +1,6 @@
 // src/App.js
 import React from 'react';
-import { BrowserRouter as Router, Route, Routes, useLocation } from 'react-router-dom';
-import Navbar from './components/Navbar';
+import { BrowserRouter as Router, Link, Route, Routes, useLocation } from 'react-router-dom';
 import Home from './pages/Home';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
@@ -13,13 +12,17 @@ import './App.css'; // Optional: For global styles
 
 function AppShell() {
   const location = useLocation();
-  const showNavbar = location.pathname !== '/';
+  const showHomeReturn = location.pathname !== '/';
 
   return (
     <div >
       <div className="App" >
         <ScrollToTop />
-        {showNavbar ? <Navbar /> : null}
+        {showHomeReturn ? (
+          <Link to="/" className="home-return" aria-label="Return to home">
+            &lt;&lt; return home
+          </Link>
+        ) : null}
         <Routes>
           <Route path="/" exact element={<Home />} />
           <Route path="/blog" element={<Blog />} />

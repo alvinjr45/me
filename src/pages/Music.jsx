@@ -37,7 +37,7 @@ const navOrder = {
 };
 
 function Music() {
-  const [activePlaylist, setActivePlaylist] = useState('hm');
+  const [activePlaylist, setActivePlaylist] = useState('funk');
   const [activeArtist, setActiveArtist] = useState('drizzy');
   const [activeSongs, setActiveSongs] = useState('top10');
   const [isReady, setIsReady] = useState(false);

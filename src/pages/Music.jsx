@@ -49,7 +49,6 @@ function Music() {
   const songsRef = useRef(null);
   const artistDelay = useRef(null);
   const artistVisibleRef = useRef(artistVisible);
-  const songsVisibleRef = useRef(false);
   const [showSecondCue, setShowSecondCue] = useState(false);
 
   useEffect(() => {

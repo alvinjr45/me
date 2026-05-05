@@ -7,14 +7,14 @@ function BlogPostArticle({ post }) {
     <main className="blog-post-page">
       <article className="blog-post-page__article">
         <header className="blog-post-page__hero">
-          <div className="blog-post-page__image-wrap">
-            <img src={post.image} alt={post.imageAlt || post.title} className="blog-post-page__image" />
-          </div>
           <div className="blog-post-page__hero-copy">
             <p className="blog-post-page__eyebrow">{post.eyebrow}</p>
             <h1>{post.title}</h1>
             <p className="blog-post-page__meta">{post.date}</p>
             <p className="blog-post-page__excerpt">{post.excerpt}</p>
+          </div>
+          <div className="blog-post-page__image-wrap">
+            <img src={post.image} alt={post.imageAlt || post.title} className="blog-post-page__image" />
           </div>
         </header>
 

@@ -37,11 +37,15 @@ Deploy the Edge Function:
 supabase functions deploy admin-blog-post
 ```
 
+The repo includes `supabase/config.toml` with JWT verification disabled for this function. The function still checks `ADMIN_POST_SECRET` itself, but Supabase will allow the browser request to reach the function.
+
 Set the admin secret:
 
 ```bash
 supabase secrets set ADMIN_POST_SECRET="use-a-long-random-password"
 ```
+
+Do not set `SUPABASE_SERVICE_ROLE_KEY` manually. Supabase reserves `SUPABASE_*` names and injects `SUPABASE_URL` plus `SUPABASE_SERVICE_ROLE_KEY` into Edge Functions automatically.
 
 Optional bucket path override:
 
@@ -49,13 +53,15 @@ Optional bucket path override:
 supabase secrets set BLOG_MEDIA_PREFIX="ajt3/me/blog"
 ```
 
-Optional production CORS lock:
+Optional CORS lock:
 
 ```bash
-supabase secrets set ADMIN_CORS_ORIGIN="https://your-domain.com"
+supabase secrets set ADMIN_CORS_ORIGINS="http://localhost:3000,http://192.168.1.235:5173,https://your-domain.com"
 ```
 
 After deployment, visit `/admin`, enter the shared admin secret on the access screen, then manage existing posts or create new standardized posts with a cover image, content sections, and photo/video media. Blog URLs are generated from the title.
+
+Cover images display at a standardized 16:9 crop across cards and post pages. Upload 1600 x 900 or larger for the cleanest result.
 
 ## Available Scripts
 

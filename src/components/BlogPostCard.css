@@ -19,7 +19,8 @@
 
 .blog-post-card--featured {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 0.85fr);
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.72fr);
+  align-items: stretch;
   background:
     linear-gradient(135deg, rgba(12, 17, 28, 0.88), rgba(2, 6, 18, 0.72)),
     linear-gradient(90deg, rgba(251, 127, 51, 0.16), rgba(51, 175, 251, 0.12));
@@ -28,6 +29,8 @@
 
 .blog-post-card__media {
   display: block;
+  min-width: 0;
+  width: 100%;
   aspect-ratio: 16 / 9;
   overflow: hidden;
   background: rgba(249, 249, 249, 0.06);
@@ -47,15 +50,17 @@
 }
 
 .blog-post-card--featured .blog-post-card__media {
-  aspect-ratio: auto;
-  min-height: 360px;
-  height: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 0;
+  height: auto;
+  max-height: 440px;
 }
 
 .blog-post-card__body {
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
   padding: 1.5rem;
 }
 

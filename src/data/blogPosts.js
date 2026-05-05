@@ -116,6 +116,20 @@ function formatPostDate(value) {
     return '';
   }
 
+  const dateOnly = String(value).match(/^(\d{4})-(\d{2})-(\d{2})/);
+
+  if (dateOnly) {
+    const [, year, month, day] = dateOnly;
+    const date = new Date(Date.UTC(Number(year), Number(month) - 1, Number(day)));
+
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC'
+    }).format(date);
+  }
+
   const date = new Date(value);
 
   if (Number.isNaN(date.getTime())) {
@@ -125,7 +139,8 @@ function formatPostDate(value) {
   return new Intl.DateTimeFormat('en-US', {
     month: 'long',
     day: 'numeric',
-    year: 'numeric'
+    year: 'numeric',
+    timeZone: 'UTC'
   }).format(date);
 }
 

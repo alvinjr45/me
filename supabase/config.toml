@@ -1,0 +1,2 @@
+[functions.admin-blog-post]
+verify_jwt = false

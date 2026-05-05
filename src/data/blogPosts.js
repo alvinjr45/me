@@ -1,3 +1,5 @@
+import { supabase } from '../lib/supabaseClient';
+
 const blogPosts = [
   {
     slug: 'building-ajt3-with-glass-and-glitch',
@@ -109,15 +111,87 @@ const blogPosts = [
   }
 ];
 
-export function getBlogPosts() {
+function formatPostDate(value) {
+  if (!value) {
+    return '';
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  }).format(date);
+}
+
+function normalizeSupabasePost(post) {
+  return {
+    slug: post.slug,
+    title: post.title,
+    eyebrow: post.eyebrow,
+    excerpt: post.excerpt,
+    date: formatPostDate(post.published_at),
+    image: post.cover_image_url || '/images/Home Banner.png',
+    imageAlt: post.cover_image_alt || post.title,
+    tags: post.tags || [],
+    sections: post.sections || [],
+    media: post.media || []
+  };
+}
+
+async function fetchSupabasePosts() {
+  if (!supabase) {
+    return null;
+  }
+
+  const { data, error } = await supabase
+    .from('ajt3_blog_posts')
+    .select('slug,title,eyebrow,excerpt,published_at,cover_image_url,cover_image_alt,tags,sections,media')
+    .eq('is_published', true)
+    .order('published_at', { ascending: false });
+
+  if (error) {
+    throw error;
+  }
+
+  return data.map(normalizeSupabasePost);
+}
+
+export async function getBlogPosts() {
+  const posts = await fetchSupabasePosts();
+
+  if (posts) {
+    return posts;
+  }
+
   return blogPosts;
 }
 
-export function getBlogPostBySlug(slug) {
+export async function getBlogPostBySlug(slug) {
+  if (supabase) {
+    const { data, error } = await supabase
+      .from('ajt3_blog_posts')
+      .select('slug,title,eyebrow,excerpt,published_at,cover_image_url,cover_image_alt,tags,sections,media')
+      .eq('slug', slug)
+      .eq('is_published', true)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    return data ? normalizeSupabasePost(data) : undefined;
+  }
+
   return blogPosts.find((post) => post.slug === slug);
 }
 
-export function getBlogPostsByTag(tag) {
-  return blogPosts.filter((post) => post.tags.includes(tag));
+export async function getBlogPostsByTag(tag) {
+  const posts = await getBlogPosts();
+  return posts.filter((post) => post.tags.includes(tag));
 }
-

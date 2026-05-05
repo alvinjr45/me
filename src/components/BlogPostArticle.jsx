@@ -8,7 +8,7 @@ function BlogPostArticle({ post }) {
       <article className="blog-post-page__article">
         <header className="blog-post-page__hero">
           <div className="blog-post-page__image-wrap">
-            <img src={post.image} alt={post.title} className="blog-post-page__image" />
+            <img src={post.image} alt={post.imageAlt || post.title} className="blog-post-page__image" />
           </div>
           <div className="blog-post-page__hero-copy">
             <p className="blog-post-page__eyebrow">{post.eyebrow}</p>
@@ -35,6 +35,21 @@ function BlogPostArticle({ post }) {
             </section>
           ))}
         </div>
+
+        {post.media?.length ? (
+          <section className="blog-post-page__media" aria-label="Post media">
+            {post.media.map((item) => (
+              <figure key={`${item.src}-${item.caption || item.alt || item.type}`} className="blog-post-page__media-item">
+                {item.type === 'video' ? (
+                  <video controls src={item.src} poster={item.poster || undefined} />
+                ) : (
+                  <img src={item.src} alt={item.alt || ''} />
+                )}
+                {item.caption ? <figcaption>{item.caption}</figcaption> : null}
+              </figure>
+            ))}
+          </section>
+        ) : null}
 
         <footer className="blog-post-page__footer">
           <Link to="/blog">Back to /blog</Link>

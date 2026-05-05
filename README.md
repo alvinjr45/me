@@ -2,6 +2,61 @@
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+## Supabase Blog Admin
+
+Blog posts can be served from Supabase with a lightweight `/admin` manager. The public site uses the anon key for read-only published posts. Admin writes and post management go through the `admin-blog-post` Supabase Edge Function, which checks `ADMIN_POST_SECRET` server-side before listing, inserting, or updating posts and media.
+
+### Local app env
+
+Create `.env.local` from `.env.example`:
+
+```bash
+REACT_APP_SUPABASE_URL=https://your-project-ref.supabase.co
+REACT_APP_SUPABASE_ANON_KEY=your-public-anon-key
+```
+
+If these values are missing, the app falls back to the local posts in `src/data/blogPosts.js`.
+
+### Supabase setup
+
+Run the migration in `supabase/migrations/20260505000000_create_blog_posts.sql` with the Supabase CLI or paste it into the Supabase SQL editor. It creates:
+
+- `public.ajt3_blog_posts` with RLS enabled
+- a public-read policy for published posts
+- a public `blog-media` storage bucket for uploaded photos and videos
+
+Uploads are stored under a namespaced directory in the bucket. By default, this site writes media to:
+
+```text
+blog-media/ajt3/me/blog/{title-slug}/...
+```
+
+Deploy the Edge Function:
+
+```bash
+supabase functions deploy admin-blog-post
+```
+
+Set the admin secret:
+
+```bash
+supabase secrets set ADMIN_POST_SECRET="use-a-long-random-password"
+```
+
+Optional bucket path override:
+
+```bash
+supabase secrets set BLOG_MEDIA_PREFIX="ajt3/me/blog"
+```
+
+Optional production CORS lock:
+
+```bash
+supabase secrets set ADMIN_CORS_ORIGIN="https://your-domain.com"
+```
+
+After deployment, visit `/admin`, enter the shared admin secret on the access screen, then manage existing posts or create new standardized posts with a cover image, content sections, and photo/video media. Blog URLs are generated from the title.
+
 ## Available Scripts
 
 In the project directory, you can run:

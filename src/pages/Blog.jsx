@@ -1,10 +1,39 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import BlogPostCard from '../components/BlogPostCard';
 import { getBlogPosts } from '../data/blogPosts';
 import './Blog.css';
 
 function Blog() {
-  const posts = getBlogPosts();
+  const [posts, setPosts] = useState([]);
+  const [status, setStatus] = useState('loading');
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getBlogPosts()
+      .then((nextPosts) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setPosts(nextPosts);
+        setStatus('ready');
+      })
+      .catch((nextError) => {
+        if (!isMounted) {
+          return;
+        }
+
+        setError(nextError.message || 'Unable to load blog posts.');
+        setStatus('error');
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const [featuredPost, ...archivePosts] = posts;
 
   return (
@@ -23,7 +52,7 @@ function Blog() {
             <a className="blog-page__primary-link" href="#latest-post">
               Read latest
             </a>
-            <span>{posts.length} entries live</span>
+            <span>{status === 'loading' ? 'Loading entries' : `${posts.length} entries live`}</span>
           </div>
         </div>
         <aside className="blog-page__terminal" aria-label="Blog status">
@@ -48,6 +77,8 @@ function Blog() {
           </dl>
         </aside>
       </section>
+
+      {status === 'error' ? <p className="blog-page__notice">{error}</p> : null}
 
       {featuredPost ? (
         <section id="latest-post" className="blog-page__featured" aria-label="Latest blog post">

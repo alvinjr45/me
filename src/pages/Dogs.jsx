@@ -1,11 +1,25 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import VideoSection from '../components/VideoSection';
 import BlogPostCard from '../components/BlogPostCard';
 import { getBlogPostsByTag } from '../data/blogPosts';
 import './Dogs.css';
 
 function Dogs() {
-  const dogPosts = getBlogPostsByTag('dogs');
+  const [dogPosts, setDogPosts] = useState([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    getBlogPostsByTag('dogs').then((posts) => {
+      if (isMounted) {
+        setDogPosts(posts);
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   return (
     <>

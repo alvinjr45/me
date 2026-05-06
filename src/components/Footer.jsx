@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './Footer.css';
 
 const WEBSITE_URL = 'https://ajt3.website';
@@ -6,22 +7,20 @@ const WEBSITE_URL = 'https://ajt3.website';
 export default function Footer() {
   return (
     <footer className="site-footer">
-      <div className="footer-cta">
-        <div>
-          <p className="footer-cta__pretitle">Still curious?</p>
-          <h3 className="footer-cta__title">Let&apos;s prototype something bold.</h3>
-          <p className="footer-cta__body">
-            Toss me a line about a collab, review, or late-night tinkering session—
-            I&apos;m in the lab and always listening.
-          </p>
-        </div>
-        <a className="footer-cta__button" href={WEBSITE_URL}>
-          Contact AJ
-        </a>
+      <div className="footer-signoff">
+        <p className="footer-signoff__name">AJT3.Me</p>
+        <p className="footer-signoff__line">Built somewhere between a good playlist and a bad idea.</p>
       </div>
-      <div className="footer-meta">
+
+      <nav className="footer-links" aria-label="Footer navigation">
+        <Link to="/blog">Blog</Link>
+        <Link to="/music">Music</Link>
+        <Link to="/dogs">Dogs</Link>
+        <a href={WEBSITE_URL}>Contact</a>
+      </nav>
+
+      <div className="footer-fineprint">
         <span>© {new Date().getFullYear()} AJ Thompson</span>
-        <span>AJT3.Me • Software day, everything else night</span>
       </div>
     </footer>
   );

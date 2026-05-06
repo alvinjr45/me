@@ -29,15 +29,8 @@ function Dogs() {
         header={"Drake and Josh"}
         message={"Meet the pups!"}
       />
-      <section className="dogs-posts">
-        <div className="dogs-posts__intro">
-          <p className="dogs-posts__eyebrow">Drake and Josh / Posts</p>
-          <h2 className="dogs-posts__heading">Stories from the dog side of the site</h2>
-          <p className="dogs-posts__copy">
-            These entries use the same blog system as the main blog page, filtered here for everything that belongs in
-            the Drake and Josh orbit.
-          </p>
-        </div>
+      <section className="dogs-posts" aria-labelledby="dogs-posts-title">
+        <h2 id="dogs-posts-title" className="dogs-posts__title">Dog Blogs</h2>
         <div className="dogs-posts__grid">
           {dogPosts.map((post) => (
             <BlogPostCard key={post.slug} post={post} />

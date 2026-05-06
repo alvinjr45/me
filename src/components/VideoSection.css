@@ -44,25 +44,12 @@
     margin-top: 0.75rem;
 }
 
-.video-btns {
-    z-index: 2;
-    margin-top: 2rem;
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-}
-
-.video-btns .btn {
-    min-width: 180px;
-}
-
-.fa-play-circle {
-    margin-left: 4px;
+.video-scroll-cue {
+    z-index: 3;
 }
 
 @media screen and (max-width: 768px) {
-    .video-btns {
-        flex-direction: column;
+    .video-scroll-cue {
+        bottom: 1.25rem;
     }
 }

@@ -23,12 +23,13 @@
 
 .button {
   padding: 10px 20px;
+  min-height: 44px;
   font-size: 16px;
   border: none;
   border-radius: 8px;
   background-color: var(--color-main);
   color: var(--color-ink);
-  cursor: default;
+  touch-action: manipulation;
   transition: background 0.3s ease;
 }
 
@@ -42,4 +43,26 @@
   font-size: 16px;
   color: var(--color-muted);
   text-align: center;
+}
+
+@media (max-width: 560px) {
+  .container {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .controls {
+    gap: 8px;
+  }
+
+  .button {
+    flex: 1 1 120px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .button:hover {
+    background-color: var(--color-main);
+    color: var(--color-ink);
+  }
 }

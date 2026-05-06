@@ -7,13 +7,14 @@
 
 .home-return {
   position: absolute;
-  top: 1rem;
-  left: 1rem;
+  top: calc(1rem + env(safe-area-inset-top));
+  left: calc(1rem + env(safe-area-inset-left));
   z-index: 1000;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.25rem;
+  min-height: 44px;
+  padding: 0.5rem 0.25rem;
   border: 0;
   background: transparent;
   color: var(--color-main);
@@ -21,6 +22,8 @@
   font-size: 0.95rem;
   font-weight: 700;
   line-height: 1;
+  text-align: left;
+  touch-action: manipulation;
   transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
 }
 
@@ -48,4 +51,21 @@ h4 {
 p {
   color: var(--color-muted);
   line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .home-return {
+    position: fixed;
+    top: calc(0.35rem + env(safe-area-inset-top));
+    left: calc(0.75rem + env(safe-area-inset-left));
+    font-size: 0.82rem;
+    background: rgba(5, 5, 5, 0.72);
+    border-radius: 999px;
+    padding: 0.45rem 0.75rem;
+    backdrop-filter: blur(8px);
+  }
+
+  .section-padding {
+    padding: 3rem 1rem;
+  }
 }

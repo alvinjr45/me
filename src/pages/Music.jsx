@@ -234,7 +234,8 @@ function Music() {
           </div>
         </section>
       </div>
-      <div
+      <button
+        type="button"
         className={`music-page__fold-cue ${
           showFirstCue ? 'music-page__fold-cue--visible' : 'music-page__fold-cue--hidden'
         }`}
@@ -242,7 +243,7 @@ function Music() {
       >
         <span>Scroll for more</span>
         <span aria-hidden="true">⌄</span>
-      </div>
+      </button>
       <section
         className={`music-page__artist-section music-page__section-fade ${
           artistVisible ? 'music-page__section-fade--visible' : ''
@@ -295,7 +296,8 @@ function Music() {
         </div>
       </section>
 
-      <div
+      <button
+        type="button"
         className={`music-page__fold-cue music-page__fold-cue--secondary ${
           showSecondCue ? 'music-page__fold-cue--visible' : 'music-page__fold-cue--hidden'
         }`}
@@ -303,7 +305,7 @@ function Music() {
       >
         <span>Scroll for more</span>
         <span aria-hidden="true">⌄</span>
-      </div>
+      </button>
 
       <section
         className={`music-page__songs-section music-page__section-fade ${

@@ -43,7 +43,7 @@
 .footer-links a {
   display: inline-flex;
   align-items: center;
-  min-height: 2rem;
+  min-height: 44px;
   padding: 0.3rem 0.65rem;
   border: 1px solid transparent;
   border-radius: 999px;
@@ -81,6 +81,10 @@
   .footer-signoff,
   .footer-links {
     justify-content: center;
+  }
+
+  .footer-links {
+    flex-wrap: wrap;
   }
 
   .footer-fineprint {

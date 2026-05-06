@@ -1,6 +1,7 @@
 .video-container {
     position: relative;
     height: 100vh;
+    height: 100svh;
     width: 100%;
     overflow: hidden;
     background: var(--color-background);
@@ -49,6 +50,11 @@
 }
 
 @media screen and (max-width: 768px) {
+    .video-container {
+        min-height: 520px;
+        padding: 0 1rem;
+    }
+
     .video-scroll-cue {
         bottom: 1.25rem;
     }

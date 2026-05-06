@@ -37,10 +37,16 @@ function Navbar() {
           <span>AJT3.Me</span>
           <span className="brand-icon brand-icon--closing">&lt;/&gt;</span>
         </Link>
-        <button className="navbar-toggle" onClick={handleClick} aria-label="Toggle navigation">
+        <button
+          className="navbar-toggle"
+          onClick={handleClick}
+          aria-label="Toggle navigation"
+          aria-expanded={click}
+          aria-controls="primary-navigation"
+        >
           <i className={click ? 'fas fa-times' : 'fas fa-bars'} />
         </button>
-        <div className={`nav-menu ${click ? 'nav-menu--open' : ''}`}>
+        <div id="primary-navigation" className={`nav-menu ${click ? 'nav-menu--open' : ''}`}>
           {navLinks.map((link) => (
             <Link key={link.to} to={link.to} className="nav-links" onClick={closeMobileMenu}>
               {link.label}

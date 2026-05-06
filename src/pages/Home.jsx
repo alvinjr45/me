@@ -8,17 +8,20 @@ const WEBSITE_URL = 'https://ajt3.website';
 const homeHighlights = [
   {
     title: '.blog( )',
-    copy: 'Fresh logs, build notes, and longer-form posts from the AJT3 side of the internet.',
+    label: 'Build notes and longer-form posts',
+    copy: 'Fresh logs from the AJT3 side of the internet.',
     to: '/blog'
   },
   {
     title: '.music( )',
-    copy: 'A dedicated page for tracks, player embeds, and the part of the site that lives closest to the keys.',
+    label: 'Tracks, embeds, and piano energy',
+    copy: 'The part of the site that lives closest to the keys.',
     to: '/music'
   },
   {
     title: '.drakeAndJosh( )',
-    copy: 'The full page for the two main characters, with their own lane on the site.',
+    label: 'A page for the two main characters',
+    copy: 'Their own lane on the site.',
     to: '/dogs'
   }
 ];
@@ -41,23 +44,28 @@ function Home() {
         <p className="home-hero__eyebrow">AJT3.Me</p>
         <h1 className="home-hero__heading">.me( )</h1>
         <p className="home-hero__subtitle">
-          I’m A.J., a 27-year-old software developer who loves reviewing the latest tech, trying new things,
-          and channeling piano energy into every project. If you like playful experimentation with a
-          dash of Drake &amp; Josh nostalgia, you’ve landed in the right orbit.
+          I’m A.J., a software developer who reviews tech, builds experiments, and channels piano energy into
+          every project.
         </p>
       </div>
       <section className="home-hero__highlights" aria-label="Featured pages">
         {homeHighlights.map((highlight) => (
           <Link key={highlight.title} className="home-hero__highlight-card" to={highlight.to}>
-            <p className="home-hero__highlight-kicker">Featured</p>
-            <h2>{highlight.title}</h2>
-            <p>{highlight.copy}</p>
+            <div>
+              <p className="home-hero__highlight-kicker">Featured</p>
+              <h2>{highlight.title}</h2>
+            </div>
+            <p className="home-hero__highlight-label">{highlight.label}</p>
+            <p className="home-hero__highlight-copy">{highlight.copy}</p>
           </Link>
         ))}
         <a className="home-hero__highlight-card home-hero__highlight-card--build" href={WEBSITE_URL}>
-          <p className="home-hero__highlight-kicker">Widget</p>
-          <h2>.build( )</h2>
-          <p>Got a tech idea you want to build? Lets get creative!</p>
+          <div>
+            <p className="home-hero__highlight-kicker">Widget</p>
+            <h2>.build( )</h2>
+          </div>
+          <p className="home-hero__highlight-label">Bring a tech idea to life</p>
+          <p className="home-hero__highlight-copy">Lets get creative.</p>
         </a>
       </section>
     </main>

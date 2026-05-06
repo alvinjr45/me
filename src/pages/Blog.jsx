@@ -17,7 +17,7 @@ function Blog() {
           return;
         }
 
-        setPosts(nextPosts);
+        setPosts(nextPosts.filter((post) => !post.tags.includes('dogs')));
         setStatus('ready');
       })
       .catch((nextError) => {

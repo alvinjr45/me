@@ -29,6 +29,9 @@ const songsPages = [
 ];
 
 const navOrder = {
+  hm: 1,
+  funk: 2,
+  gospel: 3,
   wunna: 1,
   pluto: 2,
   drizzy: 3,

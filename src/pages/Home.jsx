@@ -12,14 +12,14 @@ const homeHighlights = [
     to: '/blog'
   },
   {
-    title: '.drakeAndJosh( )',
-    copy: 'The full page for the two main characters, with their own lane on the site.',
-    to: '/dogs'
-  },
-  {
     title: '.music( )',
     copy: 'A dedicated page for tracks, player embeds, and the part of the site that lives closest to the keys.',
     to: '/music'
+  },
+  {
+    title: '.drakeAndJosh( )',
+    copy: 'The full page for the two main characters, with their own lane on the site.',
+    to: '/dogs'
   }
 ];
 

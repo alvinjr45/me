@@ -1,131 +1,84 @@
-# Getting Started with Create React App
+# AJT3.me
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+AJT3.me is a dark, code-flavored personal site for A.J. Thompson. The public experience is split into a home page, a blog, a music page, a dogs page, an admin blog manager, and a 404 screen. The app uses a single React router, a shared footer, a scroll-to-top helper, and a Supabase-backed blog system with a local fallback data set for offline or unconfigured development.
 
-## Supabase Blog Admin
+## What lives on the site
 
-Blog posts can be served from Supabase with a lightweight `/admin` manager. The public site uses the anon key for read-only published posts. Admin writes and post management go through the `admin-blog-post` Supabase Edge Function, which checks `ADMIN_POST_SECRET` server-side before listing, inserting, or updating posts and media.
+- `/` Home landing page with animated glitch background and featured links
+- `/blog` Blog index with a featured entry and archive cards
+- `/blog/:slug` Long-form blog post reader with sections and optional media
+- `/music` Playlist, artist, and songs embeds with scroll cues
+- `/dogs` Dog-focused content page with a banner video and tag-filtered posts
+- `/admin` Protected blog editor for managing Supabase posts and uploads
+- `*` 404 page with the same visual language as the rest of the site
 
-### Local app env
+## Docs
 
-Create `.env.local` from `.env.example`:
+- [Site map and page behavior](docs/site-map.md)
+- [Content model and post data](docs/content-model.md)
+- [Admin workflow and Supabase setup](docs/admin-and-supabase.md)
+- [Design system and component notes](docs/design-system.md)
+- [Legacy and unused files](docs/legacy-components.md)
+
+## Runtime model
+
+The blog system resolves content in this order:
+
+1. If Supabase is configured in the browser, public blog pages read published posts from `ajt3_blog_posts`.
+2. If Supabase is not configured, the app falls back to the local post data in `src/data/blogPosts.js`.
+3. The admin page writes back through the `admin-blog-post` Supabase Edge Function, which checks a shared secret before listing or saving posts.
+
+This means the public site can render with local content during development, while production can use Supabase as the source of truth.
+
+## Local environment
+
+Create a `.env.local` file with:
 
 ```bash
 REACT_APP_SUPABASE_URL=https://your-project-ref.supabase.co
 REACT_APP_SUPABASE_ANON_KEY=your-public-anon-key
 ```
 
-If these values are missing, the app falls back to the local posts in `src/data/blogPosts.js`.
+If these values are missing, the blog pages use the local data set instead of Supabase.
 
-### Supabase setup
+## Supabase setup
 
-Run the migration in `supabase/migrations/20260505000000_create_blog_posts.sql` with the Supabase CLI or paste it into the Supabase SQL editor. It creates:
+The migration at `supabase/migrations/20260505000000_create_blog_posts.sql` creates:
 
-- `public.ajt3_blog_posts` with RLS enabled
-- a public-read policy for published posts
-- a public `blog-media` storage bucket for uploaded photos and videos
+- `public.ajt3_blog_posts`
+- row-level security that exposes published posts to public clients
+- a public `blog-media` storage bucket for uploaded post assets
+- a public select policy for media objects in that bucket
 
-Uploads are stored under a namespaced directory in the bucket. By default, this site writes media to:
+The admin edge function lives at `supabase/functions/admin-blog-post/index.ts`. It supports:
 
-```text
-blog-media/ajt3/me/blog/{title-slug}/...
-```
+- `list` requests for the admin panel
+- `save` requests for creating or updating posts
+- optional cover image uploads
+- optional media uploads for images and videos
 
-Deploy the Edge Function:
+Deployment secrets used by the function:
 
-```bash
-supabase functions deploy admin-blog-post
-```
+- `ADMIN_POST_SECRET`
+- `BLOG_MEDIA_PREFIX` `or` default path `ajt3/me/blog`
+- `BLOG_MEDIA_BUCKET` `or` default bucket `blog-media`
+- `ADMIN_CORS_ORIGINS` `or` `ADMIN_CORS_ORIGIN`
 
-The repo includes `supabase/config.toml` with JWT verification disabled for this function. The function still checks `ADMIN_POST_SECRET` itself, but Supabase will allow the browser request to reach the function.
+Important security note:
 
-Set the admin secret:
+- The browser sends the shared admin secret to the edge function.
+- The function validates that secret server-side before touching the database or storage.
+- Public reads are limited to published posts by row-level security.
 
-```bash
-supabase secrets set ADMIN_POST_SECRET="use-a-long-random-password"
-```
+## Content conventions
 
-Do not set `SUPABASE_SERVICE_ROLE_KEY` manually. Supabase reserves `SUPABASE_*` names and injects `SUPABASE_URL` plus `SUPABASE_SERVICE_ROLE_KEY` into Edge Functions automatically.
+- Blog posts use slugs generated from titles.
+- Cover images are displayed as 16:9 crops in cards and post headers.
+- Sections are stored as structured content with headings, paragraphs, and optional bullet lists.
+- Media items can be images or videos and support captions plus optional video posters.
+- The dogs section uses the `dogs` tag to filter posts from the main blog data.
 
-Optional bucket path override:
+## Verification
 
-```bash
-supabase secrets set BLOG_MEDIA_PREFIX="ajt3/me/blog"
-```
+I did not run the app build or a browser server. The documentation and metadata updates were made by reading the source files directly.
 
-Optional CORS lock:
-
-```bash
-supabase secrets set ADMIN_CORS_ORIGINS="http://localhost:3000,http://192.168.1.235:5173,https://your-domain.com"
-```
-
-After deployment, visit `/admin`, enter the shared admin secret on the access screen, then manage existing posts or create new standardized posts with a cover image, content sections, and photo/video media. Blog URLs are generated from the title.
-
-Cover images display at a standardized 16:9 crop across cards and post pages. Upload 1600 x 900 or larger for the cleanest result.
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)

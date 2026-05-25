@@ -35,6 +35,10 @@
 }
 
 .footer-fineprint {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.8rem;
   color: rgba(249, 249, 249, 0.52);
   font-size: 0.78rem;
   white-space: nowrap;
@@ -53,6 +57,7 @@
   }
 
   .footer-fineprint {
+    justify-content: center;
     white-space: normal;
   }
 }

@@ -41,6 +41,33 @@ for select
 to anon, authenticated
 using (is_published = true);
 
+create table if not exists public.ajt3_dog_incidents (
+  id text primary key,
+  culprit text not null default 'Drake',
+  incident text not null,
+  incident_at timestamptz not null default now(),
+  portrait_url text,
+  portrait_alt text,
+  updated_at timestamptz not null default now()
+);
+
+drop trigger if exists set_dog_incidents_updated_at on public.ajt3_dog_incidents;
+
+create trigger set_dog_incidents_updated_at
+before update on public.ajt3_dog_incidents
+for each row
+execute function public.set_updated_at();
+
+alter table public.ajt3_dog_incidents enable row level security;
+
+drop policy if exists "Dog incidents are readable" on public.ajt3_dog_incidents;
+
+create policy "Dog incidents are readable"
+on public.ajt3_dog_incidents
+for select
+to anon, authenticated
+using (true);
+
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
   'blog-media',

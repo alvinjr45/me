@@ -1,94 +1,21 @@
 import React, { useMemo, useState } from 'react';
-import heic2any from 'heic2any';
-import { isSupabaseConfigured } from '../lib/supabaseClient';
+import { useNavigate } from 'react-router-dom';
+import { defaultDogIncident } from '../data/dogIncident';
+import {
+  emptyMediaUrl,
+  emptySection,
+  getSupabaseFunctionHeaders,
+  normalizeUploadFile,
+  slugify,
+  toInputDate,
+  toLines,
+  toTextList
+} from '../lib/adminPostEditor';
 import './Admin.css';
-
-const emptySection = {
-  heading: '',
-  paragraphs: '',
-  bullets: ''
-};
-
-const emptyMediaUrl = {
-  type: 'image',
-  src: '',
-  alt: '',
-  caption: '',
-  poster: ''
-};
-
-const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
-
-function slugify(value) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
-function toTextList(value) {
-  return Array.isArray(value) ? value.join('\n\n') : '';
-}
-
-function toInputDate(value, fallback) {
-  if (!value) {
-    return fallback;
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return fallback;
-  }
-
-  return date.toISOString().slice(0, 10);
-}
-
-function toLines(value) {
-  return value
-    .split('\n')
-    .map((line) => line.trim())
-    .filter(Boolean);
-}
-
-function isHeicFile(file) {
-  const fileName = file.name.toLowerCase();
-  return file.type === 'image/heic' || file.type === 'image/heif' || fileName.endsWith('.heic') || fileName.endsWith('.heif');
-}
-
-async function normalizeUploadFile(file) {
-  if (!isHeicFile(file)) {
-    return file;
-  }
-
-  let converted;
-
-  try {
-    converted = await heic2any({
-      blob: file,
-      toType: 'image/jpeg',
-      quality: 0.92
-    });
-  } catch {
-    throw new Error(`HEIC conversion failed for ${file.name}. Export it as JPG or try a different browser.`);
-  }
-
-  const blob = Array.isArray(converted) ? converted[0] : converted;
-  const baseName = file.name.replace(/\.(heic|heif)$/i, '');
-
-  if (blob.size > MAX_UPLOAD_BYTES) {
-    throw new Error(`HEIC file ${file.name} is too large after conversion. Keep uploads under 50 MB or resize it first.`);
-  }
-
-  return new File([blob], `${baseName || 'upload'}.jpg`, {
-    type: 'image/jpeg',
-    lastModified: file.lastModified
-  });
-}
 
 function Admin() {
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     adminSecret: '',
     title: '',
@@ -106,12 +33,18 @@ function Admin() {
   const [mediaUrls, setMediaUrls] = useState([{ ...emptyMediaUrl }]);
   const [mediaFiles, setMediaFiles] = useState([]);
   const [posts, setPosts] = useState([]);
+  const [incident, setIncident] = useState(defaultDogIncident);
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
+  const [incidentStatus, setIncidentStatus] = useState('idle');
+  const [incidentMessage, setIncidentMessage] = useState('');
 
   const publishUrl = process.env.REACT_APP_SUPABASE_URL
     ? `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/admin-blog-post`
+    : '';
+  const incidentUrl = process.env.REACT_APP_SUPABASE_URL
+    ? `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/admin-dog-incident`
     : '';
 
   function updateField(name, value) {
@@ -144,6 +77,45 @@ function Admin() {
         caption: ''
       }))
     );
+  }
+
+  function updateIncidentField(name, value) {
+    setIncident((current) => ({
+      ...current,
+      [name]: value
+    }));
+  }
+
+  async function readResponsePayload(response) {
+    const raw = await response.text();
+
+    if (!raw) {
+      return { raw: '', data: null };
+    }
+
+    try {
+      return { raw, data: JSON.parse(raw) };
+    } catch {
+      return { raw, data: null };
+    }
+  }
+
+  function formatBackendError(result, fallback) {
+    const details = result?.details;
+
+    if (details && typeof details === 'object') {
+      const parts = [];
+      if (details.code) parts.push(`code=${details.code}`);
+      if (details.message) parts.push(`message=${details.message}`);
+      if (details.hint) parts.push(`hint=${details.hint}`);
+      if (details.details) parts.push(`details=${details.details}`);
+
+      if (parts.length) {
+        return `${fallback} (${parts.join(', ')})`;
+      }
+    }
+
+    return fallback;
   }
 
   function handleNewPost() {
@@ -227,18 +199,18 @@ function Admin() {
     try {
       const response = await fetch(publishUrl, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: getSupabaseFunctionHeaders({ json: true }),
         body: JSON.stringify({
           action: 'list',
           adminSecret
         })
       });
-      const result = await response.json();
+      const payload = await readResponsePayload(response);
+      const result = payload.data || {};
 
       if (!response.ok) {
-        throw new Error(result.error || 'Unable to load posts.');
+        console.error('Post list failed', { status: response.status, payload: payload.raw });
+        throw new Error(`Post list failed (${response.status}): ${result.error || payload.raw || 'Unable to load posts.'}`);
       }
 
       setPosts(result.posts || []);
@@ -256,14 +228,74 @@ function Admin() {
     }
   }
 
+  async function loadIncident({ silent = false, adminSecret = form.adminSecret } = {}) {
+    if (!incidentUrl) {
+      setIncidentStatus('error');
+      setIncidentMessage('Supabase URL is not configured.');
+      return false;
+    }
+
+    if (!adminSecret) {
+      setIncidentStatus('error');
+      setIncidentMessage('Enter the admin secret before loading the incident.');
+      return false;
+    }
+
+    if (!silent) {
+      setIncidentStatus('loading');
+      setIncidentMessage('');
+    }
+
+    try {
+      const response = await fetch(incidentUrl, {
+        method: 'GET',
+        headers: {
+          ...getSupabaseFunctionHeaders(),
+          'x-admin-secret': adminSecret
+        }
+      });
+      const payload = await readResponsePayload(response);
+      const result = payload.data || {};
+
+      if (!response.ok) {
+        console.error('Incident load failed', { status: response.status, payload: payload.raw });
+        throw new Error(
+          formatBackendError(
+            result,
+            `Incident load failed (${response.status}): ${result.error || payload.raw || 'Unable to load the incident.'}`
+          )
+        );
+      }
+
+      setIncident({
+        culprit: result.incident?.culprit || defaultDogIncident.culprit,
+        incident: result.incident?.incident || defaultDogIncident.incident,
+        incidentAt: result.incident?.incidentAt || result.incident?.incident_at || defaultDogIncident.incidentAt
+      });
+
+      if (!silent) {
+        setIncidentStatus('idle');
+        setIncidentMessage('Latest incident loaded.');
+      }
+
+      return true;
+    } catch (error) {
+      setIncidentStatus('error');
+      setIncidentMessage(error.message);
+      return false;
+    }
+  }
+
   async function handleUnlock(event) {
     event.preventDefault();
     setStatus('loading');
     setMessage('');
 
     const didLoad = await loadPosts({ adminSecret: form.adminSecret });
+    await loadIncident({ silent: true, adminSecret: form.adminSecret });
 
     if (didLoad) {
+      sessionStorage.setItem('ajt3_admin_secret', form.adminSecret);
       setIsUnlocked(true);
       setStatus('idle');
       setMessage('');
@@ -273,11 +305,14 @@ function Admin() {
   function handleLock() {
     setIsUnlocked(false);
     setPosts([]);
-    handleNewPost();
+    setIncident(defaultDogIncident);
     setForm((current) => ({
       ...current,
       adminSecret: ''
     }));
+    sessionStorage.removeItem('ajt3_admin_secret');
+    setIncidentStatus('idle');
+    setIncidentMessage('');
   }
 
   async function handleSubmit(event) {
@@ -328,12 +363,15 @@ function Admin() {
 
       const response = await fetch(publishUrl, {
         method: 'POST',
+        headers: getSupabaseFunctionHeaders(),
         body
       });
-      const result = await response.json();
+      const payload = await readResponsePayload(response);
+      const result = payload.data || {};
 
       if (!response.ok) {
-        throw new Error(result.error || 'Unable to publish post.');
+        console.error('Publish failed', { status: response.status, payload: payload.raw });
+        throw new Error(`Publish failed (${response.status}): ${result.error || payload.raw || 'Unable to publish post.'}`);
       }
 
       setStatus('saved');
@@ -349,6 +387,58 @@ function Admin() {
     }
   }
 
+  async function handleIncidentSubmit(event) {
+    event.preventDefault();
+
+    if (!incident.incident.trim()) {
+      setIncidentStatus('error');
+      setIncidentMessage('Incident details are required.');
+      return;
+    }
+
+    try {
+      setIncidentStatus('saving');
+      setIncidentMessage('');
+
+      const body = new FormData();
+      body.append('culprit', incident.culprit);
+      body.append('incident', incident.incident);
+      body.append('incidentAt', incident.incidentAt);
+
+      const response = await fetch(incidentUrl, {
+        method: 'POST',
+        headers: {
+          ...getSupabaseFunctionHeaders(),
+          'x-admin-secret': form.adminSecret
+        },
+        body
+      });
+      const payload = await readResponsePayload(response);
+      const result = payload.data || {};
+
+      if (!response.ok) {
+        console.error('Incident save failed', { status: response.status, payload: payload.raw });
+        throw new Error(
+          formatBackendError(
+            result,
+            `Incident save failed (${response.status}): ${result.error || payload.raw || 'Unable to save the latest incident.'}`
+          )
+        );
+      }
+
+      setIncidentStatus('saved');
+      setIncident({
+        culprit: result.incident?.culprit || incident.culprit,
+        incident: result.incident?.incident || incident.incident,
+        incidentAt: result.incident?.incidentAt || result.incident?.incident_at || incident.incidentAt
+      });
+      setIncidentMessage('Latest incident saved.');
+    } catch (error) {
+      setIncidentStatus('error');
+      setIncidentMessage(error.message);
+    }
+  }
+
   return (
     <main className="admin-page">
       {!isUnlocked ? (
@@ -356,12 +446,11 @@ function Admin() {
           <header className="admin-page__header">
             <p>AJT3 Admin</p>
             <h1>Blog Manager</h1>
-            <span>{isSupabaseConfigured ? 'Supabase connected' : 'Supabase env vars missing'}</span>
           </header>
 
           <section className="admin-page__panel admin-page__gate">
             <label>
-              Admin secret
+              Password
               <input
                 required
                 type="password"
@@ -379,203 +468,76 @@ function Admin() {
           {message ? <p className={`admin-page__message admin-page__message--${status}`}>{message}</p> : null}
         </form>
       ) : (
-      <form className="admin-page__form" onSubmit={handleSubmit}>
-        <header className="admin-page__header">
-          <p>AJT3 Admin</p>
-          <h1>Blog Manager</h1>
-          <span>{isSupabaseConfigured ? 'Supabase connected' : 'Supabase env vars missing'}</span>
-        </header>
+        <div className="admin-page__dashboard">
+          <header className="admin-page__header">
+            <p>AJT3 Admin</p>
+            <h1>Blog Manager</h1>
+          </header>
 
-        <section className="admin-page__panel">
-          <div className="admin-page__panel-title">
-            <h2>Posts</h2>
-            <div className="admin-page__button-group">
-              <button type="button" onClick={() => loadPosts()} disabled={status === 'loading' || !publishUrl}>
-                {status === 'loading' ? 'Loading...' : 'Refresh'}
-              </button>
-              <button type="button" onClick={handleNewPost}>
-                New post
-              </button>
-              <button type="button" onClick={handleLock}>
-                Lock
-              </button>
-            </div>
-          </div>
-          {posts.length ? (
-            <div className="admin-page__post-list">
-              {posts.map((post) => (
-                <button
-                  key={post.slug}
-                  type="button"
-                  className={post.slug === form.originalSlug ? 'admin-page__post-button admin-page__post-button--active' : 'admin-page__post-button'}
-                  onClick={() => handleEditPost(post)}
-                >
-                  <span>{post.title}</span>
-                  <small>{post.is_published ? 'Published' : 'Draft'}</small>
+          <section className="admin-page__panel">
+            <div className="admin-page__panel-title">
+              <h2>Posts</h2>
+              <div className="admin-page__button-group">
+                <button type="button" onClick={() => navigate('/admin/new')}>
+                  New post
                 </button>
-              ))}
+                <button type="button" onClick={handleLock}>
+                  Lock
+                </button>
+              </div>
             </div>
-          ) : null}
-        </section>
+            {posts.length ? (
+              <div className="admin-page__post-list">
+                {posts.map((post) => (
+                  <button
+                    key={post.slug}
+                    type="button"
+                    className="admin-page__post-button"
+                    onClick={() => navigate(`/admin/new?slug=${encodeURIComponent(post.slug)}`)}
+                  >
+                    <span>{post.title}</span>
+                    <small>{post.is_published ? 'Published' : 'Draft'}</small>
+                  </button>
+                ))}
+              </div>
+            ) : null}
+          </section>
 
-        <section className="admin-page__panel">
-          <label>
-            Title
-            <input required value={form.title} onChange={(event) => updateField('title', event.target.value)} />
-          </label>
-          {form.title ? <p className="admin-page__url-preview">URL: /blog/{slugify(form.title)}</p> : null}
-          <div className="admin-page__row">
-            <label>
-              Eyebrow
-              <input value={form.eyebrow} onChange={(event) => updateField('eyebrow', event.target.value)} />
-            </label>
-            <label>
-              Publish date
-              <input
-                type="date"
-                value={form.publishedAt}
-                onChange={(event) => updateField('publishedAt', event.target.value)}
-              />
-            </label>
-          </div>
-          <label>
-            Excerpt
-            <textarea required value={form.excerpt} onChange={(event) => updateField('excerpt', event.target.value)} />
-          </label>
-          <label>
-            Tags
-            <input
-              placeholder="dogs, music, site"
-              value={form.tags}
-              onChange={(event) => updateField('tags', event.target.value)}
-            />
-          </label>
-        </section>
-
-        <section className="admin-page__panel">
-          <h2>Cover</h2>
-          <label>
-            Upload cover
-            <input type="file" accept="image/*,.heic,.heif" onChange={(event) => setCoverFile(event.target.files[0] || null)} />
-          </label>
-          <p className="admin-page__hint">Covers display at 16:9. Upload 1600 x 900 or larger for the cleanest crop.</p>
-          <label>
-            Or cover URL
-            <input value={form.coverImageUrl} onChange={(event) => updateField('coverImageUrl', event.target.value)} />
-          </label>
-          <label>
-            Cover alt text
-            <input value={form.coverImageAlt} onChange={(event) => updateField('coverImageAlt', event.target.value)} />
-          </label>
-        </section>
-
-        <section className="admin-page__panel">
-          <div className="admin-page__panel-title">
-            <h2>Sections</h2>
-            <button type="button" onClick={() => setSections((current) => [...current, { ...emptySection }])}>
-              Add section
-            </button>
-          </div>
-          {sections.map((section, index) => (
-            <fieldset key={index}>
+          <section className="admin-page__panel">
+            <div className="admin-page__panel-title">
+              <h2>Dog incident</h2>
+              <div className="admin-page__button-group">
+                <button type="button" onClick={handleIncidentSubmit} disabled={incidentStatus === 'saving' || !incidentUrl}>
+                  {incidentStatus === 'saving' ? 'Saving...' : 'Save incident'}
+                </button>
+              </div>
+            </div>
+            <div className="admin-page__row">
               <label>
-                Heading
-                <input value={section.heading} onChange={(event) => updateSection(index, 'heading', event.target.value)} />
+                Culprit
+                <select value={incident.culprit} onChange={(event) => updateIncidentField('culprit', event.target.value)}>
+                  <option value="Drake">Drake</option>
+                  <option value="Josh">Josh</option>
+                </select>
               </label>
               <label>
-                Paragraphs
-                <textarea
-                  value={section.paragraphs}
-                  onChange={(event) => updateSection(index, 'paragraphs', event.target.value)}
+                Incident date
+                <input
+                  type="date"
+                  value={toInputDate(incident.incidentAt, today)}
+                  onChange={(event) => updateIncidentField('incidentAt', event.target.value)}
                 />
               </label>
-              <label>
-                Bullets
-                <textarea value={section.bullets} onChange={(event) => updateSection(index, 'bullets', event.target.value)} />
-              </label>
-            </fieldset>
-          ))}
-        </section>
+            </div>
+            <label>
+              What happened
+              <textarea value={incident.incident} onChange={(event) => updateIncidentField('incident', event.target.value)} />
+            </label>
+            {incidentMessage ? <p className={`admin-page__message admin-page__message--${incidentStatus}`}>{incidentMessage}</p> : null}
+          </section>
 
-        <section className="admin-page__panel">
-          <h2>Media</h2>
-          <label>
-            Upload photos or videos
-            <input type="file" accept="image/*,video/*,.heic,.heif" multiple onChange={(event) => handleMediaFiles(event.target.files)} />
-          </label>
-          {mediaFiles.map((item, index) => (
-            <fieldset key={item.file.name}>
-              <legend>{item.file.name}</legend>
-              <div className="admin-page__row">
-                <label>
-                  Alt text
-                  <input value={item.alt} onChange={(event) => updateMediaFile(index, 'alt', event.target.value)} />
-                </label>
-                <label>
-                  Caption
-                  <input value={item.caption} onChange={(event) => updateMediaFile(index, 'caption', event.target.value)} />
-                </label>
-              </div>
-            </fieldset>
-          ))}
-
-          <div className="admin-page__panel-title">
-            <h3>Media URLs</h3>
-            <button type="button" onClick={() => setMediaUrls((current) => [...current, { ...emptyMediaUrl }])}>
-              Add URL
-            </button>
-          </div>
-          {mediaUrls.map((item, index) => (
-            <fieldset key={index}>
-              <div className="admin-page__row">
-                <label>
-                  Type
-                  <select value={item.type} onChange={(event) => updateMediaUrl(index, 'type', event.target.value)}>
-                    <option value="image">Image</option>
-                    <option value="video">Video</option>
-                  </select>
-                </label>
-                <label>
-                  URL
-                  <input value={item.src} onChange={(event) => updateMediaUrl(index, 'src', event.target.value)} />
-                </label>
-              </div>
-              <div className="admin-page__row">
-                <label>
-                  Alt text
-                  <input value={item.alt} onChange={(event) => updateMediaUrl(index, 'alt', event.target.value)} />
-                </label>
-                <label>
-                  Caption
-                  <input value={item.caption} onChange={(event) => updateMediaUrl(index, 'caption', event.target.value)} />
-                </label>
-              </div>
-              {item.type === 'video' ? (
-                <label>
-                  Poster URL
-                  <input value={item.poster} onChange={(event) => updateMediaUrl(index, 'poster', event.target.value)} />
-                </label>
-              ) : null}
-            </fieldset>
-          ))}
-        </section>
-
-        <div className="admin-page__actions">
-          <label className="admin-page__toggle">
-            <input
-              type="checkbox"
-              checked={form.isPublished}
-              onChange={(event) => updateField('isPublished', event.target.checked)}
-            />
-            Published
-          </label>
-          <button type="submit" disabled={status === 'saving' || !publishUrl}>
-            {status === 'saving' ? 'Publishing...' : 'Publish post'}
-          </button>
+          {message ? <p className={`admin-page__message admin-page__message--${status}`}>{message}</p> : null}
         </div>
-
-        {message ? <p className={`admin-page__message admin-page__message--${status}`}>{message}</p> : null}
-      </form>
       )}
     </main>
   );

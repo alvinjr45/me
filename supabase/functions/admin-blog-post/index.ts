@@ -117,6 +117,20 @@ function normalizePublishedAt(value: FormDataEntryValue | null) {
   return rawValue;
 }
 
+function normalizeIncidentAt(value: FormDataEntryValue | null) {
+  const rawValue = String(value || '').trim();
+
+  if (!rawValue) {
+    return new Date().toISOString();
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(rawValue)) {
+    return `${rawValue}T12:00:00.000Z`;
+  }
+
+  return rawValue;
+}
+
 Deno.serve(async (request) => {
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders(request) });
@@ -156,8 +170,67 @@ Deno.serve(async (request) => {
       return jsonResponse(request, { posts: data });
     }
 
+    if (action === 'incident-list') {
+      const { data, error } = await supabase
+        .from('ajt3_dog_incidents')
+        .select('id,culprit,incident,incident_at,updated_at')
+        .eq('id', 'latest')
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return jsonResponse(request, {
+        incident: data
+          ? {
+              culprit: data.culprit,
+              incident: data.incident,
+              incidentAt: data.incident_at
+            }
+          : null
+      });
+    }
+
+    if (action === 'incident-save') {
+      const incidentFormData = requireFormData(formData);
+      const culprit = String(incidentFormData.get('culprit') || 'Drake').trim() || 'Drake';
+      const incident = String(incidentFormData.get('incident') || '').trim();
+
+      if (!incident) {
+        return jsonResponse(request, { error: 'Incident details are required' }, 400);
+      }
+
+      const incidentRow = {
+        id: 'latest',
+        culprit,
+        incident,
+        incident_at: normalizeIncidentAt(incidentFormData.get('incidentAt')),
+        portrait_url: null,
+        portrait_alt: null
+      };
+
+      const { data, error } = await supabase
+        .from('ajt3_dog_incidents')
+        .upsert(incidentRow, { onConflict: 'id' })
+        .select('id,culprit,incident,incident_at')
+        .single();
+
+      if (error) {
+        throw error;
+      }
+
+      return jsonResponse(request, {
+        incident: {
+          culprit: data.culprit,
+          incident: data.incident,
+          incidentAt: data.incident_at
+        }
+      });
+    }
+
     if (action !== 'save') {
-      return jsonResponse(request, { error: 'Unknown action' }, 400);
+      return jsonResponse(request, { error: `Unknown action: ${action}` }, 400);
     }
 
     const saveFormData = requireFormData(formData);

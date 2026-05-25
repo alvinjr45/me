@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import HomeLink from '../components/HomeLink';
 import './Music.css';
 
 const playlists = {
@@ -195,6 +196,7 @@ function Music() {
             <br />
             Enjoy the flows that fuel late-night keyboard sessions.
           </p>
+          <HomeLink className="home-link--compact">Home</HomeLink>
         </section>
         <section className="music-page__embed-layout">
           <div className={`music-page__playlist-nav ${isReady ? 'music-page__playlist-nav--visible' : 'music-page__playlist-nav--hidden'}`}>

@@ -2,6 +2,8 @@
 
 The public blog content is intentionally simple: posts can come from Supabase or from the local fallback array in `src/data/blogPosts.js`. Both sources normalize into the same shape so the page components do not care where the content came from.
 
+The home page also reads a separate single-row dog-incident record from Supabase when configured.
+
 ## Blog Post Shape
 
 Current fields used by the app:
@@ -95,6 +97,21 @@ Important behavior:
 - `is_published` controls whether public clients can read the post.
 - `updated_at` is maintained by a trigger.
 
+The migration also creates `public.ajt3_dog_incidents` with these fields:
+
+- `id`
+- `culprit`
+- `incident`
+- `incident_at`
+- `portrait_url`
+- `portrait_alt`
+- `updated_at`
+
+Important behavior:
+
+- The home page uses the row with `id = 'latest'`.
+- The admin page updates that same row so the widget always shows the latest incident.
+
 ## Tagging Rules
 
 - Tags are stored as a string array in Supabase.
@@ -107,4 +124,3 @@ Important behavior:
 - Slugs are derived from the title by lowercasing, trimming, and replacing non-alphanumeric groups with hyphens.
 - The admin panel previews the resulting URL while editing.
 - If a title change would collide with an existing slug, the edge function rejects the save.
-

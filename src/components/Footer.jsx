@@ -1,4 +1,5 @@
 import React from 'react';
+import HomeLink from './HomeLink';
 import './Footer.css';
 
 export default function Footer() {
@@ -10,6 +11,7 @@ export default function Footer() {
       </div>
 
       <div className="footer-fineprint">
+        <HomeLink className="home-link--compact">Home</HomeLink>
         <span>© {new Date().getFullYear()} AJ Thompson</span>
       </div>
     </footer>

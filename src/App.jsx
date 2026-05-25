@@ -5,6 +5,7 @@ import Home from './pages/Home';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Admin from './pages/Admin';
+import NewPost from './pages/NewPost';
 import Dogs from './pages/Dogs';
 import Music from './pages/Music';
 import NotFound from './pages/NotFound';
@@ -22,6 +23,7 @@ function AppShell() {
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/new" element={<NewPost />} />
           <Route path="/dogs" element={<Dogs />} />
           <Route path="/music" element={<Music />} />
           <Route path="*" element={<NotFound />} />

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import BlogPostCard from '../components/BlogPostCard';
+import HomeLink from '../components/HomeLink';
 import { getBlogPosts } from '../data/blogPosts';
 import './Blog.css';
 
@@ -49,6 +50,7 @@ function Blog() {
             Field notes on code, product ideas, experiments, music, and the parts of life that keep the build moving.
           </p>
           <div className="blog-page__hero-actions">
+            <HomeLink className="home-link--compact">Home</HomeLink>
             <a className="blog-page__primary-link" href="#latest-post">
               Read latest
             </a>

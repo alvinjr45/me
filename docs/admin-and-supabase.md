@@ -9,6 +9,7 @@ The admin system is a small publishing pipeline built on top of Supabase.
 3. The edge function validates the secret against `ADMIN_POST_SECRET`.
 4. If the request is valid, the function reads or writes `ajt3_blog_posts`.
 5. If uploads are included, the function stores them in the `blog-media` bucket and writes public URLs into the post record.
+6. The same function also stores the latest dog incident used by the home page widget.
 
 ## Browser Side
 
@@ -33,6 +34,7 @@ The browser sends:
 - CORS
 - secret validation
 - list requests
+- incident list and save requests
 - save requests
 - file upload to Supabase Storage
 - slug conflict checks
@@ -44,6 +46,7 @@ The browser sends:
 `supabase/migrations/20260505000000_create_blog_posts.sql` sets up:
 
 - the blog post table
+- the dog incidents table used by the home page widget
 - the `updated_at` trigger
 - row-level security
 - a public-read policy for published posts
@@ -87,6 +90,7 @@ If `BLOG_MEDIA_PREFIX` is changed, the same slug-based structure is still used b
 
 - Covers display best at 16:9.
 - The admin page accepts either a cover upload or a remote cover URL.
+- The admin page also edits the latest dog incident shown on the home page.
 - Posts can be saved as published or draft.
 - The public blog and dogs pages only show published posts.
 
@@ -96,4 +100,3 @@ If `BLOG_MEDIA_PREFIX` is changed, the same slug-based structure is still used b
 - If the shared secret is wrong, the edge function returns unauthorized.
 - If a slug already exists, the save is rejected instead of silently overwriting another post.
 - If uploads fail, the save fails rather than producing partial content.
-

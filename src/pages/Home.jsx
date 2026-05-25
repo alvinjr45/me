@@ -92,6 +92,27 @@ function Home() {
             </div>
           </section>
 
+          <section className="home-page__incident" aria-label="Latest dog incident">
+            <Link className="home-page__incident-card" to="/dogs" aria-label="Open the Drake and Josh page">
+              <p className="home-page__incident-kicker">Days since last incident</p>
+              <div className="home-page__incident-copy">
+                <h2 className="home-page__incident-days">
+                  {incidentDays === null ? '—' : incidentDays}
+                  <span>days</span>
+                </h2>
+                <div className="home-page__incident-meta">
+                  <span>{incidentDate}</span>
+                </div>
+                <p className="home-page__incident-label">{incident.culprit}</p>
+                <p className="home-page__incident-text">{incident.incident}</p>
+              </div>
+              <figure className="home-page__incident-portrait">
+                <img src={incident.portraitUrl} alt={incident.portraitAlt || `${incident.culprit} portrait`} />
+                <figcaption>{incident.culprit} did it.</figcaption>
+              </figure>
+            </Link>
+          </section>
+
           <section className="home-page__highlights" aria-label="Featured pages">
             {homeHighlights.map((highlight) => {
               const cardContent = (
@@ -127,27 +148,6 @@ function Home() {
                 </Link>
               );
             })}
-          </section>
-
-          <section className="home-page__incident" aria-label="Latest dog incident">
-            <div className="home-page__incident-card">
-              <p className="home-page__incident-kicker">Days since last incident</p>
-              <div className="home-page__incident-copy">
-                <h2 className="home-page__incident-days">
-                  {incidentDays === null ? '—' : incidentDays}
-                  <span>days</span>
-                </h2>
-                <p className="home-page__incident-label">{incident.culprit}</p>
-                <p className="home-page__incident-text">{incident.incident}</p>
-                <div className="home-page__incident-meta">
-                  <span>{incidentDate}</span>
-                </div>
-              </div>
-              <figure className="home-page__incident-portrait">
-                <img src={incident.portraitUrl} alt={incident.portraitAlt || `${incident.culprit} portrait`} />
-                <figcaption>{incident.culprit} did it.</figcaption>
-              </figure>
-            </div>
           </section>
         </div>
       ) : null}

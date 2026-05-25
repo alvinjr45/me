@@ -1,8 +1,34 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './BlogPostArticle.css';
 
 function BlogPostArticle({ post }) {
+  const [lightboxImage, setLightboxImage] = useState(null);
+
+  useEffect(() => {
+    if (!lightboxImage) {
+      return undefined;
+    }
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        setLightboxImage(null);
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    document.body.classList.add('blog-post-page--modal-open');
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.body.classList.remove('blog-post-page--modal-open');
+    };
+  }, [lightboxImage]);
+
+  const openLightbox = (src, alt, caption) => {
+    setLightboxImage({ src, alt, caption });
+  };
+
   return (
     <main className="blog-post-page">
       <article className="blog-post-page__article">
@@ -14,7 +40,14 @@ function BlogPostArticle({ post }) {
             <p className="blog-post-page__excerpt">{post.excerpt}</p>
           </div>
           <div className="blog-post-page__image-wrap">
-            <img src={post.image} alt={post.imageAlt || post.title} className="blog-post-page__image" />
+            <button
+              type="button"
+              className="blog-post-page__image-button"
+              onClick={() => openLightbox(post.image, post.imageAlt || post.title, post.title)}
+              aria-label={`Enlarge ${post.title} image`}
+            >
+              <img src={post.image} alt={post.imageAlt || post.title} className="blog-post-page__image" />
+            </button>
           </div>
         </header>
 
@@ -43,7 +76,14 @@ function BlogPostArticle({ post }) {
                 {item.type === 'video' ? (
                   <video controls src={item.src} poster={item.poster || undefined} />
                 ) : (
-                  <img src={item.src} alt={item.alt || ''} />
+                  <button
+                    type="button"
+                    className="blog-post-page__image-button blog-post-page__image-button--media"
+                    onClick={() => openLightbox(item.src, item.alt || post.title, item.caption || item.alt || post.title)}
+                    aria-label={`Enlarge ${item.alt || post.title}`}
+                  >
+                    <img src={item.src} alt={item.alt || ''} />
+                  </button>
                 )}
                 {item.caption ? <figcaption>{item.caption}</figcaption> : null}
               </figure>
@@ -55,6 +95,33 @@ function BlogPostArticle({ post }) {
           <Link to="/blog">Back to /blog</Link>
         </footer>
       </article>
+
+      {lightboxImage ? (
+        <div
+          className="blog-post-page__lightbox"
+          role="presentation"
+          onClick={() => setLightboxImage(null)}
+        >
+          <div
+            className="blog-post-page__lightbox-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label={lightboxImage.alt}
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="blog-post-page__lightbox-close"
+              onClick={() => setLightboxImage(null)}
+              aria-label="Close enlarged image"
+            >
+              Close
+            </button>
+            <img src={lightboxImage.src} alt={lightboxImage.alt} className="blog-post-page__lightbox-image" />
+            {lightboxImage.caption ? <p className="blog-post-page__lightbox-caption">{lightboxImage.caption}</p> : null}
+          </div>
+        </div>
+      ) : null}
     </main>
   );
 }

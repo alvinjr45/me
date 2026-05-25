@@ -17,8 +17,6 @@ const playlists = {
 };
 const artistPages = [
   { key: 'drizzy', title: 'Drizzy', src: 'https://embed.music.apple.com/us/playlist/drake/pl.u-lx4JTP2ja3D' },
-  { key: 'wunna', title: 'Wunna', src: 'https://embed.music.apple.com/us/playlist/gunna/pl.u-RgV5TeP3q1a' },
-  { key: 'pluto', title: 'Pluto', src: 'https://embed.music.apple.com/us/playlist/pluto/pl.u-le6AcP2ja3D' },
   { key: 'weeknd', title: 'The Weeknd', src: 'https://embed.music.apple.com/us/playlist/the-weeknd/pl.u-BpJesRv1kPN' },
   { key: 'cole', title: 'Cole', src: 'https://embed.music.apple.com/us/playlist/carolinas-finest/pl.u-vvdMt8YzK6p' },
 ];
@@ -32,11 +30,9 @@ const navOrder = {
   hm: 1,
   funk: 2,
   gospel: 3,
-  wunna: 1,
-  pluto: 2,
-  drizzy: 3,
-  weeknd: 4,
-  cole: 5,
+  drizzy: 1,
+  weeknd: 2,
+  cole: 3,
 };
 
 function Music() {

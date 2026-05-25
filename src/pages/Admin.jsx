@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import heic2any from 'heic2any';
 import { isSupabaseConfigured } from '../lib/supabaseClient';
 import './Admin.css';
 
@@ -15,6 +16,8 @@ const emptyMediaUrl = {
   caption: '',
   poster: ''
 };
+
+const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 function slugify(value) {
   return value
@@ -47,6 +50,41 @@ function toLines(value) {
     .split('\n')
     .map((line) => line.trim())
     .filter(Boolean);
+}
+
+function isHeicFile(file) {
+  const fileName = file.name.toLowerCase();
+  return file.type === 'image/heic' || file.type === 'image/heif' || fileName.endsWith('.heic') || fileName.endsWith('.heif');
+}
+
+async function normalizeUploadFile(file) {
+  if (!isHeicFile(file)) {
+    return file;
+  }
+
+  let converted;
+
+  try {
+    converted = await heic2any({
+      blob: file,
+      toType: 'image/jpeg',
+      quality: 0.92
+    });
+  } catch {
+    throw new Error(`HEIC conversion failed for ${file.name}. Export it as JPG or try a different browser.`);
+  }
+
+  const blob = Array.isArray(converted) ? converted[0] : converted;
+  const baseName = file.name.replace(/\.(heic|heif)$/i, '');
+
+  if (blob.size > MAX_UPLOAD_BYTES) {
+    throw new Error(`HEIC file ${file.name} is too large after conversion. Keep uploads under 50 MB or resize it first.`);
+  }
+
+  return new File([blob], `${baseName || 'upload'}.jpg`, {
+    type: 'image/jpeg',
+    lastModified: file.lastModified
+  });
 }
 
 function Admin() {
@@ -244,48 +282,50 @@ function Admin() {
 
   async function handleSubmit(event) {
     event.preventDefault();
-    setStatus('saving');
-    setMessage('');
-
-    const body = new FormData();
-    body.append('action', 'save');
-    body.append('adminSecret', form.adminSecret);
-    body.append('originalSlug', form.originalSlug);
-    body.append('title', form.title);
-    body.append('eyebrow', form.eyebrow);
-    body.append('excerpt', form.excerpt);
-    body.append('publishedAt', form.publishedAt);
-    body.append('tags', JSON.stringify(toLines(form.tags.replaceAll(',', '\n'))));
-    body.append('coverImageUrl', form.coverImageUrl);
-    body.append('coverImageAlt', form.coverImageAlt);
-    body.append('isPublished', String(form.isPublished));
-    body.append(
-      'sections',
-      JSON.stringify(
-        sections
-          .map((section) => ({
-            heading: section.heading.trim(),
-            paragraphs: toLines(section.paragraphs),
-            bullets: toLines(section.bullets)
-          }))
-          .filter((section) => section.heading || section.paragraphs.length || section.bullets.length)
-      )
-    );
-    body.append('mediaUrls', JSON.stringify(mediaUrls.filter((item) => item.src.trim())));
-    body.append(
-      'uploadedMediaMeta',
-      JSON.stringify(mediaFiles.map(({ type, alt, caption }) => ({ type, alt, caption })))
-    );
-
-    if (coverFile) {
-      body.append('coverFile', coverFile);
-    }
-
-    mediaFiles.forEach(({ file }) => {
-      body.append('mediaFiles', file);
-    });
-
     try {
+      setStatus('saving');
+      setMessage('');
+
+      const body = new FormData();
+      body.append('action', 'save');
+      body.append('adminSecret', form.adminSecret);
+      body.append('originalSlug', form.originalSlug);
+      body.append('title', form.title);
+      body.append('eyebrow', form.eyebrow);
+      body.append('excerpt', form.excerpt);
+      body.append('publishedAt', form.publishedAt);
+      body.append('tags', JSON.stringify(toLines(form.tags.replaceAll(',', '\n'))));
+      body.append('coverImageUrl', form.coverImageUrl);
+      body.append('coverImageAlt', form.coverImageAlt);
+      body.append('isPublished', String(form.isPublished));
+      body.append(
+        'sections',
+        JSON.stringify(
+          sections
+            .map((section) => ({
+              heading: section.heading.trim(),
+              paragraphs: toLines(section.paragraphs),
+              bullets: toLines(section.bullets)
+            }))
+            .filter((section) => section.heading || section.paragraphs.length || section.bullets.length)
+        )
+      );
+      body.append('mediaUrls', JSON.stringify(mediaUrls.filter((item) => item.src.trim())));
+      body.append(
+        'uploadedMediaMeta',
+        JSON.stringify(mediaFiles.map(({ type, alt, caption }) => ({ type, alt, caption })))
+      );
+
+      if (coverFile) {
+        const uploadCoverFile = await normalizeUploadFile(coverFile);
+        body.append('coverFile', uploadCoverFile);
+      }
+
+      for (const { file } of mediaFiles) {
+        const uploadFile = await normalizeUploadFile(file);
+        body.append('mediaFiles', uploadFile);
+      }
+
       const response = await fetch(publishUrl, {
         method: 'POST',
         body
@@ -416,7 +456,7 @@ function Admin() {
           <h2>Cover</h2>
           <label>
             Upload cover
-            <input type="file" accept="image/*" onChange={(event) => setCoverFile(event.target.files[0] || null)} />
+            <input type="file" accept="image/*,.heic,.heif" onChange={(event) => setCoverFile(event.target.files[0] || null)} />
           </label>
           <p className="admin-page__hint">Covers display at 16:9. Upload 1600 x 900 or larger for the cleanest crop.</p>
           <label>
@@ -461,7 +501,7 @@ function Admin() {
           <h2>Media</h2>
           <label>
             Upload photos or videos
-            <input type="file" accept="image/*,video/*" multiple onChange={(event) => handleMediaFiles(event.target.files)} />
+            <input type="file" accept="image/*,video/*,.heic,.heif" multiple onChange={(event) => handleMediaFiles(event.target.files)} />
           </label>
           {mediaFiles.map((item, index) => (
             <fieldset key={item.file.name}>

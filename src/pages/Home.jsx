@@ -82,8 +82,7 @@ function Home() {
         <div className="home-page__frame">
           <section className="home-page__hero">
             <div className="home-page__hero-copy">
-              <p className="home-page__eyebrow">AJT3 / portfolio interface</p>
-              <h1 className="home-page__heading">.me()</h1>
+              <h1 className="home-page__heading">.me( )</h1>
               <p className="home-page__lede">Me and all the things I've built</p>
               <p className="home-page__subcopy">
                 A layered collection of code, sound, reviews, and experiments, presented with cleaner structure and a

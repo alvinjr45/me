@@ -112,15 +112,6 @@
   opacity: 0.75;
 }
 
-.home-page__eyebrow {
-  margin: 0 0 1.1rem;
-  color: rgba(249, 249, 249, 0.72);
-  text-transform: uppercase;
-  letter-spacing: 0.32em;
-  font-size: 0.74rem;
-  font-weight: 700;
-}
-
 .home-page__heading {
   margin: 0;
   max-width: 12ch;
@@ -593,14 +584,6 @@
     opacity: 0.9;
   }
 
-  .home-page__eyebrow {
-    margin-bottom: 0.9rem;
-    letter-spacing: 0.26em;
-    font-size: 0.68rem;
-    color: rgba(249, 249, 249, 0.66);
-    animation: homePageMobileRise 0.82s cubic-bezier(0.22, 1, 0.36, 1) 0.28s both;
-  }
-
   .home-page__heading {
     max-width: 100%;
     font-size: clamp(2.2rem, 10vw, 3.4rem);
@@ -817,12 +800,6 @@
     padding: 1.05rem 0.9rem 0.95rem;
     border-radius: 24px;
     margin-bottom: 0.6rem;
-  }
-
-  .home-page__eyebrow {
-    margin-bottom: 0.8rem;
-    letter-spacing: 0.18em;
-    font-size: 0.64rem;
   }
 
   .home-page__heading {

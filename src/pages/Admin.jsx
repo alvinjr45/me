@@ -2,14 +2,8 @@ import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { defaultDogIncident } from '../data/dogIncident';
 import {
-  emptyMediaUrl,
-  emptySection,
   getSupabaseFunctionHeaders,
-  normalizeUploadFile,
-  slugify,
   toInputDate,
-  toLines,
-  toTextList
 } from '../lib/adminPostEditor';
 import './Admin.css';
 
@@ -28,10 +22,6 @@ function Admin() {
     coverImageAlt: '',
     isPublished: true
   });
-  const [coverFile, setCoverFile] = useState(null);
-  const [sections, setSections] = useState([{ ...emptySection }]);
-  const [mediaUrls, setMediaUrls] = useState([{ ...emptyMediaUrl }]);
-  const [mediaFiles, setMediaFiles] = useState([]);
   const [posts, setPosts] = useState([]);
   const [incident, setIncident] = useState(defaultDogIncident);
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -52,31 +42,6 @@ function Admin() {
       ...current,
       [name]: value
     }));
-  }
-
-  function updateSection(index, name, value) {
-    setSections((current) =>
-      current.map((section, sectionIndex) => (sectionIndex === index ? { ...section, [name]: value } : section))
-    );
-  }
-
-  function updateMediaUrl(index, name, value) {
-    setMediaUrls((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, [name]: value } : item)));
-  }
-
-  function updateMediaFile(index, name, value) {
-    setMediaFiles((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, [name]: value } : item)));
-  }
-
-  function handleMediaFiles(files) {
-    setMediaFiles(
-      Array.from(files).map((file) => ({
-        file,
-        type: file.type.startsWith('video/') ? 'video' : 'image',
-        alt: '',
-        caption: ''
-      }))
-    );
   }
 
   function updateIncidentField(name, value) {
@@ -116,66 +81,6 @@ function Admin() {
     }
 
     return fallback;
-  }
-
-  function handleNewPost() {
-    setForm((current) => ({
-      adminSecret: current.adminSecret,
-      title: '',
-      originalSlug: '',
-      eyebrow: 'Journal',
-      excerpt: '',
-      publishedAt: today,
-      tags: '',
-      coverImageUrl: '',
-      coverImageAlt: '',
-      isPublished: true
-    }));
-    setCoverFile(null);
-    setSections([{ ...emptySection }]);
-    setMediaUrls([{ ...emptyMediaUrl }]);
-    setMediaFiles([]);
-    setMessage('');
-    setStatus('idle');
-  }
-
-  function handleEditPost(post) {
-    setForm((current) => ({
-      adminSecret: current.adminSecret,
-      title: post.title || '',
-      originalSlug: post.slug || '',
-      eyebrow: post.eyebrow || 'Journal',
-      excerpt: post.excerpt || '',
-      publishedAt: toInputDate(post.published_at, today),
-      tags: Array.isArray(post.tags) ? post.tags.join(', ') : '',
-      coverImageUrl: post.cover_image_url || '',
-      coverImageAlt: post.cover_image_alt || '',
-      isPublished: Boolean(post.is_published)
-    }));
-    setCoverFile(null);
-    setSections(
-      post.sections?.length
-        ? post.sections.map((section) => ({
-            heading: section.heading || '',
-            paragraphs: toTextList(section.paragraphs),
-            bullets: Array.isArray(section.bullets) ? section.bullets.join('\n') : ''
-          }))
-        : [{ ...emptySection }]
-    );
-    setMediaUrls(
-      post.media?.length
-        ? post.media.map((item) => ({
-            type: item.type || 'image',
-            src: item.src || '',
-            alt: item.alt || '',
-            caption: item.caption || '',
-            poster: item.poster || ''
-          }))
-        : [{ ...emptyMediaUrl }]
-    );
-    setMediaFiles([]);
-    setStatus('idle');
-    setMessage(`Editing /blog/${post.slug}`);
   }
 
   async function loadPosts({ silent = false, adminSecret = form.adminSecret } = {}) {
@@ -313,78 +218,6 @@ function Admin() {
     sessionStorage.removeItem('ajt3_admin_secret');
     setIncidentStatus('idle');
     setIncidentMessage('');
-  }
-
-  async function handleSubmit(event) {
-    event.preventDefault();
-    try {
-      setStatus('saving');
-      setMessage('');
-
-      const body = new FormData();
-      body.append('action', 'save');
-      body.append('adminSecret', form.adminSecret);
-      body.append('originalSlug', form.originalSlug);
-      body.append('title', form.title);
-      body.append('eyebrow', form.eyebrow);
-      body.append('excerpt', form.excerpt);
-      body.append('publishedAt', form.publishedAt);
-      body.append('tags', JSON.stringify(toLines(form.tags.replaceAll(',', '\n'))));
-      body.append('coverImageUrl', form.coverImageUrl);
-      body.append('coverImageAlt', form.coverImageAlt);
-      body.append('isPublished', String(form.isPublished));
-      body.append(
-        'sections',
-        JSON.stringify(
-          sections
-            .map((section) => ({
-              heading: section.heading.trim(),
-              paragraphs: toLines(section.paragraphs),
-              bullets: toLines(section.bullets)
-            }))
-            .filter((section) => section.heading || section.paragraphs.length || section.bullets.length)
-        )
-      );
-      body.append('mediaUrls', JSON.stringify(mediaUrls.filter((item) => item.src.trim())));
-      body.append(
-        'uploadedMediaMeta',
-        JSON.stringify(mediaFiles.map(({ type, alt, caption }) => ({ type, alt, caption })))
-      );
-
-      if (coverFile) {
-        const uploadCoverFile = await normalizeUploadFile(coverFile);
-        body.append('coverFile', uploadCoverFile);
-      }
-
-      for (const { file } of mediaFiles) {
-        const uploadFile = await normalizeUploadFile(file);
-        body.append('mediaFiles', uploadFile);
-      }
-
-      const response = await fetch(publishUrl, {
-        method: 'POST',
-        headers: getSupabaseFunctionHeaders(),
-        body
-      });
-      const payload = await readResponsePayload(response);
-      const result = payload.data || {};
-
-      if (!response.ok) {
-        console.error('Publish failed', { status: response.status, payload: payload.raw });
-        throw new Error(`Publish failed (${response.status}): ${result.error || payload.raw || 'Unable to publish post.'}`);
-      }
-
-      setStatus('saved');
-      setForm((current) => ({
-        ...current,
-        originalSlug: result.post.slug
-      }));
-      await loadPosts({ silent: true });
-      setMessage(`Saved /blog/${result.post.slug}`);
-    } catch (error) {
-      setStatus('error');
-      setMessage(error.message);
-    }
   }
 
   async function handleIncidentSubmit(event) {

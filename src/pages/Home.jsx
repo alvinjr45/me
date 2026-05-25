@@ -85,8 +85,8 @@ function Home() {
               <h1 className="home-page__heading">.me( )</h1>
               <p className="home-page__lede">Me and all the things I've built</p>
               <p className="home-page__subcopy">
-                A layered collection of code, sound, reviews, and experiments, presented with cleaner structure and a
-                sharper edge.
+                Someone asked me why I like software develeopment. The truth is because I'm good at it. I think it
+                loves me
               </p>
             </div>
           </section>

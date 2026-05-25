@@ -599,7 +599,10 @@
   }
 
   .home-page__subcopy {
-    display: none;
+    display: block;
+    margin-top: 0.9rem;
+    font-size: 0.95rem;
+    line-height: 1.65;
   }
 
   .home-page__highlights {
@@ -812,7 +815,10 @@
   }
 
   .home-page__subcopy {
-    display: none;
+    display: block;
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    line-height: 1.6;
   }
 
   .home-page__highlights {

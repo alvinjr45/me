@@ -17,22 +17,26 @@ const playlists = {
   },
 };
 const artistPages = [
-  { key: 'drizzy', title: 'Drizzy', src: 'https://embed.music.apple.com/us/playlist/drake/pl.u-lx4JTP2ja3D' },
   { key: 'weeknd', title: 'The Weeknd', src: 'https://embed.music.apple.com/us/playlist/the-weeknd/pl.u-BpJesRv1kPN' },
+  { key: 'drizzy', title: 'Drizzy', src: 'https://embed.music.apple.com/us/playlist/drake/pl.u-lx4JTP2ja3D' },
   { key: 'cole', title: 'Cole', src: 'https://embed.music.apple.com/us/playlist/carolinas-finest/pl.u-vvdMt8YzK6p' },
 ];
 
 const songsPages = [
   { key: 'top10', title: 'Top 10', src: 'https://embed.music.apple.com/us/playlist/top-10-songs-of-all-time/pl.u-AZ5aTlm28oZ' },
-  { key: 'songofday', title: 'Song of the day', src: 'https://embed.music.apple.com/us/album/cpr/1438765128?i=1438765140' },
+  {
+    key: 'favorites',
+    title: 'Favorites',
+    src: 'https://embed.music.apple.com/us/playlist/favorite-songs/pl.u-XzUgPDVM8'
+  },
 ];
 
 const navOrder = {
   hm: 1,
   funk: 2,
   gospel: 3,
-  drizzy: 1,
-  weeknd: 2,
+  weeknd: 1,
+  drizzy: 2,
   cole: 3,
 };
 

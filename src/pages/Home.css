@@ -524,7 +524,7 @@
   }
 
   .home-page--ready .home-page__incident-card {
-    animation: homePageReveal 1s cubic-bezier(0.22, 1, 0.36, 1) 0.92s both;
+    animation: homePageReveal 1s cubic-bezier(0.22, 1, 0.36, 1) 2s both;
   }
 
   .home-page--ready .home-page__highlight-card {
@@ -532,19 +532,19 @@
   }
 
   .home-page--ready .home-page__highlight-card:nth-child(1) {
-    animation-delay: 1.18s;
+    animation-delay: 1.08s;
   }
 
   .home-page--ready .home-page__highlight-card:nth-child(2) {
-    animation-delay: 1.36s;
+    animation-delay: 1.26s;
   }
 
   .home-page--ready .home-page__highlight-card:nth-child(3) {
-    animation-delay: 1.54s;
+    animation-delay: 1.44s;
   }
 
   .home-page--ready .home-page__highlight-card:nth-child(4) {
-    animation-delay: 1.72s;
+    animation-delay: 1.62s;
   }
 }
 
@@ -715,7 +715,7 @@
     position: absolute;
     inset: 0 0 auto;
     z-index: 2;
-    padding: 3.5rem 1rem 0.95rem;
+    padding: 4.4rem 1rem 0.95rem;
     text-align: left;
     background: linear-gradient(180deg, rgba(4, 7, 12, 0.98), rgba(4, 7, 12, 0.88) 48%, rgba(4, 7, 12, 0));
     display: grid;
@@ -724,7 +724,7 @@
       "days label"
       "meta text";
     gap: 0.5rem 0.85rem;
-    align-items: start;
+    align-items: center;
   }
 
   .home-page__incident-kicker {
@@ -751,9 +751,9 @@
   .home-page__incident-days {
     grid-area: days;
     margin: 0;
-    justify-content: flex-start;
+    justify-content: center;
     font-size: clamp(2.1rem, 10vw, 3rem);
-    align-self: start;
+    align-self: center;
     line-height: 0.94;
   }
 
@@ -772,8 +772,8 @@
   .home-page__incident-meta {
     grid-area: meta;
     margin-top: 0;
-    justify-content: flex-start;
-    align-self: start;
+    justify-content: center;
+    align-self: center;
     margin-bottom: 0;
   }
 
@@ -786,14 +786,16 @@
   .home-page__incident-label {
     grid-area: label;
     margin: 0;
-    align-self: end;
+    align-self: center;
     line-height: 1.15;
+    text-align: center;
   }
 
   .home-page__incident-text {
     grid-area: text;
     margin: 0;
     line-height: 1.55;
+    text-align: center;
   }
 
   .home-page__incident-portrait img {
@@ -859,7 +861,7 @@
   }
 
   .home-page__incident-copy {
-    padding: 3.25rem 0.85rem 0.85rem;
+    padding: 4.1rem 0.85rem 0.85rem;
   }
 
   .home-page__incident-days {

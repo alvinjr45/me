@@ -44,13 +44,15 @@ function Music() {
   const [activeArtist, setActiveArtist] = useState('drizzy');
   const [activeSongs, setActiveSongs] = useState('top10');
   const [isReady, setIsReady] = useState(false);
-  const [copyVisible, setCopyVisible] = useState(false);
   const [artistVisible, setArtistVisible] = useState(false);
   const [framesInitial, setFramesInitial] = useState(false);
   const artistRef = useRef(null);
   const songsRef = useRef(null);
   const artistDelay = useRef(null);
   const artistVisibleRef = useRef(artistVisible);
+  const activePlaylistFrame = playlists[activePlaylist];
+  const activeArtistFrame = artistPages.find((page) => page.key === activeArtist);
+  const activeSongsFrame = songsPages.find((page) => page.key === activeSongs);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsReady(true), 1450);
@@ -65,36 +67,6 @@ function Music() {
     const timer = setTimeout(() => setFramesInitial(false), 1200);
     return () => clearTimeout(timer);
   }, [isReady]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setCopyVisible(true), 450);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const scrollToArtistButtons = () => {
-    if (!artistRef.current) {
-      return;
-    }
-
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
-      return;
-    }
-
-    const nav = artistRef.current.querySelector('.music-page__playlist-nav');
-    if (!nav) {
-      return;
-    }
-
-    const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    const desiredGap = 9 * rootFontSize;
-    const navTop = nav.getBoundingClientRect().top + window.scrollY;
-    const scrollLimit = document.documentElement.scrollHeight - window.innerHeight;
-
-    window.scrollTo({
-      top: Math.min(Math.max(navTop - desiredGap, 0), scrollLimit),
-      behavior: 'smooth',
-    });
-  };
 
   useEffect(() => {
     if (!artistRef.current) {
@@ -127,14 +99,10 @@ function Music() {
     };
   }, []);
 
-  useEffect(() => {
-    return undefined;
-  }, []);
-
   return (
-    <main className="music-page">
+    <main className={`music-page${isReady ? ' music-page--ready' : ''}`}>
       <div className="music-page__primary">
-        <section className={`music-page__copy${copyVisible ? ' music-page__copy--visible' : ''}`}>
+        <section className={`music-page__copy${isReady ? ' music-page__copy--visible' : ''}`}>
           <p>Favorite sounds</p>
           <h1>.playlists( )</h1>
           <p>
@@ -160,23 +128,22 @@ function Music() {
             ))}
           </div>
           <div className="music-page__embed">
-            {Object.entries(playlists).map(([key, playlist]) => {
-              const shouldShow = isReady && activePlaylist === key;
-              return (
-                <iframe
-                  key={key}
-                  allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-                  frameBorder="0"
-                  width="100%"
-                  height="820"
-                className={`music-page__iframe ${shouldShow ? 'music-page__iframe--active' : ''} ${framesInitial ? 'music-page__iframe--initial' : ''}`}
-                  src={playlist.embed}
-                  sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-                  title={`${playlist.title} Playlist`}
-                  loading="eager"
-                />
-              );
-            })}
+            {activePlaylistFrame ? (
+              <iframe
+                key={activePlaylist}
+                allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+                frameBorder="0"
+                width="100%"
+                height="820"
+                className={`music-page__iframe ${isReady ? 'music-page__iframe--active' : ''} ${
+                  isReady && framesInitial ? 'music-page__iframe--initial' : ''
+                }`}
+                src={activePlaylistFrame.embed}
+                sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                title={`${activePlaylistFrame.title} Playlist`}
+                loading="eager"
+              />
+            ) : null}
           </div>
         </section>
       </div>
@@ -203,23 +170,22 @@ function Music() {
             ))}
           </div>
           <div className="music-page__embed">
-            {artistPages.map((page) => {
-              const shouldShow = isReady && activeArtist === page.key;
-              return (
-                <iframe
-                  key={`${page.key}-dup`}
-                  allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-                  frameBorder="0"
-                  width="100%"
-                  height="820"
-                  className={`music-page__iframe ${shouldShow ? 'music-page__iframe--active' : ''} ${framesInitial ? 'music-page__iframe--initial' : ''}`}
-                  src={page.src}
-                  sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-                  title={`${page.title} Playlist`}
-                  loading="eager"
-                />
-              );
-            })}
+            {activeArtistFrame ? (
+              <iframe
+                key={activeArtist}
+                allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+                frameBorder="0"
+                width="100%"
+                height="820"
+                className={`music-page__iframe ${isReady ? 'music-page__iframe--active' : ''} ${
+                  isReady && framesInitial ? 'music-page__iframe--initial' : ''
+                }`}
+                src={activeArtistFrame.src}
+                sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                title={`${activeArtistFrame.title} Playlist`}
+                loading="eager"
+              />
+            ) : null}
           </div>
         </div>
         <div className="music-page__artist-copy">
@@ -238,7 +204,7 @@ function Music() {
         }`}
         ref={songsRef}
       >
-        <div className={`music-page__copy music-page__songs-copy${copyVisible ? ' music-page__copy--visible' : ''}`}>
+        <div className={`music-page__copy music-page__songs-copy${isReady ? ' music-page__copy--visible' : ''}`}>
           <p>Curated cuts</p>
           <h1>.songs( )</h1>
           <p>These are tracks that played through the late-night lab sessions.</p>
@@ -259,25 +225,22 @@ function Music() {
             ))}
           </div>
           <div className="music-page__embed">
-            {songsPages.map((page) => {
-              const shouldShow = isReady && activeSongs === page.key;
-              return (
-                <iframe
-                  key={`${page.key}-songs-frame`}
-                  allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
-                  frameBorder="0"
-                  width="100%"
-                  height="820"
-                  className={`music-page__iframe ${shouldShow ? 'music-page__iframe--active' : ''} ${
-                    framesInitial ? 'music-page__iframe--initial' : ''
-                  }`}
-                  src={page.src}
-                  sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
-                  title={`${page.title} songs playlist`}
-                  loading="eager"
-                />
-              );
-            })}
+            {activeSongsFrame ? (
+              <iframe
+                key={activeSongs}
+                allow="autoplay *; encrypted-media *; fullscreen *; clipboard-write"
+                frameBorder="0"
+                width="100%"
+                height="820"
+                className={`music-page__iframe ${isReady ? 'music-page__iframe--active' : ''} ${
+                  isReady && framesInitial ? 'music-page__iframe--initial' : ''
+                }`}
+                src={activeSongsFrame.src}
+                sandbox="allow-forms allow-popups allow-same-origin allow-scripts allow-storage-access-by-user-activation allow-top-navigation-by-user-activation"
+                title={`${activeSongsFrame.title} songs playlist`}
+                loading="eager"
+              />
+            ) : null}
           </div>
         </section>
       </section>

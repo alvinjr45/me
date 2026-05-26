@@ -29,6 +29,14 @@
   gap: 2rem;
   grid-template-columns: minmax(260px, 1fr) minmax(400px, 1.2fr);
   align-items: flex-start;
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+}
+
+.music-page--ready .music-page__primary {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .music-page__primary section {
@@ -214,16 +222,15 @@
   inset: 0;
   border-radius: 10px;
   cursor: inherit;
-  opacity: 0;
-  transform: translateY(12px);
-  transition: none;
-  pointer-events: none;
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.9s ease, transform 0.9s ease;
+  pointer-events: auto;
 }
 
 .music-page__iframe--active {
   opacity: 1;
   pointer-events: auto;
-  z-index: 1;
   transform: translateY(0);
 }
 

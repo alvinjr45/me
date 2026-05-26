@@ -187,7 +187,7 @@ function Home() {
               <h1 className="home-page__heading">.me( )</h1>
               <p className="home-page__lede">Me and all the things I've built</p>
               <p className="home-page__subcopy">
-                Someone asked me why I love software development. The truth is because its never been all that hard.
+                Someone asked me why I love software development. The truth is because it's never been all that hard.
                 I think software development loves me.
               </p>
             </div>
@@ -202,12 +202,10 @@ function Home() {
                     {incidentDays === null ? '—' : incidentDays}
                     <span>days</span>
                   </h2>
-                  <div className="home-page__incident-meta">
-                    <span>{incidentDate}</span>
-                    {incidentCountText ? <span>{incidentCountText}</span> : null}
-                  </div>
+                  <span className="home-page__incident-date">{incidentDate}</span>
                   <p className="home-page__incident-label">{dogIncident.culprit}</p>
                   <p className="home-page__incident-text">{dogIncident.incident}</p>
+                  {incidentCountText ? <span className="home-page__incident-count">{incidentCountText}</span> : null}
                 </div>
                 <figure className="home-page__incident-portrait">
                   {!incidentPortraitFailed && dogIncident.portraitUrl ? (

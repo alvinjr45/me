@@ -80,6 +80,116 @@ function formatError(error: unknown) {
   return details;
 }
 
+async function getIncidentCount(supabase: ReturnType<typeof createClient>, culprit: string) {
+  try {
+    const { data, error } = await supabase
+      .from('ajt3_dog_incident_counters')
+      .select('culprit,incident_count')
+      .eq('culprit', culprit)
+      .maybeSingle();
+
+    if (error) {
+      throw error;
+    }
+
+    const count = Number(data?.incident_count);
+    return Number.isFinite(count) ? count : null;
+  } catch (error) {
+    console.warn('[admin-dog-incident] counter load failed', formatError(error));
+    return null;
+  }
+}
+
+async function bumpIncidentCount(supabase: ReturnType<typeof createClient>, culprit: string) {
+  try {
+    const { data, error } = await supabase.rpc('increment_dog_incident_counter', {
+      culprit_name: culprit
+    });
+
+    if (!error) {
+      const nextCount = Number(data);
+      return Number.isFinite(nextCount) ? nextCount : null;
+    }
+
+    console.warn('[admin-dog-incident] counter rpc failed, falling back to direct increment', formatError(error));
+    const currentCount = (await getIncidentCount(supabase, culprit)) ?? 0;
+    const nextCount = currentCount + 1;
+
+    const { error: upsertError } = await supabase
+      .from('ajt3_dog_incident_counters')
+      .upsert({ culprit, incident_count: nextCount }, { onConflict: 'culprit' });
+
+    if (upsertError) {
+      throw upsertError;
+    }
+
+    return nextCount;
+  } catch (error) {
+    console.warn('[admin-dog-incident] counter save failed', formatError(error));
+    return null;
+  }
+}
+
+async function saveIncidentAndCount(
+  supabase: ReturnType<typeof createClient>,
+  culprit: string,
+  incident: string,
+  incidentAt: string
+) {
+  try {
+    const { data, error } = await supabase.rpc('save_dog_incident', {
+      culprit_name: culprit,
+      incident_text: incident,
+      incident_time: incidentAt
+    });
+
+    if (!error) {
+      const row = Array.isArray(data) ? data[0] : data;
+      const incidentCount = Number(row?.incident_count);
+
+      return {
+        culprit: String(row?.culprit || culprit),
+        incident: String(row?.incident || incident),
+        incidentAt: String(row?.incident_at || incidentAt),
+        incidentCount: Number.isFinite(incidentCount) ? incidentCount : null
+      };
+    }
+
+    console.warn('[admin-dog-incident] save rpc failed, falling back to direct writes', formatError(error));
+
+    const incidentRow = {
+      id: 'latest',
+      culprit,
+      incident,
+      incident_at: incidentAt,
+      portrait_url: null,
+      portrait_alt: null
+    };
+
+    const { data: incidentData, error: incidentError } = await supabase
+      .from('ajt3_dog_incidents')
+      .upsert(incidentRow, { onConflict: 'id' })
+      .select('id,culprit,incident,incident_at')
+      .single();
+
+    if (incidentError) {
+      throw incidentError;
+    }
+
+    const incidentCount = await bumpIncidentCount(supabase, incidentData.culprit);
+
+    return {
+      culprit: incidentData.culprit,
+      incident: incidentData.incident,
+      incidentAt: incidentData.incident_at,
+      incidentCount
+    };
+  } catch (error) {
+    console.warn('[admin-dog-incident] save and count failed', formatError(error));
+    return null;
+  }
+}
+
 Deno.serve(async (request) => {
   console.info('[admin-dog-incident] request', {
     method: request.method,
@@ -121,13 +231,16 @@ Deno.serve(async (request) => {
         return jsonResponse(request, { error: 'Load failed', details: formatError(error) }, 500);
       }
 
+      const incidentCount = data?.culprit ? await getIncidentCount(supabase, data.culprit) : null;
+
       console.info('[admin-dog-incident] loaded incident');
       return jsonResponse(request, {
         incident: data
           ? {
               culprit: data.culprit,
               incident: data.incident,
-              incidentAt: data.incident_at
+              incidentAt: data.incident_at,
+              incidentCount
             }
           : null
       });
@@ -141,35 +254,24 @@ Deno.serve(async (request) => {
       return jsonResponse(request, { error: 'Incident details are required' }, 400);
     }
 
-    const incidentRow = {
-      id: 'latest',
-      culprit,
-      incident,
-      incident_at: normalizeIncidentAt(formData.get('incidentAt')),
-      portrait_url: null,
-      portrait_alt: null
-    };
+    const incidentAt = normalizeIncidentAt(formData.get('incidentAt'));
+    const savedIncident = await saveIncidentAndCount(supabase, culprit, incident, incidentAt);
 
-    const { data, error } = await supabase
-      .from('ajt3_dog_incidents')
-      .upsert(incidentRow, { onConflict: 'id' })
-      .select('id,culprit,incident,incident_at')
-      .single();
-
-      if (error) {
-        console.error('[admin-dog-incident] save failed', formatError(error));
-        return jsonResponse(request, { error: 'Save failed', details: formatError(error) }, 500);
-      }
+    if (!savedIncident) {
+      return jsonResponse(request, { error: 'Save failed' }, 500);
+    }
 
     console.info('[admin-dog-incident] saved incident', {
-      culprit: data.culprit,
-      incidentAt: data.incident_at
+      culprit: savedIncident.culprit,
+      incidentAt: savedIncident.incidentAt,
+      incidentCount: savedIncident.incidentCount
     });
     return jsonResponse(request, {
       incident: {
-        culprit: data.culprit,
-        incident: data.incident,
-        incidentAt: data.incident_at
+        culprit: savedIncident.culprit,
+        incident: savedIncident.incident,
+        incidentAt: savedIncident.incidentAt,
+        incidentCount: savedIncident.incidentCount
       }
     });
   } catch (error) {

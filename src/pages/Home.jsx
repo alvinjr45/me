@@ -1,8 +1,13 @@
 import React from 'react';
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import LetterGlitch from '../components/LetterGlitch';
-import { defaultDogIncident, formatIncidentDate, getDaysSinceIncident, getLatestDogIncident } from '../data/dogIncident';
+import {
+  formatIncidentDate,
+  formatIncidentCount,
+  getDaysSinceIncident,
+  getLatestDogIncident
+} from '../data/dogIncident';
 import './Home.css';
 
 const homeGlitchColors = ['#fb7f33', '#33affb', '#f9f9f9'];
@@ -38,32 +43,129 @@ const homeHighlights = [
 function Home() {
   const [dogIncident, setDogIncident] = useState(null);
   const [isContentReady, setIsContentReady] = useState(false);
+  const [incidentPortraitFailed, setIncidentPortraitFailed] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     let isMounted = true;
 
-    getLatestDogIncident()
-      .then((incident) => {
+    async function loadIncident() {
+      try {
+        const incident = await getLatestDogIncident();
+
         if (isMounted) {
           setDogIncident(incident);
-          setIsContentReady(true);
+          setIncidentPortraitFailed(false);
         }
-      })
-      .catch(() => {
+      } catch {
         if (isMounted) {
-          setDogIncident(defaultDogIncident);
+          setDogIncident(null);
+          setIncidentPortraitFailed(false);
+        }
+      } finally {
+        if (isMounted) {
           setIsContentReady(true);
         }
-      });
+      }
+    }
+
+    loadIncident();
 
     return () => {
       isMounted = false;
     };
   }, []);
 
-  const incident = dogIncident || defaultDogIncident;
-  const incidentDays = dogIncident ? getDaysSinceIncident(incident.incidentAt) : null;
-  const incidentDate = dogIncident ? formatIncidentDate(incident.incidentAt) : '';
+  useEffect(() => {
+    const secret = ['a', 'd', 'm', 'i', 'n'];
+    let buffer = '';
+    let timeoutId = null;
+
+    function resetBuffer() {
+      buffer = '';
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+        timeoutId = null;
+      }
+    }
+
+    function handleKeyDown(event) {
+      if (event.metaKey || event.ctrlKey || event.altKey) {
+        return;
+      }
+
+      const key = event.key.toLowerCase();
+
+      if (key.length !== 1) {
+        return;
+      }
+
+      buffer = `${buffer}${key}`.slice(-secret.length);
+
+      if (buffer === secret.join('')) {
+        resetBuffer();
+        navigate('/admin');
+        return;
+      }
+
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+
+      timeoutId = window.setTimeout(resetBuffer, 1500);
+    }
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (timeoutId) {
+        window.clearTimeout(timeoutId);
+      }
+    };
+  }, [navigate]);
+
+  useEffect(() => {
+    async function refreshIncidentIfVisible() {
+      if (document.visibilityState !== 'visible') {
+        return;
+      }
+
+      try {
+        const incident = await getLatestDogIncident();
+        setDogIncident(incident);
+        setIncidentPortraitFailed(false);
+      } catch {
+        setDogIncident(null);
+        setIncidentPortraitFailed(false);
+      }
+    }
+
+    function handleStorage(event) {
+      if (event.key === 'ajt3_dog_incident_updated_at') {
+        void refreshIncidentIfVisible();
+      }
+    }
+
+    function handleFocus() {
+      void refreshIncidentIfVisible();
+    }
+
+    document.addEventListener('visibilitychange', refreshIncidentIfVisible);
+    window.addEventListener('storage', handleStorage);
+    window.addEventListener('focus', handleFocus);
+
+    return () => {
+      document.removeEventListener('visibilitychange', refreshIncidentIfVisible);
+      window.removeEventListener('storage', handleStorage);
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
+
+  const incidentDays = dogIncident ? getDaysSinceIncident(dogIncident.incidentAt) : null;
+  const incidentDate = dogIncident ? formatIncidentDate(dogIncident.incidentAt) : '';
+  const incidentCountText = dogIncident ? formatIncidentCount(dogIncident.incidentCount) : '';
+  const hasIncident = Boolean(dogIncident);
 
   return (
     <main className={`home-page${isContentReady ? ' home-page--ready' : ''}`} role="main" aria-busy={!isContentReady}>
@@ -85,31 +187,58 @@ function Home() {
               <h1 className="home-page__heading">.me( )</h1>
               <p className="home-page__lede">Me and all the things I've built</p>
               <p className="home-page__subcopy">
-                Someone asked me why I like software develeopment. The truth is because I'm good at it. I think it
-                loves me
+                Someone asked me why I love software development. The truth is because its never been all that hard.
+                I think software development loves me.
               </p>
             </div>
           </section>
 
           <section className="home-page__incident" aria-label="Latest dog incident">
-            <Link className="home-page__incident-card" to="/dogs" aria-label="Open the Drake and Josh page">
-              <p className="home-page__incident-kicker">Days since last incident</p>
-              <div className="home-page__incident-copy">
-                <h2 className="home-page__incident-days">
-                  {incidentDays === null ? '—' : incidentDays}
-                  <span>days</span>
-                </h2>
-                <div className="home-page__incident-meta">
-                  <span>{incidentDate}</span>
+            {hasIncident ? (
+              <Link className="home-page__incident-card" to="/dogs" aria-label="Open the Drake and Josh page">
+                <p className="home-page__incident-kicker">Days since last incident</p>
+                <div className="home-page__incident-copy">
+                  <h2 className="home-page__incident-days">
+                    {incidentDays === null ? '—' : incidentDays}
+                    <span>days</span>
+                  </h2>
+                  <div className="home-page__incident-meta">
+                    <span>{incidentDate}</span>
+                    {incidentCountText ? <span>{incidentCountText}</span> : null}
+                  </div>
+                  <p className="home-page__incident-label">{dogIncident.culprit}</p>
+                  <p className="home-page__incident-text">{dogIncident.incident}</p>
                 </div>
-                <p className="home-page__incident-label">{incident.culprit}</p>
-                <p className="home-page__incident-text">{incident.incident}</p>
+                <figure className="home-page__incident-portrait">
+                  {!incidentPortraitFailed && dogIncident.portraitUrl ? (
+                    <img
+                      src={dogIncident.portraitUrl}
+                      alt={dogIncident.portraitAlt || `${dogIncident.culprit} portrait`}
+                      onError={() => setIncidentPortraitFailed(true)}
+                    />
+                  ) : (
+                    <div
+                      className="home-page__incident-portrait-fallback"
+                      role="img"
+                      aria-label={`${dogIncident.culprit || 'Dog'} portrait unavailable`}
+                    >
+                      <span>{dogIncident.culprit || 'Dog'}</span>
+                    </div>
+                  )}
+                  <figcaption>{dogIncident.culprit} did it.</figcaption>
+                </figure>
+              </Link>
+            ) : (
+              <div className="home-page__incident-card home-page__incident-card--empty" aria-live="polite">
+                <p className="home-page__incident-kicker">Days since last incident</p>
+                <div className="home-page__incident-empty">
+                  <p className="home-page__incident-empty-title">No incident data seeded yet.</p>
+                  <p className="home-page__incident-empty-copy">
+                    Add the latest incident in admin to populate this widget.
+                  </p>
+                </div>
               </div>
-              <figure className="home-page__incident-portrait">
-                <img src={incident.portraitUrl} alt={incident.portraitAlt || `${incident.culprit} portrait`} />
-                <figcaption>{incident.culprit} did it.</figcaption>
-              </figure>
-            </Link>
+            )}
           </section>
 
           <section className="home-page__highlights" aria-label="Featured pages">

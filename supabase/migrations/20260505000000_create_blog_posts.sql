@@ -68,6 +68,101 @@ for select
 to anon, authenticated
 using (true);
 
+create table if not exists public.ajt3_dog_incident_counters (
+  culprit text primary key,
+  incident_count integer not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+drop trigger if exists set_dog_incident_counters_updated_at on public.ajt3_dog_incident_counters;
+
+create trigger set_dog_incident_counters_updated_at
+before update on public.ajt3_dog_incident_counters
+for each row
+execute function public.set_updated_at();
+
+alter table public.ajt3_dog_incident_counters enable row level security;
+
+drop policy if exists "Dog incident counters are readable" on public.ajt3_dog_incident_counters;
+
+create policy "Dog incident counters are readable"
+on public.ajt3_dog_incident_counters
+for select
+to anon, authenticated
+using (true);
+
+create or replace function public.increment_dog_incident_counter(culprit_name text)
+returns integer
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  next_count integer;
+begin
+  insert into public.ajt3_dog_incident_counters (culprit, incident_count)
+  values (culprit_name, 1)
+  on conflict (culprit) do update
+  set
+    incident_count = public.ajt3_dog_incident_counters.incident_count + 1,
+    updated_at = now()
+  returning incident_count into next_count;
+
+  return next_count;
+end;
+$$;
+
+create or replace function public.save_dog_incident(
+  culprit_name text,
+  incident_text text,
+  incident_time timestamptz
+)
+returns table (culprit text, incident text, incident_at timestamptz, incident_count integer)
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  next_count integer;
+begin
+  insert into public.ajt3_dog_incidents (
+    id,
+    culprit,
+    incident,
+    incident_at,
+    portrait_url,
+    portrait_alt
+  )
+  values (
+    'latest',
+    culprit_name,
+    incident_text,
+    incident_time,
+    null,
+    null
+  )
+  on conflict (id) do update
+  set
+    culprit = excluded.culprit,
+    incident = excluded.incident,
+    incident_at = excluded.incident_at,
+    portrait_url = excluded.portrait_url,
+    portrait_alt = excluded.portrait_alt,
+    updated_at = now();
+
+  insert into public.ajt3_dog_incident_counters (culprit, incident_count)
+  values (culprit_name, 1)
+  on conflict (culprit) do update
+  set
+    incident_count = public.ajt3_dog_incident_counters.incident_count + 1,
+    updated_at = now()
+  returning incident_count into next_count;
+
+  return query
+  select culprit_name, incident_text, incident_time, next_count;
+end;
+$$;
+
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (
   'blog-media',

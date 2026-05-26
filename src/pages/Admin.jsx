@@ -1,10 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { defaultDogIncident } from '../data/dogIncident';
-import {
-  getSupabaseFunctionHeaders,
-  toInputDate,
-} from '../lib/adminPostEditor';
+import { createDogIncidentDraft, formatIncidentCount } from '../data/dogIncident';
+import { getSupabaseFunctionHeaders, toInputDate } from '../lib/adminPostEditor';
 import './Admin.css';
 
 function Admin() {
@@ -23,7 +20,7 @@ function Admin() {
     isPublished: true
   });
   const [posts, setPosts] = useState([]);
-  const [incident, setIncident] = useState(defaultDogIncident);
+  const [incident, setIncident] = useState(() => createDogIncidentDraft(today));
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
@@ -78,6 +75,21 @@ function Admin() {
       if (parts.length) {
         return `${fallback} (${parts.join(', ')})`;
       }
+    }
+
+    return fallback;
+  }
+
+  function getIncidentCountValue(result, fallback) {
+    const primary = Number(result?.incident?.incidentCount);
+    const secondary = Number(result?.incident?.incident_count);
+
+    if (Number.isFinite(primary)) {
+      return primary;
+    }
+
+    if (Number.isFinite(secondary)) {
+      return secondary;
     }
 
     return fallback;
@@ -173,14 +185,19 @@ function Admin() {
       }
 
       setIncident({
-        culprit: result.incident?.culprit || defaultDogIncident.culprit,
-        incident: result.incident?.incident || defaultDogIncident.incident,
-        incidentAt: result.incident?.incidentAt || result.incident?.incident_at || defaultDogIncident.incidentAt
+        culprit: result.incident?.culprit || '',
+        incident: result.incident?.incident || '',
+        incidentAt: result.incident?.incidentAt || result.incident?.incident_at || today,
+        incidentCount: getIncidentCountValue(result, null)
       });
 
       if (!silent) {
         setIncidentStatus('idle');
-        setIncidentMessage('Latest incident loaded.');
+        const incidentCount = getIncidentCountValue(result, null);
+        const countLabel = formatIncidentCount(incidentCount);
+        setIncidentMessage(
+          result.incident ? `Latest incident loaded.${countLabel ? ` ${countLabel}` : ''}` : 'No incident data seeded yet.'
+        );
       }
 
       return true;
@@ -210,7 +227,7 @@ function Admin() {
   function handleLock() {
     setIsUnlocked(false);
     setPosts([]);
-    setIncident(defaultDogIncident);
+    setIncident(createDogIncidentDraft(today));
     setForm((current) => ({
       ...current,
       adminSecret: ''
@@ -222,6 +239,12 @@ function Admin() {
 
   async function handleIncidentSubmit(event) {
     event.preventDefault();
+
+    if (!incident.culprit) {
+      setIncidentStatus('error');
+      setIncidentMessage('Select a culprit before saving.');
+      return;
+    }
 
     if (!incident.incident.trim()) {
       setIncidentStatus('error');
@@ -263,9 +286,16 @@ function Admin() {
       setIncident({
         culprit: result.incident?.culprit || incident.culprit,
         incident: result.incident?.incident || incident.incident,
-        incidentAt: result.incident?.incidentAt || result.incident?.incident_at || incident.incidentAt
+        incidentAt: result.incident?.incidentAt || result.incident?.incident_at || incident.incidentAt,
+        incidentCount: getIncidentCountValue(result, incident.incidentCount)
       });
-      setIncidentMessage('Latest incident saved.');
+      const incidentCount = getIncidentCountValue(result, incident.incidentCount);
+      const countLabel = formatIncidentCount(incidentCount);
+      setIncidentMessage(`Latest incident saved.${countLabel ? ` ${countLabel}` : ''}`);
+
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('ajt3_dog_incident_updated_at', String(Date.now()));
+      }
     } catch (error) {
       setIncidentStatus('error');
       setIncidentMessage(error.message);
@@ -349,6 +379,9 @@ function Admin() {
               <label>
                 Culprit
                 <select value={incident.culprit} onChange={(event) => updateIncidentField('culprit', event.target.value)}>
+                  <option value="" disabled>
+                    Select a culprit
+                  </option>
                   <option value="Drake">Drake</option>
                   <option value="Josh">Josh</option>
                 </select>

@@ -275,6 +275,13 @@
     box-shadow 0.22s ease;
 }
 
+.home-page__incident-card--empty {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 18rem;
+}
+
 .home-page__incident-card::before {
   content: "";
   position: absolute;
@@ -367,9 +374,10 @@
 
 .home-page__incident-meta {
   display: flex;
+  flex-direction: column;
   flex-wrap: wrap;
-  align-items: center;
-  gap: 0.8rem;
+  align-items: flex-start;
+  gap: 0.25rem;
   margin-top: 1rem;
   color: rgba(249, 249, 249, 0.58);
   font-size: 0.82rem;
@@ -397,6 +405,28 @@
   display: block;
 }
 
+.home-page__incident-portrait-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at top, rgba(51, 175, 251, 0.18), transparent 48%),
+    radial-gradient(circle at bottom, rgba(251, 127, 51, 0.18), transparent 52%),
+    linear-gradient(180deg, rgba(14, 18, 24, 0.92), rgba(5, 8, 14, 0.98));
+  color: rgba(249, 249, 249, 0.86);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.home-page__incident-portrait-fallback span {
+  padding: 0.65rem 0.9rem;
+  border: 1px solid rgba(249, 249, 249, 0.12);
+  border-radius: 999px;
+  background: rgba(2, 6, 18, 0.36);
+}
+
 .home-page__incident-portrait figcaption {
   padding: 0.8rem 1rem 0.95rem;
   color: rgba(249, 249, 249, 0.82);
@@ -404,6 +434,29 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   background: rgba(2, 6, 18, 0.58);
+}
+
+.home-page__incident-empty {
+  position: relative;
+  z-index: 1;
+  width: min(42rem, 100%);
+  margin: 0 auto;
+  padding: 2rem 1.5rem 2.1rem;
+  text-align: center;
+}
+
+.home-page__incident-empty-title {
+  margin: 0;
+  color: var(--color-main);
+  font-size: clamp(1.15rem, 2vw, 1.55rem);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.home-page__incident-empty-copy {
+  margin: 0.85rem 0 0;
+  color: rgba(249, 249, 249, 0.8);
+  line-height: 1.7;
 }
 
 @media (min-width: 1121px) {
@@ -761,6 +814,8 @@
     justify-content: center;
     align-self: center;
     margin-bottom: 0;
+    align-items: center;
+    text-align: center;
   }
 
   .home-page__incident-portrait {

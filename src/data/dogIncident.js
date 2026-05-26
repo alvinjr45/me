@@ -13,26 +13,72 @@ export function getDogPortraitAlt(culprit) {
   return `${culprit || 'Dog'} portrait`;
 }
 
-export const defaultDogIncident = {
-  culprit: 'Drake',
-  incident: 'Stole a sock and carried it like a trophy.',
-  incidentAt: '2026-04-24T12:00:00.000Z',
-  portraitUrl: getDogPortraitUrl('Drake'),
-  portraitAlt: getDogPortraitAlt('Drake')
-};
+export function createDogIncidentDraft(incidentAt = '') {
+  return {
+    culprit: '',
+    incident: '',
+    incidentAt,
+    incidentCount: null,
+    portraitUrl: '',
+    portraitAlt: ''
+  };
+}
 
 function normalizeIncident(row) {
   if (!row) {
-    return defaultDogIncident;
+    return null;
   }
 
+  const culprit = row.culprit || '';
+
   return {
-    culprit: row.culprit || defaultDogIncident.culprit,
-    incident: row.incident || defaultDogIncident.incident,
-    incidentAt: row.incident_at || defaultDogIncident.incidentAt,
-    portraitUrl: getDogPortraitUrl(row.culprit || defaultDogIncident.culprit),
-    portraitAlt: getDogPortraitAlt(row.culprit || defaultDogIncident.culprit)
+    culprit,
+    incident: row.incident || '',
+    incidentAt: row.incident_at || '',
+    incidentCount: Number.isFinite(Number(row.incident_count))
+      ? Number(row.incident_count)
+      : null,
+    portraitUrl: culprit ? getDogPortraitUrl(culprit) : '',
+    portraitAlt: culprit ? getDogPortraitAlt(culprit) : ''
   };
+}
+
+function getIncidentCountSuffix(value) {
+  if (!Number.isFinite(value)) {
+    return '';
+  }
+
+  const normalized = Math.abs(Math.trunc(value));
+  const mod100 = normalized % 100;
+
+  if (mod100 >= 11 && mod100 <= 13) {
+    return 'th';
+  }
+
+  switch (normalized % 10) {
+    case 1:
+      return 'st';
+    case 2:
+      return 'nd';
+    case 3:
+      return 'rd';
+    default:
+      return 'th';
+  }
+}
+
+export function formatIncidentCount(value) {
+  if (!Number.isFinite(value)) {
+    return '';
+  }
+
+  const count = Math.max(0, Math.trunc(value));
+
+  if (!count) {
+    return '';
+  }
+
+  return `${count}${getIncidentCountSuffix(count)} incident all-time`;
 }
 
 export function formatIncidentDate(value) {
@@ -75,7 +121,7 @@ export function getDaysSinceIncident(value) {
 
 export async function getLatestDogIncident() {
   if (!supabase) {
-    return defaultDogIncident;
+    return null;
   }
 
   const { data, error } = await supabase
@@ -88,5 +134,35 @@ export async function getLatestDogIncident() {
     throw error;
   }
 
-  return normalizeIncident(data);
+  if (!data) {
+    return null;
+  }
+
+  let incidentCount = null;
+  const culprit = data.culprit || '';
+
+  if (culprit) {
+    try {
+      const counterResult = await supabase
+        .from('ajt3_dog_incident_counters')
+        .select('culprit,incident_count')
+        .eq('culprit', culprit)
+        .maybeSingle();
+
+      if (counterResult.error) {
+        throw counterResult.error;
+      }
+
+      if (Number.isFinite(Number(counterResult.data?.incident_count))) {
+        incidentCount = Number(counterResult.data.incident_count);
+      }
+    } catch {
+      incidentCount = null;
+    }
+  }
+
+  return normalizeIncident({
+    ...data,
+    incident_count: incidentCount
+  });
 }

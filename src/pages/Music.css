@@ -31,64 +31,6 @@
   align-items: flex-start;
 }
 
-.music-page__fold-cue {
-  position: fixed;
-  bottom: 1.5rem;
-  left: 50%;
-  transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  letter-spacing: 0.45em;
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.85);
-  text-transform: uppercase;
-  z-index: 60;
-  opacity: 0.95;
-  min-height: 44px;
-  padding: 0.45rem 0.75rem;
-  border: 0;
-  background: rgba(3, 6, 32, 0.58);
-  border-radius: 999px;
-  font: inherit;
-  transition: opacity 0.6s ease, transform 0.6s ease;
-}
-
-.music-page__fold-cue span:last-child {
-  font-size: 1rem;
-  transform: translateY(1px);
-}
-
-.music-page__fold-cue--hidden {
-  opacity: 0;
-  transform: translate(-50%, 1rem);
-  pointer-events: none;
-}
-
-.music-page__fold-cue--visible {
-  opacity: 0.95;
-  transform: translate(-50%, 0);
-  pointer-events: auto;
-}
-
-.music-page__fold-cue--secondary {
-  position: relative;
-  bottom: auto;
-  left: 50%;
-  transform: translateX(-50%);
-  margin-top: -0.5rem;
-  margin-bottom: 1.5rem;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.4s ease, visibility 0.4s ease;
-}
-
-.music-page__fold-cue--secondary.music-page__fold-cue--visible {
-  opacity: 0.95;
-  visibility: visible;
-  transform: translateX(-50%);
-}
-
 .music-page__primary section {
   margin: 0;
 }
@@ -406,13 +348,6 @@
     font-size: 2.35rem;
   }
 
-  .music-page__fold-cue {
-    bottom: calc(0.85rem + env(safe-area-inset-bottom));
-    max-width: calc(100% - 1.5rem);
-    letter-spacing: 0.22em;
-    font-size: 0.68rem;
-    white-space: nowrap;
-  }
 }
 
 @media (max-width: 420px) {

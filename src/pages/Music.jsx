@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import HomeLink from '../components/HomeLink';
 import './Music.css';
 
 const playlists = {
@@ -47,13 +46,11 @@ function Music() {
   const [isReady, setIsReady] = useState(false);
   const [copyVisible, setCopyVisible] = useState(false);
   const [artistVisible, setArtistVisible] = useState(false);
-  const [showFirstCue, setShowFirstCue] = useState(true);
   const [framesInitial, setFramesInitial] = useState(false);
   const artistRef = useRef(null);
   const songsRef = useRef(null);
   const artistDelay = useRef(null);
   const artistVisibleRef = useRef(artistVisible);
-  const [showSecondCue, setShowSecondCue] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setIsReady(true), 1450);
@@ -73,14 +70,6 @@ function Music() {
     const timer = setTimeout(() => setCopyVisible(true), 450);
     return () => clearTimeout(timer);
   }, []);
-
-  const evaluateSongsCue = () => {
-    if (!songsRef.current) {
-      return false;
-    }
-    const songsTop = songsRef.current.getBoundingClientRect().top + window.scrollY;
-    return artistVisibleRef.current && window.scrollY + window.innerHeight < songsTop - 50;
-  };
 
   const scrollToArtistButtons = () => {
     if (!artistRef.current) {
@@ -107,40 +96,6 @@ function Music() {
     });
   };
 
-  const scrollToSongsButtons = () => {
-    if (!songsRef.current) {
-      return;
-    }
-
-    if (typeof window === 'undefined' || typeof document === 'undefined') {
-      return;
-    }
-
-    const nav = songsRef.current?.querySelector('.music-page__playlist-nav');
-    if (!nav) {
-      return;
-    }
-
-    const rootFontSize = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
-    const desiredGap = 9 * rootFontSize;
-    const navTop = nav.getBoundingClientRect().top + window.scrollY;
-    const scrollLimit = document.documentElement.scrollHeight - window.innerHeight;
-
-    window.scrollTo({
-      top: Math.min(Math.max(navTop - desiredGap, 0), scrollLimit),
-      behavior: 'smooth',
-    });
-  };
-
-  const handleCueClick = () => {
-    scrollToArtistButtons();
-    setShowSecondCue(true);
-  };
-
-  const handleSecondCueClick = () => {
-    scrollToSongsButtons();
-  };
-
   useEffect(() => {
     if (!artistRef.current) {
       return undefined;
@@ -149,7 +104,6 @@ function Music() {
     const observer = new IntersectionObserver(
       ([entry]) => {
         const inView = entry.isIntersecting;
-        setShowFirstCue(!inView);
         if (inView && !artistVisibleRef.current) {
           if (artistDelay.current) {
             clearTimeout(artistDelay.current);
@@ -158,7 +112,6 @@ function Music() {
               setArtistVisible(true);
               artistVisibleRef.current = true;
               artistDelay.current = null;
-              setShowSecondCue(evaluateSongsCue());
             }, 500);
         }
       },
@@ -175,18 +128,7 @@ function Music() {
   }, []);
 
   useEffect(() => {
-    if (!songsRef.current) {
-      return undefined;
-    }
-
-    const handleScroll = () => {
-      setShowSecondCue(evaluateSongsCue());
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener('scroll', handleScroll);
+    return undefined;
   }, []);
 
   return (
@@ -200,7 +142,6 @@ function Music() {
             <br />
             Enjoy the flows that fuel late-night keyboard sessions.
           </p>
-          <HomeLink className="home-link--compact">Home</HomeLink>
         </section>
         <section className="music-page__embed-layout">
           <div className={`music-page__playlist-nav ${isReady ? 'music-page__playlist-nav--visible' : 'music-page__playlist-nav--hidden'}`}>
@@ -239,16 +180,6 @@ function Music() {
           </div>
         </section>
       </div>
-      <button
-        type="button"
-        className={`music-page__fold-cue ${
-          showFirstCue ? 'music-page__fold-cue--visible' : 'music-page__fold-cue--hidden'
-        }`}
-        onClick={handleCueClick}
-      >
-        <span>Scroll for more</span>
-        <span aria-hidden="true">⌄</span>
-      </button>
       <section
         className={`music-page__artist-section music-page__section-fade ${
           artistVisible ? 'music-page__section-fade--visible' : ''
@@ -300,17 +231,6 @@ function Music() {
           </p>
         </div>
       </section>
-
-      <button
-        type="button"
-        className={`music-page__fold-cue music-page__fold-cue--secondary ${
-          showSecondCue ? 'music-page__fold-cue--visible' : 'music-page__fold-cue--hidden'
-        }`}
-        onClick={handleSecondCueClick}
-      >
-        <span>Scroll for more</span>
-        <span aria-hidden="true">⌄</span>
-      </button>
 
       <section
         className={`music-page__songs-section music-page__section-fade ${

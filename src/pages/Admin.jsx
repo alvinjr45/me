@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createDogIncidentDraft, formatIncidentCount } from '../data/dogIncident';
-import { getSupabaseFunctionHeaders, toInputDate } from '../lib/adminPostEditor';
+import { formatBackendError, getSupabaseFunctionHeaders, readResponsePayload, toInputDate } from '../lib/adminPostEditor';
 import './Admin.css';
 
 function Admin() {
@@ -46,38 +46,6 @@ function Admin() {
       ...current,
       [name]: value
     }));
-  }
-
-  async function readResponsePayload(response) {
-    const raw = await response.text();
-
-    if (!raw) {
-      return { raw: '', data: null };
-    }
-
-    try {
-      return { raw, data: JSON.parse(raw) };
-    } catch {
-      return { raw, data: null };
-    }
-  }
-
-  function formatBackendError(result, fallback) {
-    const details = result?.details;
-
-    if (details && typeof details === 'object') {
-      const parts = [];
-      if (details.code) parts.push(`code=${details.code}`);
-      if (details.message) parts.push(`message=${details.message}`);
-      if (details.hint) parts.push(`hint=${details.hint}`);
-      if (details.details) parts.push(`details=${details.details}`);
-
-      if (parts.length) {
-        return `${fallback} (${parts.join(', ')})`;
-      }
-    }
-
-    return fallback;
   }
 
   function getIncidentCountValue(result, fallback) {

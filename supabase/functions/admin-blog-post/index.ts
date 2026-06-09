@@ -48,6 +48,23 @@ function requiredEnv(name: string) {
   return value;
 }
 
+function formatError(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return { message: String(error || 'Unknown error') };
+  }
+
+  const record = error as Record<string, unknown>;
+
+  return {
+    name: typeof record.name === 'string' ? record.name : undefined,
+    message: typeof record.message === 'string' ? record.message : undefined,
+    code: typeof record.code === 'string' ? record.code : undefined,
+    details: typeof record.details === 'string' ? record.details : undefined,
+    hint: typeof record.hint === 'string' ? record.hint : undefined,
+    stack: typeof record.stack === 'string' ? record.stack : undefined
+  };
+}
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -132,6 +149,12 @@ function normalizeIncidentAt(value: FormDataEntryValue | null) {
 }
 
 Deno.serve(async (request) => {
+  console.info('[admin-blog-post] request', {
+    method: request.method,
+    origin: request.headers.get('origin') || '',
+    contentType: request.headers.get('content-type') || ''
+  });
+
   if (request.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders(request) });
   }
@@ -150,6 +173,10 @@ Deno.serve(async (request) => {
     const expectedSecret = requiredEnv('ADMIN_POST_SECRET');
 
     if (!adminSecret || adminSecret !== expectedSecret) {
+      console.warn('[admin-blog-post] unauthorized', {
+        method: request.method,
+        origin: request.headers.get('origin') || ''
+      });
       return jsonResponse(request, { error: 'Unauthorized' }, 401);
     }
 
@@ -164,9 +191,11 @@ Deno.serve(async (request) => {
         .order('published_at', { ascending: false });
 
       if (error) {
-        throw error;
+        console.error('[admin-blog-post] list failed', formatError(error));
+        return jsonResponse(request, { error: 'Post list failed', details: formatError(error) }, 500);
       }
 
+      console.info('[admin-blog-post] listed posts', { count: data?.length || 0 });
       return jsonResponse(request, { posts: data });
     }
 
@@ -252,7 +281,8 @@ Deno.serve(async (request) => {
         .maybeSingle();
 
       if (existingError) {
-        throw existingError;
+        console.error('[admin-blog-post] existing slug check failed', formatError(existingError));
+        return jsonResponse(request, { error: 'Slug check failed', details: formatError(existingError) }, 500);
       }
 
       if (existingPost) {
@@ -268,6 +298,7 @@ Deno.serve(async (request) => {
       });
 
       if (error) {
+        console.error('[admin-blog-post] upload failed', formatError(error));
         throw error;
       }
 
@@ -315,20 +346,24 @@ Deno.serve(async (request) => {
     const { data, error } = await supabase.from('ajt3_blog_posts').upsert(post, { onConflict: 'slug' }).select('slug').single();
 
     if (error) {
-      throw error;
+      console.error('[admin-blog-post] save failed', formatError(error));
+      return jsonResponse(request, { error: 'Post save failed', details: formatError(error) }, 500);
     }
 
     if (originalSlug && originalSlug !== slug) {
       const { error: deleteError } = await supabase.from('ajt3_blog_posts').delete().eq('slug', originalSlug);
 
       if (deleteError) {
-        throw deleteError;
+        console.error('[admin-blog-post] original slug delete failed', formatError(deleteError));
+        return jsonResponse(request, { error: 'Original post cleanup failed', details: formatError(deleteError) }, 500);
       }
     }
 
+    console.info('[admin-blog-post] saved post', { slug: data.slug });
     return jsonResponse(request, { post: data });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unable to save post';
-    return jsonResponse(request, { error: message }, 500);
+    console.error('[admin-blog-post] unexpected error', formatError(error));
+    const details = formatError(error);
+    return jsonResponse(request, { error: details.message || 'Unable to save post', details }, 500);
   }
 });

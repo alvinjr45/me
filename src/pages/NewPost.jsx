@@ -4,12 +4,15 @@ import {
   createEmptyPostForm,
   emptyMediaUrl,
   emptySection,
+  formatBackendError,
   getSupabaseFunctionHeaders,
   normalizeUploadFile,
+  readResponsePayload,
   slugify,
   toInputDate,
   toLines,
-  toTextList
+  toTextList,
+  validateTotalUploadSize
 } from '../lib/adminPostEditor';
 import './Admin.css';
 
@@ -149,10 +152,17 @@ function NewPost() {
           adminSecret
         })
       });
-      const result = await response.json();
+      const payload = await readResponsePayload(response);
+      const result = payload.data || {};
 
       if (!response.ok) {
-        throw new Error(`Post list failed: ${result.error || 'Unable to load posts.'}`);
+        console.error('Post list failed', { status: response.status, payload: payload.raw });
+        throw new Error(
+          formatBackendError(
+            result,
+            `Post list failed (${response.status}): ${result.error || payload.raw || 'Unable to load posts.'}`
+          )
+        );
       }
 
       const match = (result.posts || []).find((post) => post.slug === slug);
@@ -253,6 +263,8 @@ function NewPost() {
         JSON.stringify(mediaFiles.map(({ type, alt, caption }) => ({ type, alt, caption })))
       );
 
+      validateTotalUploadSize([coverFile, ...mediaFiles.map(({ file }) => file)].filter(Boolean));
+
       if (coverFile) {
         const uploadCoverFile = await normalizeUploadFile(coverFile);
         body.append('coverFile', uploadCoverFile);
@@ -268,10 +280,17 @@ function NewPost() {
         headers: getSupabaseFunctionHeaders(),
         body
       });
-      const result = await response.json();
+      const payload = await readResponsePayload(response);
+      const result = payload.data || {};
 
       if (!response.ok) {
-        throw new Error(`Publish failed: ${result.error || 'Unable to publish post.'}`);
+        console.error('Post save failed', { status: response.status, payload: payload.raw });
+        const fallback =
+          response.status === 546
+            ? 'Publish failed (546): Supabase Edge Function hit a resource limit. Resize uploads or use media URLs for larger videos.'
+            : `Publish failed (${response.status}): ${result.error || payload.raw || 'Unable to publish post.'}`;
+
+        throw new Error(formatBackendError(result, fallback));
       }
 
       setStatus('saved');

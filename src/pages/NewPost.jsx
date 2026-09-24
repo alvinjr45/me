@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import AdminLogin from '../components/AdminLogin';
 import {
   createEmptyPostForm,
   emptyMediaUrl,
@@ -16,13 +17,9 @@ import {
 } from '../lib/adminPostEditor';
 import './Admin.css';
 
-const POST_SECRET_KEY = 'ajt3_admin_secret';
-
-function NewPost() {
+function NewPost({ slug = null, access, onBusy }) {
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
-  const location = useLocation();
   const navigate = useNavigate();
-  const slug = new URLSearchParams(location.search).get('slug');
   const [form, setForm] = useState(() => createEmptyPostForm(today));
   const [coverFile, setCoverFile] = useState(null);
   const [sections, setSections] = useState([{ ...emptySection }]);
@@ -30,7 +27,6 @@ function NewPost() {
   const [mediaFiles, setMediaFiles] = useState([]);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
-  const [isUnlocked, setIsUnlocked] = useState(false);
 
   const publishUrl = process.env.REACT_APP_SUPABASE_URL
     ? `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/admin-blog-post`
@@ -69,10 +65,7 @@ function NewPost() {
   }
 
   function handleNewPost() {
-    setForm((current) => ({
-      ...createEmptyPostForm(today),
-      adminSecret: current.adminSecret
-    }));
+    setForm(createEmptyPostForm(today));
     setCoverFile(null);
     setSections([{ ...emptySection }]);
     setMediaUrls([{ ...emptyMediaUrl }]);
@@ -83,8 +76,7 @@ function NewPost() {
   }
 
   function handleEditPost(post) {
-    setForm((current) => ({
-      adminSecret: current.adminSecret,
+    setForm({
       title: post.title || '',
       originalSlug: post.slug || '',
       eyebrow: post.eyebrow || 'Journal',
@@ -94,7 +86,7 @@ function NewPost() {
       coverImageUrl: post.cover_image_url || '',
       coverImageAlt: post.cover_image_alt || '',
       isPublished: Boolean(post.is_published)
-    }));
+    });
     setCoverFile(null);
     setSections(
       post.sections?.length
@@ -121,121 +113,30 @@ function NewPost() {
     setMessage(`Editing /blog/${post.slug}`);
   }
 
-  async function loadPostForSlug({ silent = false, adminSecret = form.adminSecret } = {}) {
-    if (!publishUrl) {
-      setStatus('error');
-      setMessage('Supabase URL is not configured.');
-      return false;
-    }
-
-    if (!adminSecret) {
-      setStatus('error');
-      setMessage('Enter the admin secret before loading posts.');
-      return false;
-    }
-
-    if (!slug) {
-      return true;
-    }
-
-    if (!silent) {
-      setStatus('loading');
-      setMessage('');
-    }
-
-    try {
-      const response = await fetch(publishUrl, {
-        method: 'POST',
-        headers: getSupabaseFunctionHeaders({ json: true }),
-        body: JSON.stringify({
-          action: 'list',
-          adminSecret
-        })
-      });
-      const payload = await readResponsePayload(response);
-      const result = payload.data || {};
-
-      if (!response.ok) {
-        console.error('Post list failed', { status: response.status, payload: payload.raw });
-        throw new Error(
-          formatBackendError(
-            result,
-            `Post list failed (${response.status}): ${result.error || payload.raw || 'Unable to load posts.'}`
-          )
-        );
-      }
-
-      const match = (result.posts || []).find((post) => post.slug === slug);
-
-      if (!match) {
-        throw new Error(`No post found for /blog/${slug}.`);
-      }
-
-      handleEditPost(match);
-
-      if (!silent) {
-        setStatus('idle');
-        setMessage(`Editing /blog/${slug}`);
-      }
-
-      return true;
-    } catch (error) {
-      setStatus('error');
-      setMessage(error.message);
-      return false;
-    }
-  }
-
   useEffect(() => {
-    const savedSecret = sessionStorage.getItem(POST_SECRET_KEY);
-
-    if (savedSecret) {
-      setForm((current) => ({
-        ...current,
-        adminSecret: savedSecret
-      }));
-      setIsUnlocked(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isUnlocked && form.adminSecret) {
-      loadPostForSlug({ silent: true, adminSecret: form.adminSecret });
+    if (access.session && slug) {
+      const post = access.session.posts.find((item) => item.slug === slug);
+      if (post) {
+        handleEditPost(post);
+      } else {
+        setStatus('error');
+        setMessage(`No post found for /blog/${slug}.`);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isUnlocked, form.adminSecret, slug]);
-
-  async function handleUnlock(event) {
-    event.preventDefault();
-
-    if (!publishUrl) {
-      setStatus('error');
-      setMessage('Supabase URL is not configured.');
-      return;
-    }
-
-    if (!form.adminSecret) {
-      setStatus('error');
-      setMessage('Enter the admin secret before continuing.');
-      return;
-    }
-
-    sessionStorage.setItem(POST_SECRET_KEY, form.adminSecret);
-    setIsUnlocked(true);
-    setStatus('idle');
-    setMessage('');
-    await loadPostForSlug({ adminSecret: form.adminSecret });
-  }
+  }, [access.session?.secret, slug]);
 
   async function handleSubmit(event) {
     event.preventDefault();
+    if (!access.session) return;
     try {
+      onBusy(true);
       setStatus('saving');
       setMessage('');
 
       const body = new FormData();
       body.append('action', 'save');
-      body.append('adminSecret', form.adminSecret);
+      body.append('adminSecret', access.session.secret);
       body.append('originalSlug', form.originalSlug);
       body.append('title', form.title);
       body.append('eyebrow', form.eyebrow);
@@ -299,44 +200,24 @@ function NewPost() {
         originalSlug: result.post.slug
       }));
       setMessage(`Saved /blog/${result.post.slug}`);
+      window.dispatchEvent(new Event('ajt3-posts-updated'));
+      try { await access.refreshPosts(); } catch { setMessage(`Saved /blog/${result.post.slug}. Refresh the posts list to see the latest changes.`); }
     } catch (error) {
       setStatus('error');
       setMessage(error.message);
+    } finally {
+      onBusy(false);
     }
   }
 
   return (
-    <main className="admin-page">
-      {!isUnlocked ? (
-        <form className="admin-page__form admin-page__form--gate" onSubmit={handleUnlock}>
-          <header className="admin-page__header">
-            <p>AJT3 Admin</p>
-            <h1>Post Editor</h1>
-          </header>
-
-          <section className="admin-page__panel admin-page__gate">
-            <label>
-              Password
-              <input
-                required
-                type="password"
-                value={form.adminSecret}
-                onChange={(event) => updateField('adminSecret', event.target.value)}
-                autoComplete="current-password"
-                autoFocus
-              />
-            </label>
-            <button type="submit" disabled={status === 'loading' || !publishUrl}>
-              {status === 'loading' ? 'Checking...' : 'Continue'}
-            </button>
-          </section>
-
-          {message ? <p className={`admin-page__message admin-page__message--${status}`}>{message}</p> : null}
-        </form>
+    <main className="admin-page admin-page--mission-control">
+      {!access.session ? (
+        <AdminLogin access={access} />
       ) : (
         <form className="admin-page__form" onSubmit={handleSubmit}>
           <header className="admin-page__header">
-            <p>AJT3 Admin</p>
+            <p>Mission Control / Publishing</p>
             <h1>Post Editor</h1>
           </header>
 
@@ -344,11 +225,11 @@ function NewPost() {
             <div className="admin-page__panel-title">
               <h2>Post</h2>
               <div className="admin-page__button-group">
-                <button type="button" onClick={handleNewPost}>
+                <button type="button" onClick={handleNewPost} disabled={status === 'saving'}>
                   New blank post
                 </button>
-                <button type="button" onClick={() => navigate('/admin')}>
-                  Back to admin
+                <button type="button" disabled={status === 'saving'} onClick={() => navigate('/admin/posts')}>
+                  Back to dashboard
                 </button>
               </div>
             </div>

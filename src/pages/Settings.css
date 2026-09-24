@@ -1,0 +1,295 @@
+.device-window__content > .settings-page.app-view {
+  --settings-background: #202226;
+  --settings-sidebar: #292c31;
+  --settings-group: #2c2f34;
+  --settings-control: #3c4047;
+  --settings-border: #464950;
+  display: grid;
+  grid-template-columns: 205px minmax(0, 1fr);
+  background: var(--settings-background);
+  color: var(--color-text);
+  font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+  font-size: 0.82rem;
+}
+
+.settings-page__sidebar { min-width: 0; padding: 18px 12px; overflow: auto; background: var(--settings-sidebar); border-right: 1px solid var(--settings-border); }
+.device-window__content .settings-page h1.settings-page__title { margin: 0 8px 16px; font-size: 1.35rem; letter-spacing: -0.04em; line-height: 1.2; }
+.settings-page__search { display: flex; align-items: center; gap: 6px; padding: 0 8px; border: 1px solid var(--settings-border); border-radius: 7px; background: var(--settings-background); color: var(--color-muted-strong); }
+.settings-page__search svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }
+.settings-page__search input { min-width: 0; width: 100%; min-height: 32px; padding: 0; border: 0; background: transparent; color: var(--color-text); }
+.settings-page__search input:focus-visible { outline: none; }
+.settings-page__search:has(input:focus-visible) { box-shadow: inset 0 0 0 1px var(--color-muted-strong); }
+.settings-page__search input::placeholder { color: var(--color-muted-strong); opacity: 1; }
+.settings-page__account { display: flex; align-items: center; gap: 10px; padding: 20px 4px; }
+.settings-page__avatar { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(145deg, #88929e, #505964); color: white; font-size: 1.35rem; }
+.settings-page__account > div { min-width: 0; }
+.settings-page__account strong { display: block; font-size: 0.86rem; overflow-wrap: anywhere; }
+.settings-page__account div > span { display: block; margin-top: 3px; color: var(--color-muted-strong); font-size: 0.7rem; }
+.settings-page__navigation { display: grid; gap: 4px; }
+.settings-page__navigation button { display: flex; align-items: center; gap: 9px; min-width: 0; min-height: 38px; padding: 5px 8px; border: 0; border-radius: 6px; background: transparent; color: inherit; text-align: left; }
+.settings-page__navigation button:hover { background: var(--settings-control); }
+.settings-page__navigation button[aria-current='page'] { background: var(--color-main); color: #111; font-weight: 600; }
+.settings-page__icon { display: grid; place-items: center; flex: none; width: 26px; height: 26px; border-radius: 6px; box-shadow: inset 0 0 0 1px #ffffff25; color: #fff; }
+.settings-page__icon svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.settings-page__icon--system { background: #727780; }
+.settings-page__icon--appearance { background: #535b9f; }
+.settings-page__icon--wallpaper { background: #2879cc; }
+.settings-page__icon--background { background: #28866b; }
+.settings-page__chevron { display: none; }
+.settings-page__empty { padding: 8px; color: var(--color-muted-strong); line-height: 1.5; }
+.settings-page__detail { display: flex; flex-direction: column; min-width: 0; min-height: 0; }
+.settings-page__toolbar { flex: none; display: flex; align-items: center; gap: 16px; min-height: 62px; padding: 14px 24px; border-bottom: 1px solid var(--color-line); }
+.settings-page__toolbar h2 { margin: 0; font-size: 1.15rem; letter-spacing: -0.025em; }
+.settings-page__toolbar h2:focus { outline: none; }
+.settings-page__back { display: none; }
+.settings-page__content { flex: 1; min-height: 0; padding: 20px 24px 32px; overflow: auto; overscroll-behavior: contain; }
+.settings-page.app-view .settings-page__section { max-width: 760px; margin: 0 auto; padding: 16px; border: 1px solid var(--settings-border); border-radius: 10px; background: var(--settings-group); }
+.settings-page__section[hidden] { display: none; }
+.settings-page__section-heading h2 { margin: 0 0 14px; font-size: 0.87rem; font-weight: 600; }
+.settings-page__wallpapers { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.8rem; }
+
+.settings-page__themes { display: flex; gap: 12px; }
+.settings-page__preference .settings-page__theme { min-width: 0; min-height: 0; width: 84px; display: grid; gap: 7px; padding: 0; border: 0; border-radius: 0; background: transparent; color: var(--color-text); font: inherit; text-align: center; }
+.settings-page__theme-preview { position: relative; display: block; height: 54px; padding: 12px 10px 0; border: 3px solid var(--settings-border); border-radius: 7px; background: linear-gradient(135deg, #ed9e74, #739bbc); }
+.settings-page__theme-preview > span { display: block; height: 100%; border-radius: 3px 3px 0 0; border-top: 7px solid #e4e5e8; background: linear-gradient(90deg, #d5d9e0 28%, #f7f7f9 28%); box-shadow: 0 0 2px #0006; }
+.settings-page__theme--dark .settings-page__theme-preview { background: linear-gradient(135deg, #9e4b38, #244566); }
+.settings-page__theme--dark .settings-page__theme-preview > span { border-color: #34363c; background: linear-gradient(90deg, #454850 28%, #23252b 28%); }
+.settings-page__theme--system .settings-page__theme-preview > span { border-image: linear-gradient(90deg, #e4e5e8 50%, #34363c 50%) 1; background: linear-gradient(90deg, #d5d9e0 28%, #f7f7f9 28% 50%, #23252b 50%); }
+.settings-page__theme[aria-pressed='true'] .settings-page__theme-preview { border-color: var(--color-main); outline: 1px solid var(--color-main); outline-offset: 2px; }
+.settings-page__theme[aria-pressed='true'] { font-weight: 700; }
+.settings-page__preference .settings-page__switch { position: relative; width: 40px; min-width: 40px; height: 24px; min-height: 24px; padding: 2px; border: 1px solid var(--settings-border); border-radius: 99px; background: var(--settings-control); }
+.settings-page__switch span { display: block; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #0004; transition: transform 150ms ease; }
+.settings-page__preference .settings-page__switch[aria-checked='true'] { background: var(--color-main); border-color: var(--color-main); }
+.settings-page__switch[aria-checked='true'] span { transform: translateX(16px); }
+
+.settings-page__background-note {
+  margin: -0.25rem 0 1rem;
+  max-width: 60ch;
+  color: var(--color-muted-strong);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.settings-page__background-preview {
+  position: relative;
+  display: block;
+  height: clamp(64px, 9cqw, 110px);
+  overflow: hidden;
+  border: 5px solid var(--scene-wall-dark);
+  border-bottom: 12px solid var(--scene-desk-light);
+  border-radius: 6px;
+}
+
+.settings-page__background-selected {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  padding: 3px 5px;
+  border-radius: 3px;
+  background: #101b26;
+  color: #fff;
+  font: 700 0.6rem var(--font-mono);
+}
+
+.settings-page__wallpaper {
+  min-width: 0;
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.5rem 0.5rem 0.8rem;
+  border: 1px solid var(--settings-border);
+  border-radius: 10px;
+  background: var(--settings-background);
+  color: var(--color-text);
+  text-align: left;
+}
+
+.settings-page__wallpaper:hover,
+.settings-page__wallpaper[aria-pressed='true'] { border-color: var(--color-main); }
+.settings-page__wallpaper[aria-pressed='true'] { box-shadow: 0 0 0 1px var(--color-main); }
+.settings-page__wallpaper-preview {
+  position: relative;
+  height: clamp(64px, 9cqw, 110px);
+  display: block;
+  overflow: hidden;
+  border-radius: 6px;
+  background-size: 150% 150%;
+  animation: settings-wallpaper-drift 8s ease-in-out infinite alternate;
+}
+
+.settings-page__wallpaper-preview::after {
+  content: '';
+  position: absolute;
+  inset: -30%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.2), transparent 42%);
+  animation: settings-wallpaper-glow 7s ease-in-out infinite alternate;
+}
+
+.settings-page__wallpaper--aurora .settings-page__wallpaper-preview { background-image: radial-gradient(ellipse at 70% 70%, #27baa9, transparent 48%), radial-gradient(ellipse at 28% 30%, #426fd1, transparent 48%), linear-gradient(135deg, #05111d, #16384b); }
+.settings-page__wallpaper--nebula .settings-page__wallpaper-preview { background-image: radial-gradient(circle at 32% 40%, #8d43ba, transparent 28%), radial-gradient(circle at 70% 65%, #126fc0, transparent 34%), linear-gradient(145deg, #09051d, #06152b); }
+.settings-page__wallpaper--tide .settings-page__wallpaper-preview { background-image: radial-gradient(ellipse at 30% 70%, #19a8ad, transparent 40%), radial-gradient(ellipse at 75% 30%, #1465a1, transparent 40%), linear-gradient(145deg, #031923, #063853); }
+.settings-page__wallpaper--ember .settings-page__wallpaper-preview { background-image: radial-gradient(circle at 30% 70%, #ef7d2e, transparent 27%), radial-gradient(circle at 75% 35%, #a82819, transparent 33%), linear-gradient(145deg, #160804, #080506); }
+.settings-page__wallpaper--synth .settings-page__wallpaper-preview { background-image: linear-gradient(rgba(107, 72, 223, 0.5) 1px, transparent 1px), linear-gradient(90deg, rgba(107, 72, 223, 0.5) 1px, transparent 1px), linear-gradient(180deg, #170539, #bd316c 48%, #17052b 52%, #05020d); background-size: 20px 20px, 20px 20px, 150% 150%; }
+.settings-page__wallpaper--sunset .settings-page__wallpaper-preview { background-image: radial-gradient(circle at 72% 34%, #ffe1aa, transparent 14%), linear-gradient(145deg, #1d3769, #a86b8b 55%, #ed976d); }
+.settings-page__wallpaper--graphite .settings-page__wallpaper-preview { background-image: radial-gradient(circle at 80% 20%, #75482f, transparent 35%), linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px), linear-gradient(135deg, #1b232c, #090c11); background-size: auto, 22px 22px, 22px 22px, auto; }
+
+@keyframes settings-wallpaper-drift {
+  from { background-position: 0% 20%; }
+  to { background-position: 100% 80%; }
+}
+
+@keyframes settings-wallpaper-glow {
+  from { transform: translate3d(-22%, 12%, 0); opacity: 0.15; }
+  to { transform: translate3d(24%, -10%, 0); opacity: 0.55; }
+}
+.settings-page__wallpaper strong { margin-top: 0.25rem; font-size: 0.85rem; }
+.settings-page__wallpaper small { color: var(--color-muted-strong); font-size: 0.68rem; line-height: 1.35; }
+.settings-page__preference { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.9rem 0; border-bottom: 1px solid var(--color-line); }
+.settings-page__preference > div:first-child { min-width: 0; }
+.settings-page__preference:last-child { border-bottom: 0; padding-bottom: 0; }
+.settings-page__preference--theme { flex-wrap: wrap; padding-top: 0; }
+.settings-page__preference strong { font-size: 0.82rem; font-weight: 500; }
+.settings-page__preference p { margin: 0.3rem 0 0; color: var(--color-muted-strong); font-size: 0.73rem; line-height: 1.4; }
+.settings-page__preference button { flex: none; min-width: 60px; min-height: 32px; padding: 0 0.7rem; border: 1px solid var(--settings-border); border-radius: 7px; background: var(--settings-control); color: var(--color-text); font: inherit; }
+.settings-page__preference button:hover { border-color: var(--color-accent); }
+
+.settings-page__segments {
+  flex: none;
+  display: flex;
+  padding: 3px;
+  border: 1px solid var(--settings-border);
+  border-radius: 9px;
+  background: var(--settings-background);
+}
+
+.settings-page__preference .settings-page__segments button {
+  min-width: 62px;
+  min-height: 34px;
+  padding: 0 0.6rem;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-muted-strong);
+}
+
+.settings-page__preference .settings-page__segments button[aria-pressed='true'] {
+  background: var(--color-main);
+  color: #071019;
+  font-weight: 800;
+}
+
+.settings-page__accents { display: flex; flex-wrap: wrap; align-items: center; gap: 0.55rem; }
+
+.settings-page__preference .settings-page__accents button {
+  position: relative;
+  width: 26px;
+  min-width: 26px;
+  min-height: 26px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-main) 0 50%, var(--accent-secondary) 50%);
+  box-shadow: 0 0 0 1px #506376;
+}
+
+.settings-page__preference .settings-page__accents button[aria-pressed='true'] {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px var(--color-accent);
+}
+
+.settings-page__range {
+  display: grid;
+  gap: 0.65rem;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.settings-page__range span { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.settings-page__range strong { font-size: 0.82rem; font-weight: 500; }
+.settings-page__range small { color: var(--color-accent); font: 0.72rem var(--font-mono); }
+.settings-page__range input { width: 100%; min-height: 24px; margin: 0; accent-color: var(--color-main); }
+
+.settings-page__system-actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  padding-top: 1rem;
+}
+
+.settings-page__system-actions button {
+  min-height: 58px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.28rem;
+  padding: 0.8rem 0.5rem;
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-text);
+  text-align: left;
+}
+
+.settings-page__system-actions button:last-child { border-bottom: 0; }
+.settings-page__system-actions button:hover { background: var(--settings-control); }
+.settings-page__system-actions strong { font-size: 0.82rem; }
+.settings-page__system-actions span { color: var(--color-muted-strong); font-size: 0.68rem; }
+.settings-page__system-actions .settings-page__system-action--danger:hover { border-color: #ff655b; background: rgba(255, 101, 91, 0.1); }
+
+.device-screen[data-appearance='light'] .device-window__content > .settings-page.app-view {
+  --settings-background: #f2f2f7;
+  --settings-sidebar: #e9eaee;
+  --settings-group: #fff;
+  --settings-control: #e0e1e6;
+  --settings-border: #c9cbd2;
+  background: var(--settings-background);
+}
+
+@container (max-width: 800px) {
+  .settings-page__preference:has(.settings-page__segments),
+  .settings-page__preference--accent { flex-wrap: wrap; }
+  .settings-page__content { padding: 16px; }
+}
+
+@container (max-width: 580px) {
+  .device-window__content > .settings-page.app-view { grid-template-columns: minmax(0, 1fr); }
+  .settings-page__sidebar { padding: 20px 16px 40px; border: 0; background: var(--settings-background); }
+  .device-window__content .settings-page h1.settings-page__title { margin: 0 0 18px; font-size: 2rem; font-weight: 700; }
+  .settings-page__search { border: 0; border-radius: 10px; background: var(--settings-group); }
+  .settings-page__search input { min-height: 38px; font-size: 1rem; }
+  .settings-page__account { gap: 12px; margin: 24px 0; padding: 14px; border-radius: 10px; background: var(--settings-group); }
+  .settings-page__avatar { width: 48px; height: 48px; }
+  .settings-page__account strong { font-size: 1rem; }
+  .settings-page__navigation { gap: 0; padding: 0 12px; border-radius: 10px; background: var(--settings-group); }
+  .settings-page__navigation button { min-height: 50px; padding: 8px 0; border-radius: 0; }
+  .settings-page__navigation button + button { border-top: 1px solid var(--color-line); }
+  .settings-page__navigation button[aria-current='page'] { background: transparent; color: inherit; font-weight: 400; }
+  .settings-page__navigation button:hover { background: var(--settings-control); }
+  .settings-page__chevron { display: block; flex: none; width: 7px; height: 7px; margin: 0 4px 0 auto; border-top: 1.5px solid var(--color-muted-strong); border-right: 1.5px solid var(--color-muted-strong); transform: rotate(45deg); }
+  .settings-page__detail { display: none; }
+  .settings-page--detail .settings-page__sidebar { display: none; }
+  .settings-page--detail .settings-page__detail { display: flex; }
+  .settings-page__toolbar { flex-wrap: wrap; gap: 8px 16px; min-height: 50px; padding: 8px 12px; }
+  .settings-page__toolbar h2 { font-size: 0.95rem; }
+  .settings-page__back { display: inline-flex; align-items: center; gap: 4px; min-height: 36px; padding: 0 4px; border: 0; background: transparent; color: var(--color-accent); }
+  .settings-page__back span { font-size: 1.8rem; line-height: 1; }
+  .settings-page__content { padding: 18px 12px 40px; }
+  .settings-page.app-view .settings-page__section { padding: 12px; border: 0; }
+  .settings-page__themes { width: 100%; gap: 10px; justify-content: space-between; }
+  .settings-page__preference .settings-page__theme { flex: 1; width: auto; max-width: 100px; }
+  .settings-page__preference { gap: 12px; }
+  .settings-page__segments { width: 100%; }
+  .settings-page__preference .settings-page__segments button { flex: 1; min-width: 0; min-height: 38px; padding: 0 4px; }
+  .settings-page__wallpapers { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .settings-page__wallpaper { padding: 5px 5px 10px; }
+  .settings-page__wallpaper small { font-size: 0.7rem; }
+}
+
+@container (max-width: 320px) {
+  .settings-page__wallpapers { grid-template-columns: minmax(0, 1fr); }
+  .settings-page__wallpaper { grid-template-columns: 72px minmax(0, 1fr); column-gap: 10px; align-items: center; }
+  .settings-page__wallpaper-preview,
+  .settings-page__background-preview { grid-row: span 2; height: 62px; }
+  .settings-page__wallpaper strong { margin: 0; }
+}

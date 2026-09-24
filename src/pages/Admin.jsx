@@ -1,45 +1,24 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createDogIncidentDraft, formatIncidentCount } from '../data/dogIncident';
 import { formatBackendError, getSupabaseFunctionHeaders, readResponsePayload, toInputDate } from '../lib/adminPostEditor';
 import './Admin.css';
 
-function Admin() {
+function Admin({ access, section = 'posts', onBusy }) {
   const today = useMemo(() => new Date().toISOString().slice(0, 10), []);
   const navigate = useNavigate();
-  const [form, setForm] = useState({
-    adminSecret: '',
-    title: '',
-    originalSlug: '',
-    eyebrow: 'Journal',
-    excerpt: '',
-    publishedAt: today,
-    tags: '',
-    coverImageUrl: '',
-    coverImageAlt: '',
-    isPublished: true
-  });
-  const [posts, setPosts] = useState([]);
+  const [query, setQuery] = useState('');
+  const [filter, setFilter] = useState('all');
+  const [postMessage, setPostMessage] = useState('');
+  const posts = access.session?.posts || [];
+  const adminSecret = access.session?.secret || '';
   const [incident, setIncident] = useState(() => createDogIncidentDraft(today));
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [status, setStatus] = useState('idle');
-  const [message, setMessage] = useState('');
   const [incidentStatus, setIncidentStatus] = useState('idle');
   const [incidentMessage, setIncidentMessage] = useState('');
 
-  const publishUrl = process.env.REACT_APP_SUPABASE_URL
-    ? `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/admin-blog-post`
-    : '';
   const incidentUrl = process.env.REACT_APP_SUPABASE_URL
     ? `${process.env.REACT_APP_SUPABASE_URL}/functions/v1/admin-dog-incident`
     : '';
-
-  function updateField(name, value) {
-    setForm((current) => ({
-      ...current,
-      [name]: value
-    }));
-  }
 
   function updateIncidentField(name, value) {
     setIncident((current) => ({
@@ -63,57 +42,7 @@ function Admin() {
     return fallback;
   }
 
-  async function loadPosts({ silent = false, adminSecret = form.adminSecret } = {}) {
-    if (!publishUrl) {
-      setStatus('error');
-      setMessage('Supabase URL is not configured.');
-      return false;
-    }
-
-    if (!adminSecret) {
-      setStatus('error');
-      setMessage('Enter the admin secret before loading posts.');
-      return false;
-    }
-
-    if (!silent) {
-      setStatus('loading');
-      setMessage('');
-    }
-
-    try {
-      const response = await fetch(publishUrl, {
-        method: 'POST',
-        headers: getSupabaseFunctionHeaders({ json: true }),
-        body: JSON.stringify({
-          action: 'list',
-          adminSecret
-        })
-      });
-      const payload = await readResponsePayload(response);
-      const result = payload.data || {};
-
-      if (!response.ok) {
-        console.error('Post list failed', { status: response.status, payload: payload.raw });
-        throw new Error(`Post list failed (${response.status}): ${result.error || payload.raw || 'Unable to load posts.'}`);
-      }
-
-      setPosts(result.posts || []);
-
-      if (!silent) {
-        setStatus('idle');
-        setMessage(`Loaded ${result.posts?.length || 0} posts.`);
-      }
-
-      return true;
-    } catch (error) {
-      setStatus('error');
-      setMessage(error.message);
-      return false;
-    }
-  }
-
-  async function loadIncident({ silent = false, adminSecret = form.adminSecret } = {}) {
+  async function loadIncident({ silent = false, signal } = {}) {
     if (!incidentUrl) {
       setIncidentStatus('error');
       setIncidentMessage('Supabase URL is not configured.');
@@ -134,6 +63,7 @@ function Admin() {
     try {
       const response = await fetch(incidentUrl, {
         method: 'GET',
+        signal,
         headers: {
           ...getSupabaseFunctionHeaders(),
           'x-admin-secret': adminSecret
@@ -141,6 +71,7 @@ function Admin() {
       });
       const payload = await readResponsePayload(response);
       const result = payload.data || {};
+      if (signal?.aborted) return false;
 
       if (!response.ok) {
         console.error('Incident load failed', { status: response.status, payload: payload.raw });
@@ -170,40 +101,19 @@ function Admin() {
 
       return true;
     } catch (error) {
+      if (signal?.aborted) return false;
       setIncidentStatus('error');
       setIncidentMessage(error.message);
       return false;
     }
   }
 
-  async function handleUnlock(event) {
-    event.preventDefault();
-    setStatus('loading');
-    setMessage('');
-
-    const didLoad = await loadPosts({ adminSecret: form.adminSecret });
-    await loadIncident({ silent: true, adminSecret: form.adminSecret });
-
-    if (didLoad) {
-      sessionStorage.setItem('ajt3_admin_secret', form.adminSecret);
-      setIsUnlocked(true);
-      setStatus('idle');
-      setMessage('');
-    }
-  }
-
-  function handleLock() {
-    setIsUnlocked(false);
-    setPosts([]);
-    setIncident(createDogIncidentDraft(today));
-    setForm((current) => ({
-      ...current,
-      adminSecret: ''
-    }));
-    sessionStorage.removeItem('ajt3_admin_secret');
-    setIncidentStatus('idle');
-    setIncidentMessage('');
-  }
+  useEffect(() => {
+    const controller = new AbortController();
+    if (adminSecret && section === 'dogs') loadIncident({ signal: controller.signal });
+    return () => controller.abort();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [adminSecret, section]);
 
   async function handleIncidentSubmit(event) {
     event.preventDefault();
@@ -221,6 +131,7 @@ function Admin() {
     }
 
     try {
+      onBusy(true);
       setIncidentStatus('saving');
       setIncidentMessage('');
 
@@ -233,7 +144,7 @@ function Admin() {
         method: 'POST',
         headers: {
           ...getSupabaseFunctionHeaders(),
-          'x-admin-secret': form.adminSecret
+          'x-admin-secret': adminSecret
         },
         body
       });
@@ -267,59 +178,41 @@ function Admin() {
     } catch (error) {
       setIncidentStatus('error');
       setIncidentMessage(error.message);
+    } finally {
+      onBusy(false);
     }
   }
 
+  const matchingPosts = posts.filter((post) =>
+    `${post.title} ${post.excerpt || ''}`.toLowerCase().includes(query.toLowerCase()) &&
+    (filter === 'all' || (filter === 'published' ? post.is_published : !post.is_published))
+  );
+
   return (
-    <main className="admin-page">
-      {!isUnlocked ? (
-        <form className="admin-page__form admin-page__form--gate" onSubmit={handleUnlock}>
-          <header className="admin-page__header">
-            <p>AJT3 Admin</p>
-            <h1>Blog Manager</h1>
-          </header>
-
-          <section className="admin-page__panel admin-page__gate">
-            <label>
-              Password
-              <input
-                required
-                type="password"
-                value={form.adminSecret}
-                onChange={(event) => updateField('adminSecret', event.target.value)}
-                autoComplete="current-password"
-                autoFocus
-              />
-            </label>
-            <button type="submit" disabled={status === 'loading' || !publishUrl}>
-              {status === 'loading' ? 'Checking...' : 'Continue'}
-            </button>
-          </section>
-
-          {message ? <p className={`admin-page__message admin-page__message--${status}`}>{message}</p> : null}
-        </form>
-      ) : (
+    <main className="admin-page admin-page--mission-control">
         <div className="admin-page__dashboard">
-          <header className="admin-page__header">
-            <p>AJT3 Admin</p>
-            <h1>Blog Manager</h1>
-          </header>
+          {section === 'posts' && <>
+          <dl className="admin-page__overview">
+            <div><dt>Total posts</dt><dd>{posts.length}</dd></div>
+            <div><dt>Published</dt><dd>{posts.filter((post) => post.is_published).length}</dd></div>
+            <div><dt>Drafts</dt><dd>{posts.filter((post) => !post.is_published).length}</dd></div>
+          </dl>
 
           <section className="admin-page__panel">
             <div className="admin-page__panel-title">
               <h2>Posts</h2>
               <div className="admin-page__button-group">
+                <button type="button" onClick={async () => { try { await access.refreshPosts(); setPostMessage('Posts refreshed.'); } catch (error) { setPostMessage(error.message); } }}>Refresh</button>
                 <button type="button" onClick={() => navigate('/admin/new')}>
                   New post
                 </button>
-                <button type="button" onClick={handleLock}>
-                  Lock
-                </button>
               </div>
             </div>
-            {posts.length ? (
+            <div className="admin-page__row"><label>Search posts<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Title or excerpt" /></label><label>Status<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All posts</option><option value="published">Published</option><option value="drafts">Drafts</option></select></label></div>
+            {postMessage && <p role="status">{postMessage}</p>}
+            {matchingPosts.length ? (
               <div className="admin-page__post-list">
-                {posts.map((post) => (
+                {matchingPosts.map((post) => (
                   <button
                     key={post.slug}
                     type="button"
@@ -331,14 +224,15 @@ function Admin() {
                   </button>
                 ))}
               </div>
-            ) : null}
+            ) : <p className="admin-page__hint">{posts.length ? 'No posts match these filters.' : 'No posts yet. Start with your first dispatch.'}</p>}
           </section>
+          </>}
 
-          <section className="admin-page__panel">
+          {section === 'dogs' && <section className="admin-page__panel">
             <div className="admin-page__panel-title">
               <h2>Dog incident</h2>
               <div className="admin-page__button-group">
-                <button type="button" onClick={handleIncidentSubmit} disabled={incidentStatus === 'saving' || !incidentUrl}>
+                <button type="button" onClick={handleIncidentSubmit} disabled={incidentStatus === 'saving' || incidentStatus === 'loading' || !incidentUrl}>
                   {incidentStatus === 'saving' ? 'Saving...' : 'Save incident'}
                 </button>
               </div>
@@ -346,7 +240,7 @@ function Admin() {
             <div className="admin-page__row">
               <label>
                 Culprit
-                <select value={incident.culprit} onChange={(event) => updateIncidentField('culprit', event.target.value)}>
+                <select disabled={incidentStatus === 'loading'} value={incident.culprit} onChange={(event) => updateIncidentField('culprit', event.target.value)}>
                   <option value="" disabled>
                     Select a culprit
                   </option>
@@ -358,6 +252,7 @@ function Admin() {
                 Incident date
                 <input
                   type="date"
+                  disabled={incidentStatus === 'loading'}
                   value={toInputDate(incident.incidentAt, today)}
                   onChange={(event) => updateIncidentField('incidentAt', event.target.value)}
                 />
@@ -365,14 +260,12 @@ function Admin() {
             </div>
             <label>
               What happened
-              <textarea value={incident.incident} onChange={(event) => updateIncidentField('incident', event.target.value)} />
+              <textarea disabled={incidentStatus === 'loading'} value={incident.incident} onChange={(event) => updateIncidentField('incident', event.target.value)} />
             </label>
             {incidentMessage ? <p className={`admin-page__message admin-page__message--${incidentStatus}`}>{incidentMessage}</p> : null}
-          </section>
+          </section>}
 
-          {message ? <p className={`admin-page__message admin-page__message--${status}`}>{message}</p> : null}
         </div>
-      )}
     </main>
   );
 }

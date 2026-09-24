@@ -1,63 +1,65 @@
 .site-footer {
-  width: 100%;
+  width: min(1500px, calc(100% - 4rem));
+  min-height: 116px;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
-  gap: 1rem 1.5rem;
-  padding: 1.15rem 1.5rem;
-  background: rgba(10, 10, 10, 0.92);
-  color: var(--color-text);
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  margin-top: 2rem;
+  gap: 2rem;
+  margin: 0 auto;
+  padding: 1.5rem 0;
+  border-top: 1px solid var(--color-line-strong);
+  background: transparent;
 }
 
-.footer-signoff {
+.site-footer .site-footer__mark {
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--color-main);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+}
+
+.site-footer .site-footer__mark:hover,
+.site-footer .site-footer__mark:focus-visible {
+  transform: none;
+  background: transparent;
+  color: var(--color-text);
+}
+
+.site-footer p {
+  margin: 0;
+  color: var(--color-muted-strong);
+  font-size: 0.86rem;
+}
+
+.site-footer__status {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
   gap: 0.55rem;
-  min-width: 0;
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.09em;
 }
 
-.footer-signoff__name {
-  margin: 0;
-  color: var(--color-main);
-  font-family: 'Source Code Pro', monospace;
-  font-size: 0.9rem;
-  font-weight: 700;
+.site-footer__status span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-accent);
+  box-shadow: 0 0 8px rgba(51, 175, 251, 0.75);
 }
 
-.footer-signoff__line {
-  margin: 0;
-  color: rgba(249, 249, 249, 0.7);
-  font-size: 0.9rem;
-  line-height: 1.35;
-}
-
-.footer-fineprint {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.8rem;
-  color: rgba(249, 249, 249, 0.52);
-  font-size: 0.78rem;
-  white-space: nowrap;
-}
-
-@media (max-width: 768px) {
+@media (max-width: 760px) {
   .site-footer {
+    width: min(100% - 1.5rem, 1500px);
     grid-template-columns: 1fr;
-    gap: 0.8rem;
-    padding: 1rem;
-    text-align: center;
-  }
-
-  .footer-signoff {
-    justify-content: center;
-  }
-
-  .footer-fineprint {
-    justify-content: center;
-    white-space: normal;
+    gap: 0.75rem;
+    padding: 1.5rem 0 2rem;
   }
 }

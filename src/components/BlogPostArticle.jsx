@@ -2,8 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './BlogPostArticle.css';
 
-function BlogPostArticle({ post }) {
+function BlogPostArticle({ post, embedded = false, onBack }) {
   const [lightboxImage, setLightboxImage] = useState(null);
+  const isNote = !post.tags?.includes('dogs');
+  const Container = embedded ? 'section' : 'main';
 
   useEffect(() => {
     if (!lightboxImage) {
@@ -30,16 +32,28 @@ function BlogPostArticle({ post }) {
   };
 
   return (
-    <main className="blog-post-page">
+    <Container className={`blog-post-page${embedded ? ' blog-post-page--embedded' : ' app-view'}${isNote ? ' blog-post-page--note' : ''}`} aria-label="Article reader">
+      <nav className="app-toolbar" aria-label="Article navigation">
+        {embedded ? <>
+          <button type="button" className="blog-post-page__back" onClick={onBack}><span aria-hidden="true">&lsaquo;</span> Notes</button>
+          <span className="blog-post-page__notebook">{post.eyebrow || 'Blog notes'}</span>
+          <Link to={`/blog/${post.slug}`} className="blog-post-page__open" aria-label={`Open ${post.title} entry`}>Open entry <span aria-hidden="true">&nearr;</span></Link>
+        </> : <><Link to={post.tags?.includes('dogs') ? '/dogs' : '/blog'} className="app-control">
+          <span aria-hidden="true">&larr;</span> {post.tags?.includes('dogs') ? 'Dogs' : 'All entries'}
+        </Link>
+        <span>{post.date}</span></>}
+      </nav>
+      <div className="app-scroll" key={post.slug}>
       <article className="blog-post-page__article">
+        {isNote ? <p className="blog-post-page__note-date">{post.date}</p> : null}
         <header className="blog-post-page__hero">
           <div className="blog-post-page__hero-copy">
             <p className="blog-post-page__eyebrow">{post.eyebrow}</p>
-            <h1>{post.title}</h1>
+            <h1 tabIndex={embedded ? -1 : undefined}>{post.title}</h1>
             <p className="blog-post-page__meta">{post.date}</p>
             <p className="blog-post-page__excerpt">{post.excerpt}</p>
           </div>
-          <div className="blog-post-page__image-wrap">
+          {post.image ? <div className="blog-post-page__image-wrap">
             <button
               type="button"
               className="blog-post-page__image-button"
@@ -48,7 +62,7 @@ function BlogPostArticle({ post }) {
             >
               <img src={post.image} alt={post.imageAlt || post.title} className="blog-post-page__image" />
             </button>
-          </div>
+          </div> : null}
         </header>
 
         <div className="blog-post-page__content">
@@ -91,10 +105,8 @@ function BlogPostArticle({ post }) {
           </section>
         ) : null}
 
-        <footer className="blog-post-page__footer">
-          <Link to="/blog">Back to /blog</Link>
-        </footer>
       </article>
+      </div>
 
       {lightboxImage ? (
         <div
@@ -122,7 +134,7 @@ function BlogPostArticle({ post }) {
           </div>
         </div>
       ) : null}
-    </main>
+    </Container>
   );
 }
 

@@ -273,7 +273,7 @@ Deno.serve(async (request) => {
       return jsonResponse(request, { error: 'Title is required' }, 400);
     }
 
-    if (originalSlug && originalSlug !== slug) {
+    if (originalSlug !== slug) {
       const { data: existingPost, error: existingError } = await supabase
         .from('ajt3_blog_posts')
         .select('slug')

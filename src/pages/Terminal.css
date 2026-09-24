@@ -1,0 +1,26 @@
+.terminal-page {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+}
+
+.terminal-page .command-terminal {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border: 0;
+  border-radius: 0;
+  background: #030609;
+  box-shadow: none;
+}
+
+.terminal-page .command-terminal__bar {
+  display: none;
+}
+
+.terminal-page .command-terminal__body {
+  flex: 1;
+  min-height: 0;
+  max-height: none;
+  padding: clamp(1rem, 2.5cqw, 1.5rem);
+}

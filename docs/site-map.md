@@ -1,16 +1,17 @@
 # Site Map
 
-This site is a single-page React app with route-based views. The router is defined in `src/App.jsx` and always renders the shared footer below the page content.
+This site is a single-page React app with route-based views. The router is defined in `src/App.jsx`. Inner public routes render the shared navigation and footer; the home and admin routes use focused layouts.
 
 ## Routes
 
 | Path | Component | Purpose | Data source |
 | --- | --- | --- | --- |
-| `/` | `src/pages/Home.jsx` | Landing page with glitch background and featured links | Static component data |
+| `/` | `src/pages/Home.jsx` | Personal-system home with interactive terminal and four pillars | Static component data and dog incident data |
+| `/tech` | `src/pages/Tech.jsx` | Technical interests, focus areas, and external portfolio link | Static component data |
 | `/blog` | `src/pages/Blog.jsx` | Blog index with featured post and archive grid | `src/data/blogPosts.js` or Supabase |
 | `/blog/:slug` | `src/pages/BlogPost.jsx` | Full blog post reader | `src/data/blogPosts.js` or Supabase |
-| `/music` | `src/pages/Music.jsx` | Playlist and music embeds with scroll-driven cues | Static component data |
-| `/dogs` | `src/pages/Dogs.jsx` | Dog-focused page with a banner video and tag-filtered posts | `src/data/blogPosts.js` or Supabase |
+| `/music` | `src/pages/Music.jsx` | Tabbed Apple Music library for playlists, artists, and songs | Static component data |
+| `/dogs` | `src/pages/Dogs.jsx` | Drake and Josh portraits, live incident monitor, and dog posts | `src/data/blogPosts.js`, dog incident data, or Supabase |
 | `/admin` | `src/pages/Admin.jsx` | Protected blog manager for creating and editing posts | Supabase edge function |
 | `*` | `src/pages/NotFound.jsx` | 404 screen using the same visual language as the home page | Static component data |
 
@@ -18,10 +19,15 @@ This site is a single-page React app with route-based views. The router is defin
 
 ### Home
 
-- Shows the AJT3.me brand mark and a short intro about A.J.
-- Renders three internal feature cards for blog, music, and dogs.
-- Renders one external `build` widget linking to the main site URL.
-- Uses the animated `LetterGlitch` background layer from `src/components/LetterGlitch.jsx`.
+- Presents Tech, Music, Dogs, and Blog as interactive nodes on one animated signal ribbon.
+- Includes a working command terminal that accepts navigation and utility commands.
+- Reflows the horizontal desktop signal into a vertical mobile path and bottom-sheet terminal.
+
+### Tech
+
+- Introduces A.J.'s technical focus areas.
+- Links to the external AJT3 website and relevant build notes.
+- Uses the existing Tech Week photography as its primary visual.
 
 ### Blog index
 
@@ -38,14 +44,14 @@ This site is a single-page React app with route-based views. The router is defin
 
 ### Music
 
-- Contains three content blocks: playlists, artists, and songs.
-- Uses button-controlled iframe switching rather than rendering all embeds at once.
-- Uses scroll cues to guide the user down the page.
-- Uses timers and intersection observers to stage the reveal animations.
+- Organizes playlists, artists, and songs into one compact library interface.
+- Keeps one Apple Music embed active at a time.
+- Preserves a specific selection for each collection while visitors browse.
 
 ### Dogs
 
-- Shows a banner video first.
+- Introduces Drake and Josh with their supplied portraits.
+- Displays the current dog incident record when Supabase is configured.
 - Loads only posts tagged `dogs`.
 - Reuses the blog card component so dog posts look like the rest of the blog archive.
 
@@ -64,6 +70,6 @@ This site is a single-page React app with route-based views. The router is defin
 ## Shared UI Rules
 
 - `ScrollToTop` resets the scroll position on route changes.
-- `Footer` is rendered by `AppShell` on every route.
+- `SiteHeader` provides direct pillar links and opens the terminal from inner public routes.
+- `Footer` is rendered by `AppShell` on inner public routes.
 - The app uses `react-router-dom` for navigation instead of a nested layout system.
-

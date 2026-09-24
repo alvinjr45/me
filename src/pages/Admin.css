@@ -19,6 +19,63 @@
   width: min(560px, 100%);
 }
 
+.admin-page__dashboard {
+  display: grid;
+  gap: 1rem;
+  width: min(920px, 100%);
+  margin: 0 auto;
+}
+
+.device-window__content .admin-page--mission-control {
+  min-height: 100%;
+  padding: 1.5rem;
+  background: #0b1119;
+}
+
+.admin-page--mission-control .admin-page__header,
+.admin-page--mission-control .admin-page__panel,
+.admin-page--mission-control .admin-page__actions,
+.admin-page--mission-control .admin-page__message {
+  border-radius: 10px;
+  background: #111b26;
+  box-shadow: none;
+}
+
+.device-window__content .admin-page--mission-control h1 {
+  font-size: clamp(1.65rem, 4cqw, 2.5rem);
+  letter-spacing: -0.04em;
+}
+
+.admin-page--mission-control .admin-page__form--gate { margin-block: 1rem; }
+.admin-page--mission-control .admin-page__welcome { padding: 2rem 1.5rem; text-align: center; }
+.admin-page--mission-control .admin-page__welcome > p { font: 0.62rem var(--font-mono); letter-spacing: 0.16em; }
+.admin-page--mission-control .admin-page__intro { color: #aab9c9; font-size: 0.9rem; line-height: 1.65; }
+.admin-page--mission-control .admin-page__badge {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 1.5rem;
+  border: 1px solid #92522d;
+  border-radius: 18px;
+  background: #37251b;
+  color: var(--color-main);
+}
+.admin-page__badge svg { width: 40px; height: 40px; }
+.admin-page--mission-control .admin-page__gate { gap: 0.85rem; }
+.admin-page--mission-control .admin-page__gate button { justify-self: stretch; background: var(--color-main); color: #211107; }
+.admin-page--mission-control .admin-page__hint { font-size: 0.8rem; }
+.admin-page--mission-control button { border-radius: 7px; font-size: 0.72rem; letter-spacing: 0.04em; }
+.admin-page--mission-control input,
+.admin-page--mission-control textarea,
+.admin-page--mission-control select { font-size: 1rem; }
+
+.admin-page__overview { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 0; border-block: 1px solid #263444; }
+.admin-page__overview > div { min-width: 0; padding: 1.2rem; }
+.admin-page__overview > div + div { border-left: 1px solid #263444; }
+.admin-page__overview dt { color: #aab9c9; font: 0.65rem var(--font-mono); }
+.admin-page__overview dd { margin: 0.4rem 0 0; color: var(--color-accent); font-size: 1.9rem; font-weight: 700; }
+
 .admin-page__header,
 .admin-page__panel,
 .admin-page__actions,
@@ -239,7 +296,7 @@
   border-color: rgba(251, 127, 51, 0.38);
 }
 
-@media (max-width: 760px) {
+@container app-viewport (max-width: 760px) {
   .admin-page {
     padding: 6rem 1rem 3rem;
   }
@@ -265,7 +322,7 @@
   }
 }
 
-@media (max-width: 480px) {
+@container app-viewport (max-width: 480px) {
   .admin-page {
     padding: 5rem 0.85rem 2.5rem;
   }
@@ -276,4 +333,18 @@
   .admin-page__message {
     padding: 1rem;
   }
+}
+
+@container (max-width: 620px) {
+  .device-window__content .admin-page--mission-control { padding: 1rem 0.75rem; }
+  .admin-page--mission-control .admin-page__row,
+  .admin-page--mission-control .admin-page__actions,
+  .admin-page--mission-control .admin-page__panel-title,
+  .admin-page--mission-control .admin-page__button-group { flex-direction: column; align-items: stretch; }
+  .admin-page--mission-control .admin-page__header,
+  .admin-page--mission-control .admin-page__panel,
+  .admin-page--mission-control .admin-page__actions { padding: 1rem; }
+  .admin-page--mission-control .admin-page__post-button { flex-direction: column; align-items: flex-start; padding-block: 0.75rem; }
+  .admin-page--mission-control .admin-page__form--gate { margin-block: 0; }
+  .admin-page__overview > div { padding: 1rem 0.65rem; }
 }

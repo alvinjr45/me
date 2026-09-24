@@ -6,8 +6,8 @@ The site uses a small, consistent visual language:
 - orange primary accent
 - blue secondary accent
 - code-inspired typography and labels
-- translucent panels with subtle blur
-- full-width, mobile-aware layouts
+- thin rule-based panels with restrained glow
+- wide editorial layouts with intentional mobile compositions
 
 ## Global Tokens
 
@@ -17,31 +17,36 @@ Defined in `src/index.css`:
 - `--color-accent` for the blue accent
 - `--color-background` for the page background
 - `--color-surface` for elevated surfaces
+- `--color-line` and `--color-line-strong` for interface rules
 - `--color-text` for primary text
 - `--color-muted` for secondary text
 
 ## Typography
 
-- Body text uses a sans-serif stack centered on `PT Sans`.
+- Body text uses the native sans-serif stack defined by `--font-sans`.
 - Code-flavored headings and technical labels often use `Source Code Pro`.
-- Main headings commonly use oversized, condensed spacing or monospace treatment depending on the page.
+- Main headings use oversized, tightly spaced sans-serif type; utility labels use the mono stack.
 
 ## Shared Layout Rules
 
 - The app root keeps a full-height dark canvas.
 - Interactive elements keep a visible focus ring.
 - Most buttons and links are sized for touch targets.
-- Cards and surfaces use rounded corners, borders, and low-opacity gradients instead of hard flat fills.
+- Cards and surfaces use crisp borders, mostly square geometry, and low-opacity gradients.
 
 ## Active Components
 
-### `LetterGlitch`
+### `SiteHeader`
 
-Used on the home page and the 404 page.
+- Provides persistent access to the four pillars.
+- Opens the site terminal from a button or the backtick key.
+- Collapses into a deliberate two-column menu on mobile.
 
-- Draws an animated canvas of changing characters
-- Accepts configurable colors, speed, and vignette options
-- Resizes with the viewport
+### `CommandTerminal`
+
+- Runs real commands such as `ls`, `whoami`, `open music`, and `cd /dogs`.
+- Navigates through React Router without reloading the page.
+- Appears inline on home and in a modal from other public routes.
 
 ### `BlogPostCard`
 
@@ -59,17 +64,9 @@ Used for individual blog posts.
 - Supports mixed paragraph and bullet content
 - Ends with a link back to `/blog`
 
-### `VideoSection`
-
-Used on the dogs page.
-
-- Plays a looping muted video banner
-- Shows a scroll cue that hides after the user scrolls far enough
-- Scrolls the page to the next section when the cue is clicked
-
 ### `Footer`
 
-Rendered on every route.
+Rendered on every public route.
 
 - Shows the site name
 - Includes a short signoff line
@@ -81,17 +78,16 @@ Runs on route changes and smooth-scrolls the viewport back to the top.
 
 ## Page Styling Notes
 
-- Home and 404 pages use the `LetterGlitch` backdrop with different intensity settings.
-- Blog pages lean on glass-like panels and a technical terminal card.
-- Music uses the most motion-heavy layout, with staged reveals and multiple iframe states.
+- Home uses a responsive luminous signal ribbon with interactive pillar nodes and a working terminal.
+- Blog pages use an editorial archive layout with system-status details.
+- Music uses a focused console with collection tabs and one active player.
 - Admin uses stacked cards and form panels so content editing stays readable on smaller screens.
-- Dogs keeps the layout simple and gives the banner video most of the attention.
+- Dogs pairs editorial portraits with the live incident monitor and field notes.
 
 ## Responsive Behavior
 
-- Home cards collapse from four columns to two and then to a vertical stack.
+- Home's split hero stacks before tablet widths and the pillar grid becomes a single column on mobile.
 - Blog archive cards collapse to one column on narrower screens.
 - The blog post article media grid collapses to one column below tablet widths.
-- Music reduces iframe height at smaller breakpoints so the embeds stay usable on phones.
+- Music moves its sidebar above the player and reduces the iframe height on phones.
 - Admin form rows collapse to single-column sections on mobile.
-

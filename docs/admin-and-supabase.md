@@ -2,6 +2,24 @@
 
 The admin system is a small publishing pipeline built on top of Supabase.
 
+## Mission Control app
+
+Mission Control opens from the desktop or mobile home screen at `/admin`. The
+post editor remains at `/admin/new` (with an optional `slug` query parameter).
+Both views now run inside the device shell. Switching to another desktop app
+or minimizing Mission Control keeps an open post draft in place. Closing the
+window unmounts it, so save work before closing it.
+
+The desktop's shared admin login uses the existing `ADMIN_POST_SECRET` password.
+`useAdminAccess` verifies it against the server's post-list endpoint and keeps the
+verified session in memory. Mission Control consumes that shared session, so its
+sections do not ask for separate logins. The edge functions authorize every read
+and write independently.
+
+The dashboard now has Overview, Blog posts, Photos, and Dog incident sections.
+See [Mission Control setup and verification](mission-control.md) before enabling
+the database-backed photo library.
+
 ## Flow
 
 1. The admin page collects a shared secret.
@@ -73,6 +91,27 @@ If either browser variable is missing, the public site uses the local blog data 
 - `ADMIN_CORS_ORIGIN`
 
 The edge function uses Supabase-provided credentials on the server side and does not require a manually stored service role key in the repo.
+
+### Troubleshooting sign-in
+
+`Load failed` or `Failed to fetch` means the browser could not read the login
+response; it does not establish that the password was rejected. Check the
+Network panel for the `admin-blog-post` OPTIONS and POST requests.
+
+- Confirm `REACT_APP_SUPABASE_URL` points to the project where `admin-blog-post`
+  is deployed.
+- Set the function secret `ADMIN_CORS_ORIGINS` to a comma-separated list of the
+  exact allowed site origins (scheme, hostname, and port, without a path or
+  trailing slash). Localhost, a LAN IP, and a deployed domain are different
+  origins. Preserve other allowed origins when adding one.
+- Confirm the OPTIONS response allows the browser's origin, POST method, and
+  `authorization`, `apikey`, and `content-type` headers.
+- A readable 401/403 response indicates rejected access; 404 indicates a missing
+  endpoint, and 5xx requires checking function logs and server configuration.
+- The password is the secret's value, not the literal text `ADMIN_POST_SECRET`.
+
+AJ Thompson and Guest are separate, keyboard-selectable profile tiles. Selecting
+Guest clears the password and login error without making an admin request.
 
 ## Storage Rules
 

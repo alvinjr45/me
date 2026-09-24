@@ -3,3 +3,6 @@ verify_jwt = false
 
 [functions.admin-dog-incident]
 verify_jwt = false
+
+[functions.admin-photo-library]
+verify_jwt = false

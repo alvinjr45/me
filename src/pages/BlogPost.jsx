@@ -38,28 +38,18 @@ function BlogPost() {
 
   if (status === 'loading') {
     return (
-      <main className="blog-post-page">
-        <article className="blog-post-page__article">
-          <section className="blog-post-page__content">
-            <h1>Loading post</h1>
-          </section>
-        </article>
+      <main className="blog-post-page app-view" aria-label="Article reader">
+        <nav className="app-toolbar" aria-label="Article navigation"><Link className="app-control" to="/blog">All entries</Link></nav>
+        <p className="app-empty" role="status">Loading entry...</p>
       </main>
     );
   }
 
   if (status === 'error' || !post) {
     return (
-      <main className="blog-post-page">
-        <article className="blog-post-page__article">
-          <section className="blog-post-page__content">
-            <h1>{status === 'error' ? 'Post unavailable' : 'Post not found'}</h1>
-            <p>{status === 'error' ? error : 'The blog entry you requested does not exist.'}</p>
-            <p>
-              <Link to="/blog">Back to /blog</Link>
-            </p>
-          </section>
-        </article>
+      <main className="blog-post-page app-view" aria-label="Article reader">
+        <nav className="app-toolbar" aria-label="Article navigation"><Link className="app-control" to="/blog">All entries</Link></nav>
+        <p className="app-empty" role="alert">{status === 'error' ? error : 'Entry not found.'}</p>
       </main>
     );
   }

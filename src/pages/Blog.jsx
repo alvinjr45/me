@@ -111,13 +111,14 @@ function Blog() {
               <span className="sr-only">Search blogs</span>
               <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setReaderOpen(false); }} placeholder="Search blogs" />
             </label>
-            <label className="blog-page__folder-picker">
-              <span className="sr-only">Blog folder</span>
-              <select value={activeFolder} onChange={(event) => selectFolder(event.target.value)}>
-                <option value="">All blogs</option>
-                {folders.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
-              </select>
-            </label>
+            <div className="blog-page__folder-filters" role="group" aria-label="Filter by blog folder">
+              <button type="button" aria-pressed={!activeFolder} onClick={() => selectFolder('')}>All blogs</button>
+              {folders.map((tag) => (
+                <button type="button" key={tag} title={tag} aria-pressed={activeFolder === tag} onClick={() => selectFolder(tag)}>
+                  <span>{tag}</span>
+                </button>
+              ))}
+            </div>
           </header>
           <div className="blog-page__entries" id={`${sidebarId}-entries`}>
             {status === 'error' ? <p className="app-empty" role="alert">{error}</p> : null}

@@ -25,6 +25,23 @@ function readFavorites() {
   }
 }
 
+function PhotoPreview({ src, width, height }) {
+  const imageRef = useRef(null);
+  const [visible, setVisible] = useState(() => typeof IntersectionObserver === 'undefined');
+
+  useEffect(() => {
+    if (typeof IntersectionObserver === 'undefined') return undefined;
+    const observer = new IntersectionObserver(([entry]) => {
+      setVisible(entry.isIntersecting);
+    });
+    observer.observe(imageRef.current);
+    return () => observer.disconnect();
+  }, []);
+
+  // Native lazy loading alone retains sources after previews leave the viewport.
+  return <img ref={imageRef} src={visible ? src : undefined} alt="" width={width} height={height} loading="lazy" decoding="async" />;
+}
+
 function Photos() {
   const isPhone = useContext(DeviceSettingsContext)?.isPhone;
   const [library, setLibrary] = useState({ photos: [], albums: [] });
@@ -173,7 +190,7 @@ function Photos() {
               if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) movePhoto(dx < 0 ? 1 : -1);
             }}
           >
-            <img key={selectedPhoto.id} src={selectedPhoto.src} alt="" />
+            <img key={selectedPhoto.id} src={selectedPhoto.src} alt="" decoding="async" />
             <button type="button" className="photos-viewer__previous photos-app__icon-button" aria-label="Previous photo" disabled={selectedIndex === 0} onClick={() => movePhoto(-1)}><PhotoIcon name="back" /></button>
             <button type="button" className="photos-viewer__next photos-app__icon-button" aria-label="Next photo" disabled={selectedIndex === viewerIds.length - 1} onClick={() => movePhoto(1)}><PhotoIcon name="next" /></button>
           </div>
@@ -182,7 +199,7 @@ function Photos() {
           <div className="photos-viewer__filmstrip" aria-label="Browse photos">
             {viewerIds.map((id) => {
               const photo = photos.find((item) => item.id === id);
-              return <button type="button" key={id} aria-label={`View ${photo.title}`} aria-pressed={id === selectedId} onClick={() => setSelectedId(id)}><img src={photo.src} alt="" /></button>;
+              return <button type="button" key={id} aria-label={`View ${photo.title}`} aria-pressed={id === selectedId} onClick={() => setSelectedId(id)}><PhotoPreview src={photo.src} /></button>;
             })}
           </div>
           <footer className="photos-viewer__footer">
@@ -224,11 +241,11 @@ function Photos() {
               ) : albumsView ? (
                 <div className="photos-app__albums">{photoAlbums.map((item) => {
                   const items = visiblePhotos.filter((photo) => photo.album === item.id);
-                  return items.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => { setCollection(item.id); setView('library'); }}><span className="photos-app__album-cover"><img src={items[0].src} alt="" loading="lazy" /></span><strong>{item.title}</strong><span>{items.length} {items.length === 1 ? 'photo' : 'photos'}</span></button> : null;
+                  return items.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => { setCollection(item.id); setView('library'); }}><span className="photos-app__album-cover"><PhotoPreview src={items[0].src} /></span><strong>{item.title}</strong><span>{items.length} {items.length === 1 ? 'photo' : 'photos'}</span></button> : null;
                 })}</div>
               ) : (
                 <div className={`photos-app__grid photos-app__grid--${size}`}>
-                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${favorites.includes(photo.id) ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><img src={photo.src} alt="" loading="lazy" width={photo.width} height={photo.height} />{favorites.includes(photo.id) && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
+                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${favorites.includes(photo.id) ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><PhotoPreview src={photo.src} width={photo.width} height={photo.height} />{favorites.includes(photo.id) && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
                 </div>
               )}
               <footer className="photos-app__count" aria-live="polite">{visiblePhotos.length} {visiblePhotos.length === 1 ? 'photo' : 'photos'}<span>{collection === 'favorites' ? 'Saved in this browser' : 'A collection by AJ Thompson'}</span></footer>

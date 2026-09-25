@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import Photos from './Photos';
 import { DeviceSettingsContext } from '../components/deviceSettings';
 import { getPhotoLibrary } from '../data/photos';
@@ -70,4 +70,66 @@ test('shows a retryable error without repopulating hidden photos from static dat
   fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
   await waitFor(() => expect(screen.queryByRole('alert')).not.toBeInTheDocument());
   expect(screen.getByRole('heading', { name: 'No photos yet' })).toBeInTheDocument();
+});
+
+describe('preview image memory use', () => {
+  const originalObserver = window.IntersectionObserver;
+  let observers;
+
+  beforeEach(() => {
+    observers = [];
+    window.IntersectionObserver = jest.fn().mockImplementation((callback) => {
+      const observer = { callback, observe: jest.fn(), disconnect: jest.fn() };
+      observers.push(observer);
+      return observer;
+    });
+  });
+
+  afterEach(() => {
+    if (originalObserver === undefined) delete window.IntersectionObserver;
+    else window.IntersectionObserver = originalObserver;
+  });
+
+  test.each(['library', 'albums', 'viewer'])('loads only visible %s previews and releases offscreen sources', async (view) => {
+    const { container, unmount } = render(<Photos />);
+    const openButton = await screen.findByRole('button', { name: 'Open New memory' });
+    if (view === 'albums') fireEvent.click(screen.getByRole('button', { name: 'Albums' }));
+    if (view === 'viewer') fireEvent.click(openButton);
+    const selector = view === 'viewer' ? '.photos-viewer__filmstrip img' : view === 'albums' ? '.photos-app__album img' : '.photos-app__tile img';
+    const preview = container.querySelector(selector);
+    const observer = observers.find((item) => item.observe.mock.calls.some(([target]) => target === preview));
+
+    expect(preview).not.toHaveAttribute('src');
+    act(() => observer.callback([{ isIntersecting: true }]));
+    expect(preview).toHaveAttribute('src', photo.src);
+    act(() => observer.callback([{ isIntersecting: false }]));
+    expect(preview).not.toHaveAttribute('src');
+    act(() => observer.callback([{ isIntersecting: true }]));
+    expect(preview).toHaveAttribute('src', photo.src);
+
+    unmount();
+    expect(observers.every((item) => item.disconnect.mock.calls.length === 1)).toBe(true);
+  });
+
+  test('opening a large collection does not request every original and keeps navigation available', async () => {
+    const collection = Array.from({ length: 100 }, (_, index) => ({
+      ...photo, id: `photo-${index}`, title: `Memory ${index}`, src: `https://example.test/${index}.jpg`
+    }));
+    getPhotoLibrary.mockResolvedValue({ photos: collection, albums: [album] });
+    const { container } = render(<Photos />);
+    const buttons = await screen.findAllByRole('button', { name: /^Open Memory / });
+    const firstTitle = buttons[0].getAttribute('aria-label').replace('Open ', '');
+    fireEvent.click(buttons[0]);
+
+    expect(container.querySelectorAll('.photos-viewer__filmstrip button')).toHaveLength(100);
+    expect(container.querySelectorAll('img[src]')).toHaveLength(1);
+    expect(container.querySelector('.photos-viewer__stage img')).toHaveAttribute('src', collection.find((item) => item.title === firstTitle).src);
+    expect(screen.getByRole('button', { name: 'Previous photo' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: 'Next photo' }));
+    expect(screen.getByText('2 of 100')).toBeInTheDocument();
+    expect(container.querySelectorAll('img[src]')).toHaveLength(1);
+
+    fireEvent.keyDown(screen.getByRole('region', { name: 'Photo viewer' }), { key: 'Escape' });
+    expect(screen.getByRole('button', { name: `Open ${firstTitle}` })).toHaveFocus();
+  });
 });

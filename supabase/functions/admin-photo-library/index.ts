@@ -57,6 +57,25 @@ Deno.serve(async (request) => {
     const value = (key: string) => json ? json[key] : form?.get(key);
     const action = value('action');
 
+    if (action === 'save_profile') {
+      const file = form?.get('file');
+      const types: Record<string, string> = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp', 'image/gif': 'gif' };
+      if (!(file instanceof File) || !types[file.type] || file.size === 0 || file.size > 20 * 1024 * 1024) {
+        return respond({ error: 'Upload a JPG, PNG, WebP, or GIF under 20 MB.' }, 400);
+      }
+      const bucket = Deno.env.get('BLOG_MEDIA_BUCKET') || 'blog-media';
+      const path = `ajt3/me/profile/${crypto.randomUUID()}.${types[file.type]}`;
+      const { error: uploadError } = await client.storage.from(bucket).upload(path, file, { contentType: file.type, upsert: false });
+      if (uploadError) return respond({ error: 'Profile photo upload failed. Please retry.' }, 500);
+      const image_url = client.storage.from(bucket).getPublicUrl(path).data.publicUrl;
+      const { data, error } = await client.from('ajt3_admin_profile').upsert({ id: 'admin', image_url, updated_at: new Date().toISOString() }).select('*').single();
+      if (error) {
+        await client.storage.from(bucket).remove([path]);
+        return respond({ error: 'Unable to save your profile photo. Check that the admin-profile migration is applied and retry.' }, 500);
+      }
+      return respond({ profile: data });
+    }
+
     if (action === 'list') {
       const [photos, albums] = await Promise.all([
         client.from('ajt3_photos').select('*').order('sort_order').order('created_at').order('id'),

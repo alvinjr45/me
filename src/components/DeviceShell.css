@@ -698,12 +698,34 @@
 .device-system-screen__clock span { margin-top: 0.55rem; font-size: clamp(0.75rem, 1.4cqw, 1rem); }
 
 .device-system-screen--phone-locked {
-  grid-template-rows: minmax(0, 1fr) auto;
-  padding: 64px 20px 12px;
-  background: linear-gradient(180deg, #04101a66, #04101a22 50%, #04101acc);
+  --unlock-offset: 0px;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
+}
+.device-system-screen__lock-sheet {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  justify-items: center;
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding: 64px 20px 12px;
+  background: linear-gradient(180deg, #04101a66, #04101a22 50%, #04101acc);
+  opacity: calc(1 - var(--unlock-progress, 0));
+  transform: translate3d(0, calc(-1 * var(--unlock-offset)), 0);
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease-out;
+  will-change: transform, opacity;
+}
+.device-screen__session { display: contents; }
+.device-screen__session--locked {
+  position: absolute;
+  inset: 0;
+  display: block;
+  pointer-events: none;
+  opacity: var(--unlock-progress, 0);
+  transform: translate3d(0, calc((1 - var(--unlock-progress, 0)) * 24px), 0) scale(calc(0.96 + var(--unlock-progress, 0) * 0.04));
+  transition: transform 300ms cubic-bezier(0.2, 0.8, 0.2, 1), opacity 300ms ease-out;
+  will-change: transform, opacity;
 }
 .device-system-screen__phone-clock {
   align-self: start;
@@ -717,29 +739,38 @@
 .device-system-screen__phone-clock svg { width: 24px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; }
 .device-system-screen__phone-clock > span { font-size: clamp(0.85rem, 4cqw, 1.1rem); }
 .device-system-screen__phone-clock time { font-size: clamp(2.6rem, 17cqw, 5.5rem); font-weight: 250; line-height: 1; letter-spacing: -0.05em; white-space: nowrap; }
+.device-system-screen__site-title {
+  max-width: 100%;
+  margin: 8px 0 0;
+  color: #fff;
+  font-size: clamp(1rem, 5cqw, 1.4rem);
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
 .device-system-screen__unlock-actions { display: grid; justify-items: center; gap: 8px; width: 100%; }
 .device-system-screen__unlock-actions button { min-height: 44px; border: 0; background: transparent; color: #fff; cursor: pointer; font: inherit; }
 .device-system-screen__unlock-actions button:focus-visible { outline: 2px solid #90caff; outline-offset: 3px; border-radius: 8px; }
 .device-system-screen__unlock-actions .device-system-screen__switch-user { padding: 8px 16px; font-size: 0.8rem; }
-.device-system-screen__swipe-unlock { display: grid; justify-items: center; gap: 8px; width: 100%; padding: 10px 0 0; }
+.device-system-screen__swipe-unlock { display: grid; justify-items: center; gap: 8px; width: 100%; padding: 10px 0 0; touch-action: none; -webkit-tap-highlight-color: transparent; }
 .device-system-screen__swipe-unlock small { color: #d2dfeb; font-size: 0.75rem; }
 .device-system-screen__unlock-indicator { width: min(120px, 50%); height: 5px; margin-top: 12px; border-radius: 99px; background: #fff; }
-.device-system-screen__phone-clock,
-.device-system-screen__unlock-actions { transform: translateY(calc(-1 * var(--unlock-offset))); transition: transform 180ms ease-out; }
-.device-system-screen--swiping > :is(.device-system-screen__phone-clock, .device-system-screen__unlock-actions) { transition: none; }
+.device-system-screen--swiping > .device-system-screen__lock-sheet,
+.device-screen--unlock-dragging > .device-screen__session--locked { transition: none; }
 @media (max-height: 500px) {
-  .device-system-screen--phone-locked { padding-top: 44px; }
+  .device-system-screen__lock-sheet { padding-top: 44px; }
   .device-system-screen__phone-clock { gap: 4px; }
   .device-system-screen__phone-clock time { font-size: 2.6rem; }
   .device-system-screen__phone-clock svg { height: 20px; }
+  .device-system-screen__site-title { margin-top: 4px; font-size: 1rem; }
   .device-system-screen__unlock-actions { gap: 0; }
   .device-system-screen__swipe-unlock { gap: 4px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .device-system-screen__phone-clock,
-  .device-system-screen__unlock-actions { transition: none; }
+  .device-system-screen__lock-sheet,
+  .device-screen__session--locked { transition: none; }
 }
-.device-screen[data-motion="off"] :is(.device-system-screen__phone-clock, .device-system-screen__unlock-actions) { transition: none; }
+.device-screen[data-motion="off"] :is(.device-system-screen__lock-sheet, .device-screen__session--locked) { transition: none; }
 
 .device-system-screen__login {
   align-self: start;
@@ -846,6 +877,7 @@
 }
 
 .device-system-screen__login strong { font-size: clamp(0.9rem, 1.5cqw, 1.1rem); text-shadow: 0 2px 10px #000; }
+.device-system-screen__avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
 .device-system-screen__login button {
   min-width: 92px;
   min-height: 36px;

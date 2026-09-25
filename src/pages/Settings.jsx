@@ -55,7 +55,8 @@ function Settings() {
     motion,
     setMotion,
     runSystemAction,
-    accountName
+    accountName,
+    accountImage
   } = useContext(DeviceSettingsContext);
 
   return (
@@ -67,7 +68,7 @@ function Settings() {
           <input type="search" aria-label="Search settings" placeholder="Search" value={search} onChange={(event) => setSearch(event.target.value)} />
         </label>
         <div className="settings-page__account">
-          <span className="settings-page__avatar" aria-hidden="true">{accountName?.trim().slice(0, 1).toUpperCase() || 'A'}</span>
+          <span className="settings-page__avatar" aria-hidden="true">{accountImage ? <img src={accountImage} alt="" /> : accountName?.trim().slice(0, 1).toUpperCase() || 'A'}</span>
           <div><strong>{accountName}</strong><span>Local account</span></div>
         </div>
         <nav className="settings-page__navigation" aria-label="Settings categories">

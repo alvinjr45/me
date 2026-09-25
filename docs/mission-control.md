@@ -60,6 +60,14 @@ Deploy the resulting frontend using the site's usual workflow.
 
 ## Photo behavior
 
+The overview includes a profile-photo preview with Change photo, Save, and Cancel.
+The saved photo appears on the administrator sign-in tile and in Settings, and
+persists across browsers. Guest initials are unchanged. Before using this control,
+apply `supabase/migrations/20260925000000_create_admin_profile.sql` and redeploy
+`admin-photo-library`. The profile table exposes only the public image URL and its
+update time; writes use the existing server-verified admin password. Profile photos
+use the existing media bucket and do not appear in the photo library.
+
 Photo uploads accept JPG, PNG, WebP and GIF up to 20 MB; the browser converts HEIC
 and HEIF with the existing converter. Each replacement gets a new storage path.
 Successful replacements retain old image files so existing external links keep

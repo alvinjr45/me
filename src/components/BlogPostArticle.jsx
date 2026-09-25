@@ -37,7 +37,6 @@ function BlogPostArticle({ post, embedded = false, onBack, backLabel = 'Blogs' }
         {embedded ? <>
           <button type="button" className="blog-post-page__back" onClick={onBack}><span aria-hidden="true">&lsaquo;</span> {backLabel}</button>
           <span className="blog-post-page__notebook">{post.eyebrow || 'Blogs'}</span>
-          <Link to={`/blog/${post.slug}`} className="blog-post-page__open" aria-label={`Open ${post.title} blog`}>Open blog <span aria-hidden="true">&nearr;</span></Link>
         </> : <><Link to={post.tags?.includes('dogs') ? '/dogs' : '/blog'} className="app-control">
           <span aria-hidden="true">&larr;</span> {post.tags?.includes('dogs') ? 'Dogs' : 'All blogs'}
         </Link>

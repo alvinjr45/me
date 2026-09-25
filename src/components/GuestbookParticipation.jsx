@@ -36,7 +36,7 @@ export default function GuestbookParticipation({ participant, onContinue, blocke
     <h2 id="guestbook-join-title" ref={heading} tabIndex={-1}>Before you join</h2>
     <p>Enter a display name, confirm both requirements, and complete the bot check to open the conversations.</p>
     <label className="guestbook-messages__join-name" htmlFor="guestbook-display-name">Display name</label>
-    <input id="guestbook-display-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={40} required autoComplete="nickname" aria-describedby="guestbook-name-notice" placeholder="How should we call you?" />
+    <input id="guestbook-display-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={40} required autoComplete="nickname" aria-describedby="guestbook-name-notice" placeholder="What should we call you?" />
     <p id="guestbook-name-notice" className="guestbook-messages__join-hint">Your display name and messages will be public.</p>
     {published ? <details className="guestbook-messages__terms"><summary>Read the Terms and Conditions</summary><p>{guestbookTerms.content}</p><small>Version: {guestbookTerms.version}</small></details> : <p className="guestbook-messages__terms-pending" role="status">Terms and Conditions are being prepared. Message entry will open once they are published.</p>}
     <details className="guestbook-messages__terms"><summary>Read the Privacy Policy</summary><p>{privacyPolicy.content}</p><small>Version: {privacyPolicy.version}</small></details>

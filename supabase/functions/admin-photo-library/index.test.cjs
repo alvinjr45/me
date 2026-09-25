@@ -45,7 +45,7 @@ const validPhoto = { action: 'save_photo', id: 'drake', title: 'Drake', album_id
 
 test('requires the admin secret before any database or storage access', async () => {
   const { send, state } = service();
-  for (const action of ['list', 'save_photo', 'save_album']) assert.equal((await send({ action }, 'wrong')).status, 401);
+  for (const action of ['list', 'save_photo', 'save_album', 'save_profile']) assert.equal((await send({ action }, 'wrong')).status, 401);
   assert.equal(state.clients, 0);
   assert.equal(state.writes.length, 0);
 });
@@ -120,4 +120,43 @@ test('does not change the database after a failed upload', async () => {
   const { send, state } = service({ failUpload: true });
   assert.equal((await send(uploadForm())).status, 500);
   assert.equal(state.writes.length, 0);
+});
+
+test('saves the admin profile independently of the photo library', async () => {
+  const { send, state } = service();
+  const form = uploadForm();
+  form.set('action', 'save_profile');
+  form.set('id', 'someone-else');
+  const saved = await send(form);
+  assert.equal(saved.status, 200);
+  const { profile } = await saved.json();
+  assert.equal(profile.id, 'admin');
+  assert.match(profile.image_url, /^https:\/\/example.test\/ajt3\/me\/profile\//);
+  assert.equal(state.writes.length, 1);
+  assert.equal(state.writes[0].table, 'ajt3_admin_profile');
+  assert.match(state.uploads[0].path, /^ajt3\/me\/profile\/[\da-f-]+\.jpg$/);
+  assert.equal(state.removals.length, 0);
+});
+
+test('rejects missing and unsupported profile images without uploading', async () => {
+  const { send, state } = service();
+  assert.equal((await send({ action: 'save_profile' })).status, 400);
+  const form = uploadForm('image/svg+xml');
+  form.set('action', 'save_profile');
+  assert.equal((await send(form)).status, 400);
+  form.set('file', new File([], 'empty.jpg', { type: 'image/jpeg' }));
+  assert.equal((await send(form)).status, 400);
+  assert.equal(state.uploads.length, 0);
+  assert.equal(state.writes.length, 0);
+});
+
+test('profile upload failures preserve the saved profile and clean up only new files', async () => {
+  const form = uploadForm();
+  form.set('action', 'save_profile');
+  const uploadFailure = service({ failUpload: true });
+  assert.equal((await uploadFailure.send(form)).status, 500);
+  assert.equal(uploadFailure.state.writes.length, 0);
+  const saveFailure = service({ failSave: true });
+  assert.equal((await saveFailure.send(form)).status, 500);
+  assert.deepEqual(saveFailure.state.removals, [saveFailure.state.uploads[0].path]);
 });

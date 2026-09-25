@@ -24,13 +24,15 @@ body.device-page #root {
 @media (max-width: 1024px), (max-height: 500px) {
   html.device-page--scene-entry { --device-scene-entry-offset: 80px; }
 
-  /* Let Safari carry page content beneath its translucent browser controls. */
+  /* Keep the initial Safari scene offset, but prevent user scrolling and bounce. */
   html.device-page,
   body.device-page {
-    overflow-x: clip;
-    overflow-y: visible;
+    overflow: hidden;
+    overscroll-behavior: none;
     background-color: var(--scene-wall-light, var(--color-background));
   }
+
+  html.device-page { height: 100%; }
 
   body.device-page,
   body.device-page #root,

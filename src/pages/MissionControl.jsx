@@ -5,6 +5,7 @@ import NewPost from './NewPost';
 import AdminPhotos from './AdminPhotos';
 import AdminCalendar from './AdminCalendar';
 import AdminGuestbook from './AdminGuestbook';
+import AdminProfile from './AdminProfile';
 import { DeviceSettingsContext } from '../components/deviceSettings';
 import { requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 import './MissionControl.css';
@@ -21,7 +22,7 @@ const sections = [
 function MissionControl() {
   const { pathname, search } = useLocation();
   const navigate = useNavigate();
-  const { adminAccess: access } = useContext(DeviceSettingsContext);
+  const { adminAccess: access, adminProfile } = useContext(DeviceSettingsContext);
   const secret = access.session?.secret;
   const isAdminRoute = pathname === '/admin' || pathname.startsWith('/admin/');
   const [lastRoute, setLastRoute] = useState({ pathname: '/admin', search: '' });
@@ -94,13 +95,14 @@ function MissionControl() {
         <div className="mission-control__content">
           {activeSection.path === '/admin' && !isEditor && (
             <main className="mission-control__overview">
+              <AdminProfile secret={secret} imageUrl={adminProfile?.imageUrl} onChange={(url) => adminProfile?.updateImage(url)} onBusy={setBusy} />
               <div className="mission-control__destinations">
-                <button type="button" onClick={() => navigate('/admin/calendar')}><span>WHAT'S NEXT</span><h2>Calendar</h2><p>Add events and make room for what matters.</p><strong>Manage events &rarr;</strong></button>
-                <button type="button" onClick={() => navigate('/admin/posts')}><span>PUBLISHING</span><h2>Blog posts</h2><p>Write, edit, and choose what goes live.</p><strong>Manage posts &rarr;</strong></button>
-                <button type="button" onClick={() => navigate('/admin/photos')}><span>YOUR CAMERA ROLL</span><h2>Photos</h2><p>Upload moments and curate your albums.</p><strong>Manage photos &rarr;</strong></button>
-                <button type="button" onClick={() => navigate('/admin/guestbook')}><span>COMMUNITY</span><h2>Guestbook</h2><p>Manage messages and keep the board welcoming.</p><strong>Manage guestbook &rarr;</strong></button>
+                <button type="button" disabled={busy} onClick={() => navigate('/admin/calendar')}><span>WHAT'S NEXT</span><h2>Calendar</h2><p>Add events and make room for what matters.</p><strong>Manage events &rarr;</strong></button>
+                <button type="button" disabled={busy} onClick={() => navigate('/admin/posts')}><span>PUBLISHING</span><h2>Blog posts</h2><p>Write, edit, and choose what goes live.</p><strong>Manage posts &rarr;</strong></button>
+                <button type="button" disabled={busy} onClick={() => navigate('/admin/photos')}><span>YOUR CAMERA ROLL</span><h2>Photos</h2><p>Upload moments and curate your albums.</p><strong>Manage photos &rarr;</strong></button>
+                <button type="button" disabled={busy} onClick={() => navigate('/admin/guestbook')}><span>COMMUNITY</span><h2>Guestbook</h2><p>Manage messages and keep the board welcoming.</p><strong>Manage guestbook &rarr;</strong></button>
               </div>
-              <section className="mission-control__recent"><header><h2>Recent posts</h2><button type="button" onClick={() => navigate('/admin/new')}>New post</button></header>{posts.slice(0, 4).map((post) => <button className="mission-control__recent-post" type="button" key={post.slug} onClick={() => navigate(`/admin/new?slug=${encodeURIComponent(post.slug)}`)}><strong>{post.title}</strong><span>{post.is_published ? 'Published' : 'Draft'}</span></button>)}{!posts.length && <p>Your first post starts here.</p>}</section>
+              <section className="mission-control__recent"><header><h2>Recent posts</h2><button type="button" disabled={busy} onClick={() => navigate('/admin/new')}>New post</button></header>{posts.slice(0, 4).map((post) => <button className="mission-control__recent-post" type="button" disabled={busy} key={post.slug} onClick={() => navigate(`/admin/new?slug=${encodeURIComponent(post.slug)}`)}><strong>{post.title}</strong><span>{post.is_published ? 'Published' : 'Draft'}</span></button>)}{!posts.length && <p>Your first post starts here.</p>}</section>
               {photoStatus === 'error' && <p className="mission-control__notice">Photos needs attention. Open Photos for details; publishing is still available.</p>}
             </main>
           )}

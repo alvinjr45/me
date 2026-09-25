@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useId, useRef, useState } from 'react';
 import BlogPostArticle from '../components/BlogPostArticle';
 import { getBlogPosts } from '../data/blogPosts';
 import './Blog.css';
@@ -11,6 +11,8 @@ function Blog() {
   const [folder, setFolder] = useState('');
   const [selectedSlug, setSelectedSlug] = useState(null);
   const [readerOpen, setReaderOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const sidebarId = useId();
   const readerRef = useRef(null);
   const noteButtons = useRef({});
   const returnFocus = useRef(false);
@@ -73,9 +75,9 @@ function Blog() {
   };
 
   return (
-    <main className={`blog-page app-view${readerOpen && selectedPost ? ' blog-page--reading' : ''}`} aria-label="Blogs">
+    <main className={`blog-page app-view${readerOpen && selectedPost ? ' blog-page--reading' : ''}${sidebarCollapsed ? ' blog-page--sidebar-collapsed' : ''}`} aria-label="Blogs">
       <div className="blog-page__workspace">
-        <aside className="blog-page__folders" aria-label="Blog folders">
+        <aside className="blog-page__folders" id={`${sidebarId}-folders`} aria-label="Blog folders">
           <div className="blog-page__brand"><NoteIcon /> <strong>Blogs</strong></div>
           <p className="blog-page__account">On AJT3</p>
           <button type="button" className={`blog-page__folder${!activeFolder ? ' is-selected' : ''}`}
@@ -93,7 +95,17 @@ function Blog() {
 
         <section className="blog-page__list" aria-label="Blogs list" aria-busy={status === 'loading'}>
           <header className="blog-page__list-header">
-            <div className="blog-page__list-title"><h2>{activeFolder || 'All blogs'}</h2><NoteIcon /></div>
+            <div className="blog-page__list-title">
+              <h2>{activeFolder || 'All blogs'}</h2>
+              <button type="button" className="blog-page__sidebar-toggle"
+                aria-label={sidebarCollapsed ? 'Expand side panel' : 'Collapse side panel'}
+                title={sidebarCollapsed ? 'Expand side panel' : 'Collapse side panel'}
+                aria-expanded={!sidebarCollapsed}
+                aria-controls={`${sidebarId}-folders ${sidebarId}-entries`}
+                onClick={() => setSidebarCollapsed((current) => !current)}>
+                <NoteIcon />
+              </button>
+            </div>
             <label className="blog-page__search">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg>
               <span className="sr-only">Search blogs</span>
@@ -107,7 +119,7 @@ function Blog() {
               </select>
             </label>
           </header>
-          <div className="blog-page__entries">
+          <div className="blog-page__entries" id={`${sidebarId}-entries`}>
             {status === 'error' ? <p className="app-empty" role="alert">{error}</p> : null}
             {status === 'loading' ? <p className="app-empty">Loading blogs...</p> : null}
             {status === 'ready' && matchingPosts.length === 0 ? <p className="app-empty">{query ? 'No matching blogs.' : 'No blogs yet.'}</p> : null}

@@ -59,7 +59,8 @@
 .blog-page__list-header { padding: 14px 12px 10px; border-bottom: 1px solid #39393d; }
 .blog-page__list-title { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
 .blog-page__list-title h2 { margin: 0; font-size: 17px; letter-spacing: -0.035em; text-transform: capitalize; }
-.blog-page__list-title > svg { color: var(--color-main); }
+.blog-page__sidebar-toggle { display: inline-flex; align-items: center; justify-content: center; flex: none; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 5px; background: transparent; color: var(--color-main); }
+.blog-page__sidebar-toggle:hover { background: #414144; }
 .blog-page__search { display: flex; align-items: center; gap: 6px; padding: 0 9px; background: #1e1e20; border: 1px solid #424246; border-radius: 7px; color: var(--notes-muted); }
 .blog-page__search svg { width: 16px; height: 16px; }
 .blog-page__search:focus-within { outline: 2px solid var(--color-accent); outline-offset: 2px; }
@@ -124,11 +125,24 @@
   .blog-page__folder-picker { display: block; }
 }
 
+@container (min-width: 681px) {
+  .blog-page--sidebar-collapsed .blog-page__workspace { grid-template-columns: 44px minmax(0, 1fr); }
+  .blog-page--sidebar-collapsed .blog-page__folders,
+  .blog-page--sidebar-collapsed .blog-page__list-title h2,
+  .blog-page--sidebar-collapsed .blog-page__search,
+  .blog-page--sidebar-collapsed .blog-page__folder-picker,
+  .blog-page--sidebar-collapsed .blog-page__entries,
+  .blog-page--sidebar-collapsed .blog-page__count { display: none; }
+  .blog-page--sidebar-collapsed .blog-page__list-header { padding: 14px 5px; border-bottom: 0; }
+  .blog-page--sidebar-collapsed .blog-page__list-title { margin-bottom: 0; }
+}
+
 @container (max-width: 680px) {
   .blog-page__workspace { grid-template-columns: minmax(0, 1fr); }
   .blog-page__list { border-right: 0; }
   .blog-page__list-header { padding: 16px 16px 12px; }
   .blog-page__list-title h2 { font-size: 24px; }
+  .blog-page__sidebar-toggle { display: none; }
   .blog-page__search input { height: 40px; font-size: 16px; }
   .blog-page__folder-picker select { min-height: 40px; font-size: 16px; }
   .blog-page__entries { padding: 0 14px; }

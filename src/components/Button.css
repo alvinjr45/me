@@ -18,7 +18,7 @@
 }
 
 .btn--primary:hover,
-.btn--primary:focus {
+.btn--primary:focus-visible {
     background-color: var(--color-accent);
     color: #fff;
 }
@@ -30,7 +30,7 @@
 }
 
 .btn--outline:hover,
-.btn--outline:focus {
+.btn--outline:focus-visible {
     background-color: rgba(51, 175, 251, 0.1);
     color: #fff;
     border-color: var(--color-accent);
@@ -46,13 +46,13 @@
 
 @media (hover: none) and (pointer: coarse) {
     .btn--primary:hover,
-    .btn--primary:focus {
+    .btn--primary:focus-visible {
         background-color: var(--color-main);
         color: var(--color-ink);
     }
 
     .btn--outline:hover,
-    .btn--outline:focus {
+    .btn--outline:focus-visible {
         background-color: transparent;
         color: var(--color-accent);
         border-color: var(--color-accent);

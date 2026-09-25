@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Calendar, { timedLayout } from './Calendar';
 import { addDays, dateFromKey, dateKey, eventsOnDay, getCalendarEvents, monthDays } from '../data/calendar';
@@ -12,20 +12,19 @@ const event = { id: 'first', title: 'Project launch', calendar: 'work', all_day:
 function openCalendar() { return render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Calendar /></MemoryRouter>); }
 beforeEach(() => { getCalendarEvents.mockReset(); getCalendarEvents.mockResolvedValue([event]); });
 
-test('shows event details, filters calendars, searches and opens event management', async () => {
+test('shows event details, filters calendars and links to event management', async () => {
   openCalendar();
   fireEvent.click((await screen.findAllByRole('button', { name: 'Project launch All day' }))[0]);
   const details = screen.getByRole('region', { name: 'Event details' });
   expect(details).toHaveTextContent('Studio');
   expect(details).toHaveTextContent('Bring ideas.');
   expect(details).toHaveFocus();
-  expect(screen.getByRole('link', { name: 'Add event in Mission Control' })).toHaveAttribute('href', `/admin/calendar?date=${today}`);
+  expect(screen.getByRole('link', { name: 'Manage events' })).toHaveAttribute('href', '/admin/calendar');
   fireEvent.click(screen.getByLabelText('Work'));
   expect(screen.queryByRole('region', { name: 'Event details' })).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Project launch All day' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByLabelText('Work'));
-  fireEvent.change(screen.getByLabelText('Search calendar'), { target: { value: 'studio' } });
-  expect(within(screen.getByRole('region', { name: 'Calendar search results' })).getByRole('button', { name: 'Project launch All day' })).toBeInTheDocument();
+  expect(screen.getAllByRole('button', { name: 'Project launch All day' }).length).toBeGreaterThan(0);
 });
 
 test('supports all four views and navigates safely across month boundaries', async () => {

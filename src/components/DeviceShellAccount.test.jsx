@@ -91,6 +91,7 @@ test('starts as Guest even with an old admin password, and blocks Mission Contro
 test.each([false, true])('blocks a direct admin editor link on phone=%s', (phone) => {
   window.matchMedia.mockImplementation((query) => ({ matches: phone && query.includes('max-width'), addEventListener: jest.fn(), removeEventListener: jest.fn() }));
   openDesktop('/admin/new?slug=private-draft');
+  if (phone) fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
   expect(screen.getByRole('alertdialog')).toBeInTheDocument();
   expect(screen.queryByLabelText('Title')).not.toBeInTheDocument();
   expect(global.fetch).not.toHaveBeenCalled();
@@ -107,6 +108,7 @@ test('phone keeps four dock shortcuts and paginates every app to fit the availab
         <DeviceShell><Home /></DeviceShell>
       </MemoryRouter>
     );
+    fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
     const dock = screen.getByRole('navigation', { name: 'App dock' });
     expect(within(dock).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['/tech', '/music', '/dogs', '/blog']);
     const apps = screen.getByRole('navigation', { name: 'Open a site app' });
@@ -132,6 +134,46 @@ test('phone keeps four dock shortcuts and paginates every app to fit the availab
     height.mockRestore();
     width.mockRestore();
   }
+});
+
+test('phone starts locked and only an upward swipe unlocks as Guest', () => {
+  window.matchMedia.mockImplementation((query) => ({ matches: query.includes('max-width'), addEventListener: jest.fn(), removeEventListener: jest.fn() }));
+  window.sessionStorage.setItem('ajt3_admin_secret', 'test-password');
+  openDesktop();
+  const lock = screen.getByRole('region', { name: 'Phone locked' });
+  lock.setPointerCapture = jest.fn();
+  const pointer = (type, x, y) => fireEvent(lock, Object.assign(new Event(type, { bubbles: true }), {
+    pointerId: 1, isPrimary: true, button: 0, clientX: x, clientY: y
+  }));
+  expect(screen.queryByRole('navigation', { name: 'App dock' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('radio')).not.toBeInTheDocument();
+  for (const [x, y] of [[100, 280], [100, 400], [250, 220]]) {
+    pointer('pointerdown', 100, 300);
+    pointer('pointermove', x, y);
+    pointer('pointerup', x, y);
+    expect(lock).toBeInTheDocument();
+  }
+  pointer('pointerdown', 100, 300);
+  pointer('pointermove', 100, 180);
+  pointer('pointercancel', 100, 180);
+  pointer('pointerup', 100, 180);
+  expect(lock).toBeInTheDocument();
+  pointer('pointerdown', 100, 300);
+  pointer('pointermove', 105, 200);
+  pointer('pointerup', 105, 200);
+  expect(screen.queryByRole('region', { name: 'Phone locked' })).not.toBeInTheDocument();
+  expect(screen.getByRole('navigation', { name: 'App dock' })).toBeInTheDocument();
+  expect(screen.getByText('Guest')).toBeInTheDocument();
+  expect(global.fetch).not.toHaveBeenCalled();
+});
+
+test('phone keeps administrator sign-in available through Switch user', async () => {
+  window.matchMedia.mockImplementation((query) => ({ matches: query.includes('max-width'), addEventListener: jest.fn(), removeEventListener: jest.fn() }));
+  openDesktop();
+  fireEvent.click(screen.getByRole('button', { name: 'Switch user' }));
+  enterAdminPassword('test-password');
+  await screen.findByRole('navigation', { name: 'App dock' });
+  expect(screen.getByText('AJ Thompson')).toBeInTheDocument();
 });
 
 test('requires verified AJ Thompson login, opens Mission Control, and clears access on logout', async () => {

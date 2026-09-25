@@ -15,8 +15,9 @@ backend operations still require `ADMIN_POST_SECRET` independently of the UI.
 - `/admin/dogs`: the existing dog incident editor.
 - `/admin/calendar`: create, edit, publish, and hide calendar events. See
   [Calendar setup and verification](calendar.md) for the required migration and function.
-- `/admin/guestbook`: hide/show or delete auto-published messages and pause/resume
-  submissions. There is no approval queue; see [Guestbook setup](guestbook.md) for
+- `/admin/guestbook`: hide/show whole conversations, hide/show or delete their
+  auto-published messages, and pause/resume submissions. There is no approval queue;
+  see [Guestbook setup](guestbook.md) for
   its separate Turnstile, rate-limit, and profanity-filter configuration.
 
 The in-app routes also work as entry links. Browser navigation remains controlled

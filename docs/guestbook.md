@@ -1,22 +1,77 @@
 # Guestbook
 
-Guestbook is available from the home screen and dock at `/guestbook`.
-Messages publish immediately after server-side checks; there is no approval
-queue. Mission Control > Guestbook provides hide/show, confirmed permanent
-deletion, pagination, and a global pause/resume switch.
+Guestbook is available from the home screen and dock at `/guestbook`. It now
+uses a Messages-style conversation list and a separate public group-chat board
+for each conversation. Visitors can create a topic with its first message or
+reply to an existing topic. Messages publish immediately after server-side checks;
+there is no approval queue. Names are unverified and all conversations are public,
+not private messages. Blue bubbles identify sends in the current app visit by
+their returned message IDs, never by matching a display name.
+
+The desktop layout has a searchable sidebar and a chat pane. Narrow app windows
+and phones switch between the conversation list and chat, with a back button.
+Drafts stay separate per conversation while the app is open. Closing/reloading
+discards drafts. Latest messages refresh every 15 seconds while the document is
+visible and the feed is at the bottom, plus on focus, manual refresh, and local
+changes. This is polling, not realtime delivery or a read receipt. Older messages
+load using timestamp/ID cursors and preserve scroll position.
+
+Mission Control > Guestbook provides separate Messages and Conversations views,
+hide/show for whole boards, per-message hide/show and confirmed permanent
+deletion, pagination, and a global pause/resume switch. Hiding a board hides its
+messages and previews and blocks new replies; it does not delete its contents.
+
+## Participation gate and pending terms
+
+Before any message or new conversation title can be entered, visitors must give
+a nonblank display name and explicitly check two initially unchecked boxes:
+they are at least 18, and they have read and agree to the Terms and Conditions.
+Reading the public boards requires no declaration. The name and declarations
+last only while this Guestbook app instance is open; they are not saved to
+browser storage. Switching conversations retains them. "Change details" resets
+both checkboxes and locks the composer while preserving unsent drafts.
+
+The terms have **not been written**. `src/data/guestbookTerms.js` intentionally
+contains no version or text. The UI labels them pending, disables acceptance,
+and keeps message entry locked instead of requesting acceptance of nonexistent
+terms. Do not add placeholder legal text or enable acceptance before publication.
+
+To publish later, add the actual terms as plain text to `guestbookTerms.content`
+and assign a nonblank `guestbookTerms.version`. Set the matching server setting
+`GUESTBOOK_TERMS_VERSION` only when that content is ready to publish. Deploy the
+frontend and updated `guestbook` function together. Change the version whenever
+the terms change. Missing server configuration closes posting; outdated or
+missing client versions are rejected with a reload/re-accept message. This
+participation change needs no additional database migration.
+
+Every submission must carry `ageConfirmed: true`, `termsAccepted: true`, and the
+current `termsVersion`, in addition to a valid name. Strict booleans are required;
+strings such as `"true"` are rejected. Checks run in the Edge Function for both
+replies and new boards before publishing. Public database writes remain denied.
+
+This is **self-declared age and terms acknowledgment**, not independent age or
+identity verification or proof that someone actually read the terms. No date of
+birth, identity document, or durable consent audit record is collected. Name and
+message storage remains unchanged. Do not describe the checkbox as verified age.
 
 ## Protection pipeline
 
 1. Require JSON, an exact allowed browser origin, and a body of at most 12 KB.
-2. Record an attempt against shared, transaction-locked database limits.
+2. Require the explicit 18+ and terms declarations for the published terms
+   version, then record an attempt against shared database limits.
 3. Reject the hidden spam field, invalid text, links/email addresses, and missing
    challenge tokens. Names are limited to 40 characters and messages to 500.
+   A new conversation requires an 80-character-max title; a reply requires an
+   existing conversation ID. Providing both or neither is rejected.
 4. Validate Turnstile on the server, including success, action `guestbook`, and
    an allowed hostname. Invalid, expired, replayed, or unavailable verification
    never permits a post.
-5. Normalize and scrub both fields; matching words become `***`. Only the
+5. Normalize and scrub names, messages, and new conversation titles; matching
+   words become `***`. Only the
    scrubbed text is stored. Render all content as React text, never HTML.
-6. Atomically recheck pause, posting limits, and duplicates, then publish.
+6. Atomically recheck pause, posting limits, duplicates, and conversation
+   visibility, then publish. A new board and first message are created together;
+   failed sends cannot leave an empty new board behind.
 
 Default rolling limits (not calendar-day resets):
 
@@ -31,6 +86,8 @@ Attempts are counted before bot verification, including unsuccessful challenges.
 The security-definer RPC is callable only with the service role; public roles
 cannot write messages, inspect counters/settings, read hidden messages, or invoke
 the publishing RPC directly. RPC counters and inserts share an advisory lock.
+Quotas are shared across conversations; creating a board uses the same post
+budget as a reply. The chat-like layout does not relax the existing spam limits.
 
 ## Setup (user-owned)
 
@@ -52,12 +109,22 @@ New installations start with submissions **paused** until setup is verified.
      your Mission Control origin as well as the public form origin.
    - `GUESTBOOK_HOSTNAMES`: comma-separated Turnstile-verified hostnames, without
      scheme, port, or path.
+   - `GUESTBOOK_TERMS_VERSION`: must match the version of the actual published
+     terms in `src/data/guestbookTerms.js`. Leave unset while terms are pending.
    - Existing `ADMIN_POST_SECRET`: used only for management requests, not visitors.
    - Optional `GUESTBOOK_BLOCKED_WORDS`: extra comma-separated English words,
      letters only, 3-30 characters each. Core list is in `content.ts`.
 3. Review pending migrations with `supabase db push --dry-run`, then apply through
    your normal database deployment workflow. The new migration is
-   `supabase/migrations/20260925000000_create_guestbook.sql`.
+   `supabase/migrations/20260925000000_create_guestbook.sql`, followed by
+   `supabase/migrations/20260927000000_guestbook_conversations.sql`. The second
+   migration preserves existing entries under "The Guestbook" and keeps the
+   current paused/open setting. It adds the conversation foreign key, parent-aware
+   RLS, and an invoker-security preview view (requires PostgreSQL 15+).
+   If the board is live, pause submissions during migration/deployment. The old
+   RPC is retained but denies legacy posts lacking a conversation; deploy the
+   updated function and frontend together before resuming. Do not reapply the
+   original migration to an existing database.
 4. Deploy `supabase functions deploy guestbook`. `supabase/config.toml` disables
    JWT verification for this public endpoint; admin actions still require the
    server-checked admin secret, and publication always requires Turnstile.
@@ -67,6 +134,12 @@ New installations start with submissions **paused** until setup is verified.
 
 ## Required live verification
 
+- Before publication of terms, verify boards are readable but no composer can
+  open and direct submissions are rejected. With actual published terms, verify
+  a name plus both declarations are needed before typing. Check whitespace-only
+  names, unchecked boxes, missing/false/string-valued declarations, and old terms
+  versions on both reply and new-board requests. Changing details or reloading
+  must require fresh declarations, and no age/date-of-birth data may be exposed.
 - Confirm allowed origins pass OPTIONS and other origins do not. CORS is not
   authentication: callers outside browsers can supply any Origin header.
 - Verify the deployed Supabase gateway supplies the client address as the final
@@ -85,6 +158,14 @@ New installations start with submissions **paused** until setup is verified.
   tables. Repeat for an authenticated non-admin role if you introduce Auth.
 - Verify hidden/show changes update the public board, deletion asks confirmation,
   and pause blocks writes even after a challenge has been completed.
+- Create two boards and reply to each. Verify no cross-board messages, drafts,
+  late network responses, or pagination results appear in the wrong chat. Check
+  title filtering, failed first-message rollback, hidden/nonexistent-board reply
+  rejection, and new boards counting toward the same spam quota.
+- With the public API key, query both the conversation preview view and message
+  table after hiding a board or message: no hidden text may appear. The view uses
+  `security_invoker = true` so it obeys the underlying RLS. Verify this on the
+  deployed PostgreSQL version, including grants for the added conversation column.
 - Try normal words such as `classic` and `Scunthorpe`, mixed-case profanity,
   leetspeak, spaced/dotted spellings, and malicious HTML in both fields. HTML must
   remain literal text in public and admin views. Check phone widths and keyboard
@@ -129,4 +210,5 @@ CI=true node node_modules/react-scripts/scripts/test.js --watchAll=false --runIn
 
 References: [Turnstile server-side validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/),
 [explicit widget rendering](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/),
-[Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security).
+[Supabase RLS and invoker-security views](https://supabase.com/docs/guides/database/postgres/row-level-security),
+[Turnstile interaction-only appearance](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/widget-configurations/).

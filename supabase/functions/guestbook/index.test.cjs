@@ -33,6 +33,7 @@ function service(options = {}) {
   const state = { rpc: [], clients: 0, challenges: [], mutations: [] };
   const env = {
     GUESTBOOK_ORIGINS: 'https://site.test', GUESTBOOK_HOSTNAMES: 'site.test',
+    GUESTBOOK_TERMS_VERSION: 'test-v1',
     GUESTBOOK_HASH_SECRET: 'only-a-test-hash-key-not-for-production', TURNSTILE_SECRET_KEY: 'test-turnstile-secret',
     ADMIN_POST_SECRET: 'admin-test', SUPABASE_URL: 'https://example.test', SUPABASE_SERVICE_ROLE_KEY: 'service-test',
     ...options.env
@@ -42,7 +43,7 @@ function service(options = {}) {
       state.rpc.push({ name, args });
       if (options.failDb) return { error: {} };
       if (args.p_kind === 'attempt') return { data: options.attempt || { ok: true } };
-      return { data: options.post || { entry: { id: 'saved', display_name: args.p_name, message: args.p_message } } };
+      return { data: options.post || { entry: { id: 'saved', conversation_id: args.p_conversation || 'new-conversation', display_name: args.p_name, message: args.p_message } } };
     },
     from(table) {
       const query = {
@@ -73,7 +74,7 @@ function service(options = {}) {
   }));
   return { send, state };
 }
-const valid = { action: 'submit', name: 'Visitor', message: 'Hello there!', token: 'one-use-token', website: '' };
+const valid = { action: 'submit', name: 'Visitor', ageConfirmed: true, termsAccepted: true, termsVersion: 'test-v1', message: 'Hello there!', token: 'one-use-token', website: '', conversationId: '00000000-0000-4000-8000-000000000001' };
 
 test('publishes automatically, scrubs both fields, and stores no raw network address or token', async () => {
   const { send, state } = service();
@@ -85,6 +86,8 @@ test('publishes automatically, scrubs both fields, and stores no raw network add
   assert.equal(data.entry.message, 'This is *** nice');
   assert.equal(state.rpc[0].args.p_kind, 'attempt');
   assert.equal(state.rpc[1].args.p_kind, 'post');
+  assert.equal(state.rpc[1].name, 'ajt3_guestbook_submit_v2');
+  assert.equal(state.rpc[1].args.p_conversation, valid.conversationId);
   assert.match(state.rpc[1].args.p_actor, /^[a-f0-9]{64}$/);
   assert.doesNotMatch(JSON.stringify(state.rpc), /203\.0\.113|one-use-token|fucking|sh1t/);
   assert.equal(state.challenges.length, 1);
@@ -100,6 +103,35 @@ test('requires exact allowed origin and supports preflight without touching the 
   assert.equal((await send(null, {}, 'GET')).status, 405);
   assert.equal((await send(valid, { 'content-type': 'text/plain' })).status, 415);
   assert.equal(state.clients, 0);
+});
+
+test('requires explicit adult and current terms declarations on replies and new conversations', async () => {
+  for (const destination of [{ conversationId: valid.conversationId }, { conversationId: undefined, title: 'New board' }]) {
+    for (const missing of [{ ageConfirmed: undefined }, { ageConfirmed: false }, { ageConfirmed: 'true' }, { termsAccepted: undefined }, { termsAccepted: false }, { termsAccepted: 'true' }]) {
+      const { send, state } = service();
+      const response = await send({ ...valid, ...destination, ...missing });
+      assert.equal(response.status, 400);
+      assert.equal((await response.json()).code, 'participation_required');
+      assert.equal(state.rpc.length, 0);
+      assert.equal(state.challenges.length, 0);
+    }
+  }
+});
+
+test('missing, stale, or unpublished terms cannot publish', async () => {
+  for (const termsVersion of [undefined, '', 'old-version', true]) {
+    const { send, state } = service();
+    const response = await send({ ...valid, termsVersion });
+    assert.equal(response.status, 409);
+    assert.equal((await response.json()).code, 'terms_changed');
+    assert.equal(state.rpc.length, 0);
+    assert.equal(state.challenges.length, 0);
+  }
+  const { send, state } = service({ env: { GUESTBOOK_TERMS_VERSION: '' } });
+  const response = await send(valid);
+  assert.equal(response.status, 503);
+  assert.equal((await response.json()).code, 'terms_unavailable');
+  assert.equal(state.rpc.length, 0);
 });
 
 test('fails closed without protection configuration, client address, database, or Turnstile', async () => {
@@ -133,7 +165,7 @@ test('denied attempts never verify tokens or publish; final limits and duplicate
     assert.equal(state.challenges.length, 0);
     assert.equal(state.rpc.length, 1);
   }
-  for (const [error, status] of [['limited', 429], ['paused', 503], ['duplicate', 409]]) {
+  for (const [error, status] of [['limited', 429], ['paused', 503], ['duplicate', 409], ['conversation_unavailable', 404]]) {
     assert.equal((await service({ post: { error } }).send(valid)).status, status);
   }
 });
@@ -155,11 +187,42 @@ test('uses the final forwarded address, ignoring spoofed prefixes', async () => 
 
 test('admin actions require authentication before database access', async () => {
   const { send, state } = service();
-  for (const action of ['list', 'visibility', 'delete', 'pause']) assert.equal((await send({ action })).status, 401);
+  for (const action of ['list', 'list_conversations', 'visibility', 'conversation_visibility', 'delete', 'pause']) assert.equal((await send({ action })).status, 401);
   assert.equal(state.clients, 0);
   assert.equal((await send({ action: 'list' }, { 'x-admin-secret': 'admin-test' })).status, 200);
   assert.equal((await send({ action: 'pause', open: false }, { 'x-admin-secret': 'admin-test' })).status, 200);
   assert.equal(state.mutations[0].value.submissions_open, false);
+});
+
+test('creates a conversation and its first message together with a scrubbed title', async () => {
+  const { send, state } = service();
+  const result = await send({ ...valid, conversationId: undefined, title: 'Fucking great projects' });
+  assert.equal(result.status, 201);
+  assert.equal((await result.json()).scrubbed, true);
+  assert.equal(state.rpc[1].args.p_title, '*** great projects');
+  assert.equal(state.rpc[1].args.p_conversation, null);
+  assert.doesNotMatch(JSON.stringify(state.rpc), /Fucking/);
+});
+
+test('rejects ambiguous, missing, oversized and invalid conversation destinations', async () => {
+  const { send, state } = service();
+  for (const fields of [{ title: 'Also a title' }, { conversationId: '' }, { conversationId: 'fake' }, { conversationId: undefined }, { conversationId: undefined, title: 'x'.repeat(81) }]) {
+    assert.equal((await send({ ...valid, ...fields })).status, 400);
+  }
+  assert.equal(state.challenges.length, 0);
+  assert.equal(state.rpc.some((call) => call.args.p_kind === 'post'), false);
+});
+
+test('conversation migration preserves messages and restricts hidden-board reads and writes', () => {
+  const sql = readFileSync(join(__dirname, '../../migrations/20260927000000_guestbook_conversations.sql'), 'utf8');
+  assert.match(sql, /security_invoker = true/);
+  assert.match(sql, /update public\.ajt3_guestbook set conversation_id/);
+  assert.match(sql, /alter column conversation_id set not null/);
+  assert.match(sql, /p_conversation and is_hidden = false for share/);
+  assert.match(sql, /conversation_unavailable/);
+  assert.match(sql, /upgrade_required/);
+  assert.match(sql, /revoke all on function public\.ajt3_guestbook_submit_v2[\s\S]*from public, anon, authenticated/);
+  assert.doesNotMatch(sql, /delete from public\.ajt3_guestbook\s/);
 });
 
 test('migration restricts public writes and RPC access, and serializes shared counters', () => {

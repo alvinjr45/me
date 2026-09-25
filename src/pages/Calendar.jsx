@@ -64,8 +64,6 @@ function Calendar() {
   const [view, setView] = useState('month');
   const [events, setEvents] = useState([]);
   const [visibleGroups, setVisibleGroups] = useState(calendarGroups.map((group) => group.id));
-  const [query, setQuery] = useState('');
-  const [sidebar, setSidebar] = useState(false);
   const [activeId, setActiveId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -98,7 +96,7 @@ function Calendar() {
   useEffect(() => { if (activeId) details.current?.focus(); }, [activeId]);
 
   function chooseDay(date) { setSelected(date); setActiveId(null); }
-  function openDay(date) { chooseDay(date); setView('day'); setQuery(''); }
+  function openDay(date) { chooseDay(date); setView('day'); }
   function selectEvent(event) { setActiveId(event.id); setSelected(dateFromKey(dateKey(eventDate(event)))); }
   function move(direction) {
     setActiveId(null);
@@ -109,17 +107,13 @@ function Calendar() {
 
   const weekStart = addDays(selected, -selected.getDay());
   const days = view === 'day' ? [selected] : Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));
-  const matches = filtered.filter((event) => `${event.title} ${event.location} ${event.notes}`.toLowerCase().includes(query.trim().toLowerCase())).sort((a, b) => eventDate(a) - eventDate(b));
   const agenda = eventsOnDay(filtered, selected);
   const heading = view === 'year' ? String(selected.getFullYear()) : view === 'day' ? selected.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }) : selected.toLocaleDateString([], { month: 'long', year: 'numeric' });
 
   return (
-    <main className={`calendar-app${sidebar ? ' calendar-app--sidebar-open' : ''}`}>
+    <main className="calendar-app">
       <header className="calendar-toolbar">
-        <button type="button" className="calendar-toolbar__sidebar" aria-expanded={sidebar} aria-controls="calendar-sidebar" onClick={() => setSidebar((value) => !value)}>Calendars</button>
-        <Link className="calendar-toolbar__add" to={`/admin/calendar?date=${dateKey(selected)}`} aria-label="Add event in Mission Control" title="Add event in Mission Control">+</Link>
-        <div className="calendar-toolbar__views" role="group" aria-label="Calendar view">{['day', 'week', 'month', 'year'].map((mode) => <button key={mode} type="button" aria-pressed={view === mode} onClick={() => { setView(mode); setQuery(''); }}>{mode[0].toUpperCase() + mode.slice(1)}</button>)}</div>
-        <label className="calendar-search"><span className="sr-only">Search calendar</span><input type="search" placeholder="Search" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+        <div className="calendar-toolbar__views" role="group" aria-label="Calendar view">{['day', 'week', 'month', 'year'].map((mode) => <button key={mode} type="button" aria-pressed={view === mode} onClick={() => setView(mode)}>{mode[0].toUpperCase() + mode.slice(1)}</button>)}</div>
       </header>
       <div className="calendar-layout">
         <aside className="calendar-sidebar" id="calendar-sidebar">
@@ -133,8 +127,7 @@ function Calendar() {
           {loading && <p className="calendar-notice" role="status">Loading events...</p>}
           {error && <div className="calendar-notice" role="alert">{error} <button type="button" onClick={() => { setLoading(true); setReload((value) => value + 1); }}>Retry calendar</button></div>}
           <div className="calendar-canvas">
-            {query.trim() ? <section className="calendar-results" aria-label="Calendar search results"><h2>Search results</h2>{matches.map((event) => <div key={event.id}><EventButton event={event} onSelect={selectEvent} /><p>{eventRange(event)}</p></div>)}{!matches.length && <p>No matching events.</p>}</section>
-              : view === 'month' ? <div className="calendar-month"><div className="calendar-month__weekdays">{weekdays.map((day) => <span key={day}>{day}</span>)}</div><div className="calendar-month__days">{monthDays(selected).map((day) => {
+            {view === 'month' ? <div className="calendar-month"><div className="calendar-month__weekdays">{weekdays.map((day) => <span key={day}>{day}</span>)}</div><div className="calendar-month__days">{monthDays(selected).map((day) => {
                 const entries = eventsOnDay(filtered, day);
                 return <div key={dateKey(day)} className={`calendar-month__cell${day.getMonth() !== selected.getMonth() ? ' is-outside' : ''}${dateKey(day) === dateKey(selected) ? ' is-selected' : ''}`}><button className="calendar-month__date" type="button" aria-label={fullDate(day)} aria-pressed={dateKey(day) === dateKey(selected)} aria-current={dateKey(day) === dateKey(new Date()) ? 'date' : undefined} onClick={() => chooseDay(day)} onDoubleClick={() => openDay(day)}>{day.getDate()}</button><div className="calendar-month__events">{entries.slice(0, 2).map((event) => <EventButton key={event.id} event={event} onSelect={selectEvent} />)}{entries.length > 2 && <button className="calendar-month__more" type="button" onClick={() => openDay(day)}>+{entries.length - 2} more</button>}</div>{entries.length > 0 && <span className="calendar-month__count" aria-label={`${entries.length} events`}>{entries.length}</span>}</div>;
               })}</div></div>
@@ -145,7 +138,7 @@ function Calendar() {
                   : <TimeView days={days} events={filtered} onSelect={selectEvent} onDay={openDay} />}
           </div>
           <section className="calendar-agenda" aria-label={active ? 'Event details' : 'Selected day events'} ref={details} tabIndex={-1}>
-            {active ? <><header><h2 style={{ color: groupFor(active).color }}>{active.title}</h2><button type="button" onClick={() => { setActiveId(null); todayButton.current?.focus(); }} aria-label="Close event details">&times;</button></header><p>{eventRange(active)}</p><p className="calendar-agenda__group">{groupFor(active).title}</p>{active.location && <p><strong>Location:</strong> {active.location}</p>}{active.notes && <p className="calendar-agenda__notes">{active.notes}</p>}</>
+            {active ? <><header><h2 style={{ color: `var(--calendar-detail-color, ${groupFor(active).color})` }}>{active.title}</h2><button type="button" onClick={() => { setActiveId(null); todayButton.current?.focus(); }} aria-label="Close event details">&times;</button></header><p>{eventRange(active)}</p><p className="calendar-agenda__group">{groupFor(active).title}</p>{active.location && <p><strong>Location:</strong> {active.location}</p>}{active.notes && <p className="calendar-agenda__notes">{active.notes}</p>}</>
               : <><header><h2>{fullDate(selected)}</h2><span>{agenda.length} {agenda.length === 1 ? 'event' : 'events'}</span></header>{!loading && !error && !agenda.length && <p>No events. A little room in the day.</p>}<div className="calendar-agenda__events">{agenda.map((event) => <EventButton key={event.id} event={event} onSelect={selectEvent} />)}</div></>}
           </section>
         </div>

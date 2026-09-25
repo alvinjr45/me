@@ -123,10 +123,7 @@ export function AppIcon({ name }) {
       <circle cx="32" cy="32" r="9" stroke="#fff" strokeWidth="3.5" />
       <circle cx="43" cy="21" r="2.5" fill="#fff" />
     </>,
-    guestbook: <>
-      <path d="M12 12h40v31H30L19 53V43h-7Z" fill="#eff8ff" />
-      <path d="M21 22h23M21 30h17" stroke="#2776b0" strokeWidth="3" strokeLinecap="round" />
-    </>,
+    guestbook: <path d="M32 11C18 11 8 19 8 30c0 7 4 13 11 16l-3 8 12-5 4 1c14 0 24-8 24-20S46 11 32 11Z" fill="#fff" />,
     admin: <>
       <path d="M27 46h10l2 7H25Z" fill="#aeb7c3" />
       <rect x="20" y="52" width="24" height="3" rx="1.5" fill="#e3e8ed" />
@@ -285,8 +282,80 @@ function GuestAccessDialog({ onDismiss, onLogout }) {
   );
 }
 
-function SystemScreen({ state, time, date, access, onGuestLogin, onPowerOn }) {
+function PhoneLockScreen({ time, date, onUnlock, onSwitchUser }) {
+  const gestureRef = useRef(null);
+  const movedRef = useRef(false);
+  const [swipe, setSwipe] = useState(0);
+
+  const resetSwipe = () => {
+    gestureRef.current = null;
+    setSwipe(0);
+  };
+
+  return (
+    <section
+      className={`device-system-screen device-system-screen--phone-locked${swipe > 0 ? ' device-system-screen--swiping' : ''}`}
+      aria-label="Phone locked"
+      style={{ '--unlock-offset': `${swipe}px` }}
+      onPointerDown={(event) => {
+        if (!event.isPrimary || event.button !== 0) return;
+        movedRef.current = false;
+        if (event.target.closest('.device-system-screen__switch-user')) return;
+        gestureRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY };
+      }}
+      onPointerMove={(event) => {
+        const gesture = gestureRef.current;
+        if (!gesture || gesture.id !== event.pointerId) return;
+        const dx = Math.abs(event.clientX - gesture.x);
+        const dy = gesture.y - event.clientY;
+        if (Math.max(dx, Math.abs(dy)) > 8) {
+          movedRef.current = true;
+          event.currentTarget.setPointerCapture(event.pointerId);
+        }
+        setSwipe(dy > dx ? Math.min(dy, 240) : 0);
+      }}
+      onPointerUp={(event) => {
+        const gesture = gestureRef.current;
+        if (!gesture || gesture.id !== event.pointerId) return;
+        const dy = gesture.y - event.clientY;
+        const shouldUnlock = dy >= 70 && dy > Math.abs(event.clientX - gesture.x);
+        resetSwipe();
+        if (shouldUnlock) onUnlock();
+      }}
+      onPointerCancel={resetSwipe}
+      onLostPointerCapture={resetSwipe}
+    >
+      <span className="device-screen__island" aria-hidden="true" />
+      <div className="device-system-screen__phone-clock">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="11" rx="3" /><path d="M8 10V6a4 4 0 0 1 8 0v4" /></svg>
+        <span>{date}</span>
+        <time>{time}</time>
+      </div>
+      <div className="device-system-screen__unlock-actions">
+        <button type="button" className="device-system-screen__switch-user" onClick={onSwitchUser}>Switch user</button>
+        <button
+          type="button"
+          className="device-system-screen__swipe-unlock"
+          aria-label="Unlock as Guest"
+          autoFocus
+          onClick={(event) => { if (!movedRef.current || event.detail === 0) onUnlock(); }}
+        >
+          <span>Swipe up to unlock</span>
+          <small>Guest</small>
+          <span className="device-system-screen__unlock-indicator" aria-hidden="true" />
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function SystemScreen({ state, isPhone, time, date, access, onGuestLogin, onPowerOn }) {
   const [selectedAccount, setSelectedAccount] = useState('guest');
+  const [showProfiles, setShowProfiles] = useState(false);
+
+  useEffect(() => {
+    if (state !== 'locked') setShowProfiles(false);
+  }, [state]);
 
   if (state === 'running') return null;
 
@@ -311,6 +380,10 @@ function SystemScreen({ state, time, date, access, onGuestLogin, onPowerOn }) {
         <p>{state === 'restarting' ? 'Restarting' : 'Starting up'}</p>
       </section>
     );
+  }
+
+  if (isPhone && !showProfiles) {
+    return <PhoneLockScreen time={time} date={date} onUnlock={() => onGuestLogin(true)} onSwitchUser={() => setShowProfiles(true)} />;
   }
 
   return (
@@ -396,7 +469,7 @@ function DeviceShell({ children, home }) {
   const [wallpaperIntensity, setWallpaperIntensity] = useState(() => getSavedNumber('ajt3-wallpaper-intensity', 100, 60, 140));
   const [clock24, setClock24] = useState(() => getSavedBoolean('ajt3-clock24', false));
   const [motion, setMotion] = useState(() => getSavedBoolean('ajt3-motion', true));
-  const [systemState, setSystemState] = useState('running');
+  const [systemState, setSystemState] = useState(() => isPhone ? 'locked' : 'running');
   const isHome = pathname === '/';
   const activeApp = desktopApps.find((app) => pathname === app.path || pathname.startsWith(`${app.path}/`)) || (!isHome ? { key: 'page', label: 'Page', path: pathname } : null);
   const activeKey = activeApp?.key;
@@ -771,10 +844,11 @@ function DeviceShell({ children, home }) {
             {guestDenied && <GuestAccessDialog onDismiss={() => navigate('/', { replace: true })} onLogout={() => runSystemAction('logout')} />}
             <SystemScreen
               state={systemState}
+              isPhone={isPhone}
               time={time}
               date={lockDate}
               access={adminAccess}
-              onGuestLogin={() => { adminAccess.logout(); navigate('/'); setSystemState('running'); }}
+              onGuestLogin={(preserveRoute = false) => { adminAccess.logout(); if (!preserveRoute) navigate('/'); setSystemState('running'); }}
               onPowerOn={powerOn}
             />
           </div>

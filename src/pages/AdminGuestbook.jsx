@@ -12,19 +12,20 @@ export default function AdminGuestbook({ secret, onBusy }) {
   const [hasMore, setHasMore] = useState(false);
   const [reload, setReload] = useState(0);
   const [offset, setOffset] = useState(0);
+  const [mode, setMode] = useState('messages');
   const mutation = useRef(null);
 
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true); setError('');
-    guestbookRequest({ action: 'list', offset }, secret, controller.signal).then((result) => {
+    guestbookRequest({ action: mode === 'conversations' ? 'list_conversations' : 'list', offset }, secret, controller.signal).then((result) => {
       if (controller.signal.aborted) return;
       if (!Array.isArray(result.entries) || typeof result.submissionsOpen !== 'boolean') throw new Error('Invalid guestbook response.');
       setEntries(result.entries); setOpen(result.submissionsOpen); setHasMore(result.entries.length === 50);
     }).catch((failure) => { if (!controller.signal.aborted) setError(failure.message); })
       .finally(() => { if (!controller.signal.aborted) setLoading(false); });
     return () => controller.abort();
-  }, [secret, reload, offset]);
+  }, [secret, reload, offset, mode]);
   useEffect(() => () => mutation.current?.abort(), []);
 
   async function change(payload) {
@@ -49,7 +50,8 @@ export default function AdminGuestbook({ secret, onBusy }) {
   }
 
   return <section className="guestbook" aria-label="Manage guestbook">
-    <header className="guestbook__header"><span>COMMUNITY</span><h1>Guestbook</h1><p>Messages publish automatically after spam checks and profanity masking. No approvals.</p></header>
+    <header className="guestbook__header"><span>COMMUNITY</span><h1>Guestbook</h1><p>Each conversation is a public message board. Messages publish after spam checks and profanity masking, without approvals.</p></header>
+    <div className="guestbook__actions" role="group" aria-label="Guestbook management views">{['messages', 'conversations'].map((view) => <button type="button" key={view} aria-pressed={mode === view} disabled={saving} onClick={() => { setMode(view); setOffset(0); setEntries([]); setNotice(''); }}>{view === 'messages' ? 'Messages' : 'Conversations'}</button>)}</div>
     <div className="guestbook__actions">
       <button type="button" disabled={loading || saving} onClick={() => setReload((value) => value + 1)}>Refresh messages</button>
       <button type="button" disabled={open === null || loading || saving} onClick={() => change({ action: 'pause', open: !open })}>{open === false ? 'Resume submissions' : 'Pause submissions'}</button>
@@ -58,8 +60,9 @@ export default function AdminGuestbook({ secret, onBusy }) {
     {loading && <p role="status">Loading guestbook...</p>}{error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
     {!loading && !error && !entries.length && <p>No messages on this page.</p>}
     {entries.map((entry) => <article className="guestbook__entry" key={entry.id}>
-      <header><strong>{entry.display_name}</strong><span>{entry.is_hidden ? 'Hidden' : 'Public'} / {new Date(entry.created_at).toLocaleDateString()}</span></header><p>{entry.message}</p>
-      <div className="guestbook__actions"><button type="button" disabled={saving || loading} onClick={() => change({ action: 'visibility', id: entry.id, hidden: !entry.is_hidden })}>{entry.is_hidden ? 'Show message' : 'Hide message'}</button><button type="button" disabled={saving || loading} onClick={() => change({ action: 'delete', id: entry.id })}>Delete message</button></div>
+      <header><strong>{mode === 'conversations' ? entry.title : entry.display_name}</strong><span>{entry.is_hidden || entry.conversation?.is_hidden ? 'Hidden' : 'Public'} / {new Date(entry.created_at).toLocaleDateString()}</span></header>
+      {mode === 'messages' && <><p>{entry.message}</p><small>Conversation: {entry.conversation?.title || 'The Guestbook'}{entry.conversation?.is_hidden ? ' (hidden)' : ''}</small></>}
+      <div className="guestbook__actions"><button type="button" disabled={saving || loading} onClick={() => change({ action: mode === 'conversations' ? 'conversation_visibility' : 'visibility', id: entry.id, hidden: !entry.is_hidden })}>{entry.is_hidden ? 'Show' : 'Hide'} {mode === 'conversations' ? 'conversation' : 'message'}</button>{mode === 'messages' && <button type="button" disabled={saving || loading} onClick={() => change({ action: 'delete', id: entry.id })}>Delete message</button>}</div>
     </article>)}
     <nav className="guestbook__actions" aria-label="Guestbook pages"><button type="button" disabled={!offset || loading || saving} onClick={() => setOffset((value) => Math.max(0, value - 50))}>Newer messages</button><button type="button" disabled={!hasMore || loading || saving} onClick={() => setOffset((value) => value + 50)}>Older messages</button></nav>
   </section>;

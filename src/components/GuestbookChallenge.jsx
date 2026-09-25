@@ -35,7 +35,7 @@ export default function GuestbookChallenge({ sitekey, onToken, resetKey }) {
       if (!mounted) return;
       api = loaded;
       widget = api.render(container.current, {
-        sitekey, action: 'guestbook', theme: 'dark', size: container.current.clientWidth < 300 ? 'compact' : 'flexible',
+        sitekey, action: 'guestbook', theme: 'dark', appearance: 'interaction-only', size: container.current.clientWidth < 300 ? 'compact' : 'flexible',
         callback: (token) => { if (mounted) { onToken(token); setError(''); } },
         'expired-callback': () => { if (mounted) onToken(''); },
         'error-callback': () => { if (mounted) { onToken(''); setError('Bot check failed. Please retry.'); } }

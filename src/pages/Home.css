@@ -5,6 +5,32 @@
   overflow: hidden;
 }
 
+.desktop-home__title {
+  position: absolute;
+  top: 42%;
+  left: clamp(24px, 5cqw, 90px);
+  width: 42%;
+  margin: 0;
+  color: #f9f9f9;
+  font-size: clamp(26px, 4.5cqw, 64px);
+  font-weight: 750;
+  line-height: 1.08;
+  letter-spacing: -0.045em;
+  text-shadow: 0 2px 4px #030507, 0 4px 20px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.desktop-home__title span { display: block; }
+
+.desktop-home__title span:first-child {
+  margin-bottom: 12px;
+  color: #ffab73;
+  font-family: var(--font-mono);
+  font-size: clamp(14px, 2cqw, 24px);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
 .desktop-home__apps {
   position: absolute;
   top: clamp(1.25rem, 3vw, 2.8rem);
@@ -58,6 +84,12 @@
 }
 
 @container (max-width: 800px) {
+  .desktop-home__title {
+    top: auto;
+    bottom: 90px;
+    font-size: clamp(24px, 4cqw, 32px);
+  }
+
   .desktop-home__apps {
     top: 12px;
     right: 12px;

@@ -426,7 +426,7 @@
 .device-app-icon--photos { background: linear-gradient(#fff, #fafafa); }
 .device-app-icon--calendar { background: #f8f8f5; }
 .device-app-icon--instagram { background: radial-gradient(circle at 25% 100%, #ffd776, #f77737 25%, #e1306c 50%, #833ab4 80%, #405de6); }
-.device-app-icon--guestbook { background: linear-gradient(#56b9f2, #236bad); }
+.device-app-icon--guestbook { background: linear-gradient(#65dc68, #20b942); }
 .device-app-icon--terminal { background: linear-gradient(#d1d5dc, #8d95a1); }
 .device-app-icon--settings { background: linear-gradient(#e3e6eb, #a6aeba); }
 .device-app-icon--admin { background: linear-gradient(#414957, #222833); }
@@ -692,6 +692,50 @@
 
 .device-system-screen__clock time { font-size: clamp(2.8rem, 7cqw, 6rem); font-weight: 250; letter-spacing: -0.06em; line-height: 1; }
 .device-system-screen__clock span { margin-top: 0.55rem; font-size: clamp(0.75rem, 1.4cqw, 1rem); }
+
+.device-system-screen--phone-locked {
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding: 64px 20px 12px;
+  background: linear-gradient(180deg, #04101a66, #04101a22 50%, #04101acc);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.device-system-screen__phone-clock {
+  align-self: start;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: 100%;
+  text-align: center;
+  text-shadow: 0 2px 12px #000;
+}
+.device-system-screen__phone-clock svg { width: 24px; height: 28px; fill: none; stroke: currentColor; stroke-width: 2; }
+.device-system-screen__phone-clock > span { font-size: clamp(0.85rem, 4cqw, 1.1rem); }
+.device-system-screen__phone-clock time { font-size: clamp(2.6rem, 17cqw, 5.5rem); font-weight: 250; line-height: 1; letter-spacing: -0.05em; white-space: nowrap; }
+.device-system-screen__unlock-actions { display: grid; justify-items: center; gap: 8px; width: 100%; }
+.device-system-screen__unlock-actions button { min-height: 44px; border: 0; background: transparent; color: #fff; cursor: pointer; font: inherit; }
+.device-system-screen__unlock-actions button:focus-visible { outline: 2px solid #90caff; outline-offset: 3px; border-radius: 8px; }
+.device-system-screen__unlock-actions .device-system-screen__switch-user { padding: 8px 16px; font-size: 0.8rem; }
+.device-system-screen__swipe-unlock { display: grid; justify-items: center; gap: 8px; width: 100%; padding: 10px 0 0; }
+.device-system-screen__swipe-unlock small { color: #d2dfeb; font-size: 0.75rem; }
+.device-system-screen__unlock-indicator { width: min(120px, 50%); height: 5px; margin-top: 12px; border-radius: 99px; background: #fff; }
+.device-system-screen__phone-clock,
+.device-system-screen__unlock-actions { transform: translateY(calc(-1 * var(--unlock-offset))); transition: transform 180ms ease-out; }
+.device-system-screen--swiping > :is(.device-system-screen__phone-clock, .device-system-screen__unlock-actions) { transition: none; }
+@media (max-height: 500px) {
+  .device-system-screen--phone-locked { padding-top: 44px; }
+  .device-system-screen__phone-clock { gap: 4px; }
+  .device-system-screen__phone-clock time { font-size: 2.6rem; }
+  .device-system-screen__phone-clock svg { height: 20px; }
+  .device-system-screen__unlock-actions { gap: 0; }
+  .device-system-screen__swipe-unlock { gap: 4px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .device-system-screen__phone-clock,
+  .device-system-screen__unlock-actions { transition: none; }
+}
+.device-screen[data-motion="off"] :is(.device-system-screen__phone-clock, .device-system-screen__unlock-actions) { transition: none; }
 
 .device-system-screen__login {
   align-self: start;

@@ -2,14 +2,13 @@
 
 Calendar opens at `/calendar` from the desktop, dock, phone home screen, or the
 terminal command `open calendar`. It uses an Apple Calendar-inspired dark layout:
-day and week time grids, a month grid, a year overview, calendar filters, search,
+day and week time grids, a month grid, a year overview, desktop calendar filters,
 Today navigation, and event details. On phones, select a date in the compact month
 grid to read its events below. Week view scrolls horizontally to preserve legibility.
 
 ## Managing events
 
-Sign in as admin, then open Mission Control > Calendar > Add event. The Calendar
-app's plus button opens this section with the selected date ready for Add event.
+Sign in as admin, then open Mission Control > Calendar > Add event.
 Choose a title, Personal/Work/Events calendar, start and end, optional location and
 notes, and whether to publish. New events start as drafts. Published events and
 their full details are visible to every visitor. Uncheck Publish in Calendar and

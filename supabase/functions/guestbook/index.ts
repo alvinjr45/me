@@ -69,10 +69,13 @@ Deno.serve(async (request: Request) => {
       if (!secret || secret !== required('ADMIN_POST_SECRET')) return respond({ error: 'Sign in to manage the guestbook.' }, 401);
     }
     const db = createClient(required('SUPABASE_URL'), required('SUPABASE_SERVICE_ROLE_KEY'));
-    if (action === 'list') {
+    if (action === 'list' || action === 'list_conversations') {
       const offset = Number.isInteger(body.offset) && body.offset >= 0 ? body.offset : 0;
       const [entries, settings] = await Promise.all([
-        db.from('ajt3_guestbook').select('id,display_name,message,created_at,is_hidden').order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + 49),
+        (action === 'list_conversations'
+          ? db.from('ajt3_guestbook_conversations').select('id,title,created_at,is_hidden')
+          : db.from('ajt3_guestbook').select('id,display_name,message,created_at,is_hidden,conversation_id,conversation:ajt3_guestbook_conversations(title,is_hidden)'))
+          .order('created_at', { ascending: false }).order('id', { ascending: false }).range(offset, offset + 49),
         db.from('ajt3_guestbook_settings').select('submissions_open').eq('id', true).single()
       ]);
       if (entries.error || settings.error) throw new Error('Database unavailable');
@@ -84,21 +87,28 @@ Deno.serve(async (request: Request) => {
       if (result.error) throw new Error('Database unavailable');
       return respond({ submissionsOpen: result.data.submissions_open });
     }
-    if (action === 'visibility' || action === 'delete') {
-      if (typeof body.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.id) || (action === 'visibility' && typeof body.hidden !== 'boolean')) return respond({ error: 'Invalid message selection.' }, 400);
-      const query = db.from('ajt3_guestbook');
+    if (action === 'visibility' || action === 'conversation_visibility' || action === 'delete') {
+      if (typeof body.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.id) || (action !== 'delete' && typeof body.hidden !== 'boolean')) return respond({ error: 'Invalid message selection.' }, 400);
+      const query = db.from(action === 'conversation_visibility' ? 'ajt3_guestbook_conversations' : 'ajt3_guestbook');
       const result = await (action === 'delete' ? query.delete() : query.update({ is_hidden: body.hidden })).eq('id', body.id).select('id').single();
       if (result.error) throw new Error('Message could not be changed');
       return respond({ ok: true });
     }
     if (action !== 'submit') return respond({ error: 'Unknown action.' }, 400);
 
+    const termsVersion = Deno.env.get('GUESTBOOK_TERMS_VERSION')?.trim();
+    if (!termsVersion) return respond({ error: 'Messaging is unavailable until the Terms and Conditions are published.', code: 'terms_unavailable' }, 503);
+    if (body.ageConfirmed !== true || body.termsAccepted !== true) {
+      return respond({ error: 'Enter your name, confirm that you are at least 18, and accept the Terms and Conditions before posting.', code: 'participation_required' }, 400);
+    }
+    if (body.termsVersion !== termsVersion) return respond({ error: 'The terms have changed. Reload the site to read and accept the current version before posting.', code: 'terms_changed' }, 409);
+
     // No bypass: missing protection configuration keeps public writes closed.
     const turnstileSecret = required('TURNSTILE_SECRET_KEY');
     const hostnames = required('GUESTBOOK_HOSTNAMES').split(',').map((item) => item.trim());
     const address = clientAddress(request);
     const actor = await digest(`address:${address}`);
-    const limit = await db.rpc('ajt3_guestbook_submit', { p_actor: actor, p_kind: 'attempt' });
+    const limit = await db.rpc('ajt3_guestbook_submit_v2', { p_actor: actor, p_kind: 'attempt' });
     if (limit.error || !limit.data) throw new Error('Rate limiter unavailable');
     if (limit.data.error === 'paused') return respond({ error: 'New messages are paused. Please check back later.' }, 503);
     if (!limit.data.ok) return respond({ error: 'Too many attempts. Please try again later.' }, 429);
@@ -106,9 +116,17 @@ Deno.serve(async (request: Request) => {
     if (typeof body.token !== 'string' || !body.token || body.token.length > 2048) return respond({ error: 'Complete the bot check before posting.' }, 400);
     let name;
     let message;
+    let title = null;
+    let conversationId = null;
     try {
       name = cleanText(body.name, 40, 'Name');
       message = cleanText(body.message, 500, 'Message');
+      if (body.conversationId != null) {
+        if (typeof body.conversationId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.conversationId) || body.title != null) throw new Error('Choose one conversation to reply to.');
+        conversationId = body.conversationId;
+      } else {
+        title = cleanText(body.title, 80, 'Conversation title');
+      }
     } catch (error) { return respond({ error: (error as Error).message }, 400); }
     const verification = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -121,16 +139,19 @@ Deno.serve(async (request: Request) => {
     const extra = Deno.env.get('GUESTBOOK_BLOCKED_WORDS') || '';
     const safeName = scrubProfanity(name, extra);
     const safeMessage = scrubProfanity(message, extra);
-    const result = await db.rpc('ajt3_guestbook_submit', {
+    const safeTitle = title === null ? null : scrubProfanity(title, extra);
+    const result = await db.rpc('ajt3_guestbook_submit_v2', {
       p_actor: actor, p_kind: 'post', p_name: safeName, p_message: safeMessage,
+      p_conversation: conversationId, p_title: safeTitle,
       p_content: await digest(`message:${safeMessage.toLowerCase().replace(/\s+/g, ' ')}`)
     });
     if (result.error || !result.data) throw new Error('Publication unavailable');
     if (result.data.error === 'paused') return respond({ error: 'New messages are paused. Please check back later.' }, 503);
     if (result.data.error === 'duplicate') return respond({ error: 'That message has already been posted recently.' }, 409);
+    if (result.data.error === 'conversation_unavailable') return respond({ error: 'This conversation is no longer available.' }, 404);
     if (result.data.error) return respond({ error: 'Posting limit reached. Please try again later.' }, 429);
     if (!result.data.entry?.id) throw new Error('Publication unavailable');
-    return respond({ entry: result.data.entry, scrubbed: safeName !== name || safeMessage !== message }, 201);
+    return respond({ entry: result.data.entry, scrubbed: safeName !== name || safeMessage !== message || safeTitle !== title }, 201);
   } catch {
     return respond({ error: 'Guestbook service is unavailable. Please try again later.' }, 503);
   }

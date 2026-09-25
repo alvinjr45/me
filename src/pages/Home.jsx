@@ -48,7 +48,9 @@ function Home() {
 
   return (
     <main className="desktop-home">
-      <h1 className="sr-only">AJ Thompson</h1>
+      <h1 className={isPhone ? 'sr-only' : 'desktop-home__title'}>
+        <span>AJ's </span><span>Personal Site</span>
+      </h1>
       <nav
         className="desktop-home__apps"
         aria-label="Open a site app"

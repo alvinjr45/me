@@ -403,7 +403,7 @@
 @media (max-width: 1024px), (max-height: 500px) {
   .scene-background {
     --scene-bar-width: 3px;
-    --desk-top: calc(50% + var(--device-monitor-height) / 2 + var(--device-offset-y) - 20px);
+    --desk-top: calc(var(--device-phone-top) + var(--device-scene-entry-offset, 0px) + var(--device-monitor-height) - 20px);
   }
 
   .scene-background__window {

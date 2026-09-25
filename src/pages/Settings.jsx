@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import PolicyLinks from '../components/PolicyLinks';
 import {
   DeviceSettingsContext,
   accentChoices,
@@ -203,6 +204,8 @@ function Settings() {
           <button type="button" onClick={() => runSystemAction('restart')}><strong>Restart</strong><span>Close apps and reboot</span></button>
           <button type="button" className="settings-page__system-action--danger" onClick={() => runSystemAction('shutdown')}><strong>Shut down</strong><span>Power off the device</span></button>
         </div>
+        <h2>Site policies</h2>
+        <PolicyLinks />
       </section>
         </div>
       </div>

@@ -44,7 +44,15 @@ afterEach(() => {
   window.confirm = savedConfirm;
 });
 
+function renderGuestbook(browse = true) {
+  const view = render(<Guestbook />);
+  if (browse) fireEvent.click(screen.getByRole('button', { name: 'Read conversations without joining' }));
+  return view;
+}
+
 function joinGuestbook() {
+  const join = screen.queryByRole('button', { name: 'Join conversation' });
+  if (join) fireEvent.click(join);
   if (!screen.queryByRole('button', { name: 'Continue to messages' })) return;
   fireEvent.change(screen.getByLabelText('Display name'), { target: { value: 'A guest' } });
   fireEvent.click(screen.getByRole('checkbox', { name: 'I confirm that I am at least 18 years old.' }));
@@ -58,9 +66,27 @@ function fillMessage() {
   fireEvent.click(screen.getByRole('button', { name: 'Complete bot check' }));
 }
 
+test('published policies unlock participation and remain accessible before joining', async () => {
+  Object.assign(guestbookTerms, jest.requireActual('../data/guestbookTerms').guestbookTerms);
+  renderGuestbook(false);
+  expect(screen.queryByRole('navigation', { name: 'Conversations' })).not.toBeInTheDocument();
+  expect(getConversations).not.toHaveBeenCalled();
+  expect(screen.getByText('Read the Privacy Policy')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
+  expect(screen.getAllByRole('link', { name: /Privacy Policy/ })[0]).toHaveAttribute('href', '/privacy');
+  expect(screen.getAllByRole('link', { name: /Terms and Conditions/ })[0]).toHaveAttribute('target', '_blank');
+  joinGuestbook();
+  await screen.findByText('Hello!');
+  fillMessage();
+  fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+  await waitFor(() => expect(guestbookRequest).toHaveBeenCalledWith(expect.objectContaining({
+    termsVersion: '2026-09-25', termsAccepted: true, ageConfirmed: true
+  }), null, expect.any(AbortSignal)));
+});
+
 test('requires a bot token, publishes without approval, and resets the token after submission', async () => {
   guestbookRequest.mockResolvedValue({ entry, scrubbed: true });
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByText('Hello!');
   joinGuestbook();
   expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
@@ -75,7 +101,7 @@ test('requires a bot token, publishes without approval, and resets the token aft
 
 test('keeps text on failure, requests a fresh challenge, and never claims publication', async () => {
   guestbookRequest.mockRejectedValue(new Error('Posting limit reached.'));
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByText('Hello!');
   fillMessage();
   fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
@@ -87,14 +113,14 @@ test('keeps text on failure, requests a fresh challenge, and never claims public
 });
 
 test('expired challenges and missing configuration cannot submit', async () => {
-  const { unmount } = render(<Guestbook />);
+  const { unmount } = renderGuestbook();
   await screen.findByText('Hello!');
   fillMessage();
   fireEvent.click(screen.getByRole('button', { name: 'Expire bot check' }));
   expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
   unmount();
   delete process.env.REACT_APP_TURNSTILE_SITE_KEY;
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByText('Hello!');
   joinGuestbook();
   expect(screen.getByText('Posting is unavailable until spam protection is configured.')).toBeInTheDocument();
@@ -104,7 +130,7 @@ test('expired challenges and missing configuration cannot submit', async () => {
 
 test('renders visitor content as text, not markup or links, and refresh removes hidden posts', async () => {
   getGuestbook.mockResolvedValueOnce({ conversation, entries: [{ ...entry, display_name: '<b>Admin</b>', message: '<img src=x onerror=alert(1)>' }] });
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByText('<img src=x onerror=alert(1)>');
   expect(screen.queryByRole('img')).not.toBeInTheDocument();
   expect(screen.getByText('<b>Admin</b>')).toContainHTML('&lt;b&gt;Admin&lt;/b&gt;');
@@ -116,7 +142,7 @@ test('renders visitor content as text, not markup or links, and refresh removes 
 
 test('load failures offer retry and do not look like an empty board', async () => {
   getGuestbook.mockRejectedValueOnce(new Error('Unable to load.'));
-  render(<Guestbook />);
+  renderGuestbook();
   expect(await screen.findByRole('alert')).toHaveTextContent('Unable to load.');
   expect(screen.queryByText('Be the first to join the conversation.')).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Retry messages' }));
@@ -126,7 +152,7 @@ test('load failures offer retry and do not look like an empty board', async () =
 test('switches boards without mixing replies and retains a separate draft per conversation', async () => {
   getConversations.mockResolvedValue([conversation, secondConversation]);
   getGuestbook.mockImplementation(async (id) => id === conversation.id ? { conversation, entries: [entry] } : { conversation: secondConversation, entries: [{ ...entry, id: 'two', conversation_id: id, message: 'Going hiking' }] });
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByText('Hello!');
   joinGuestbook();
   fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'First draft' } });
@@ -146,7 +172,7 @@ test('switches boards without mixing replies and retains a separate draft per co
 test('creates a named conversation and opens its first message', async () => {
   const created = { ...entry, id: 'created-message', conversation_id: secondConversation.id, message: 'Hello there!' };
   guestbookRequest.mockResolvedValue({ entry: created, scrubbed: false });
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByText('Hello!');
   fireEvent.click(screen.getByRole('button', { name: 'New conversation' }));
   joinGuestbook();
@@ -162,7 +188,7 @@ test('creates a named conversation and opens its first message', async () => {
 });
 
 test('an unavailable conversation clears its feed and disables replies', async () => {
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByText('Hello!');
   joinGuestbook();
   getGuestbook.mockResolvedValue({ entries: [], conversation: null });
@@ -173,8 +199,7 @@ test('an unavailable conversation clears its feed and disables replies', async (
 });
 
 test('requires a nonblank name and both unchecked confirmations before showing a composer', async () => {
-  render(<Guestbook />);
-  await screen.findByText('Hello!');
+  renderGuestbook(false);
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Complete bot check' })).not.toBeInTheDocument();
   const age = screen.getByRole('checkbox', { name: /at least 18/ });
@@ -193,25 +218,27 @@ test('requires a nonblank name and both unchecked confirmations before showing a
   fireEvent.click(screen.getByText('Read the Terms and Conditions'));
   expect(screen.getByText('Test-only terms fixture.')).toBeVisible();
   fireEvent.click(screen.getByRole('button', { name: 'Continue to messages' }));
-  expect(screen.getByLabelText('Message')).toBeInTheDocument();
+  expect(await screen.findByLabelText('Message')).toBeInTheDocument();
   expect(guestbookRequest).not.toHaveBeenCalled();
 });
 
 test('unpublished terms keep new conversations and replies read-only', async () => {
   guestbookTerms.version = null; guestbookTerms.content = '';
-  render(<Guestbook />);
-  await screen.findByText('Hello!');
+  renderGuestbook(false);
   expect(screen.getByText(/Terms and Conditions are being prepared/)).toBeInTheDocument();
   expect(screen.getByRole('checkbox', { name: /have read and agree/ })).toBeDisabled();
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Read conversations without joining' }));
+  await screen.findByText('Hello!');
   fireEvent.click(screen.getByRole('button', { name: 'New conversation' }));
   expect(screen.queryByLabelText('Conversation title')).not.toBeInTheDocument();
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Join conversation' }));
   expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
 });
 
 test('changing participation details relocks the composer and preserves the unsent draft', async () => {
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByText('Hello!');
   fillMessage();
   fireEvent.click(screen.getByRole('button', { name: 'Change details' }));
@@ -226,7 +253,7 @@ test('changing participation details relocks the composer and preserves the unse
 
 test('server-side terms changes relock composition and require a reload', async () => {
   guestbookRequest.mockRejectedValue(Object.assign(new Error('Reload the site to read the current terms.'), { code: 'terms_changed' }));
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByText('Hello!');
   fillMessage();
   fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
@@ -239,7 +266,7 @@ test('ignores late responses from a previously selected board', async () => {
   let resolveFirst;
   getConversations.mockResolvedValue([conversation, secondConversation]);
   getGuestbook.mockImplementation((id) => id === conversation.id ? new Promise((resolve) => { resolveFirst = resolve; }) : Promise.resolve({ conversation: secondConversation, entries: [{ ...entry, id: 'two', message: 'Second board' }] }));
-  render(<Guestbook />);
+  renderGuestbook();
   await screen.findByRole('heading', { name: 'The Guestbook' });
   fireEvent.click(within(screen.getByRole('navigation', { name: 'Conversations' })).getByRole('button', { name: /Weekend plans/ }));
   await screen.findByText('Second board');

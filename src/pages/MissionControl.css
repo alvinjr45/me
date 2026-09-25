@@ -41,14 +41,14 @@
 .mission-control__notice { color: #b3c4d5; font-size: 13px; line-height: 1.7; }
 .mission-control__notice h2 { color: #f5f8fc; font-size: 20px; }
 
-.admin-photos__toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 20px; }
+.admin-photos__toolbar { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 14px; margin-bottom: 20px; }
 .admin-photos__toolbar h1 { margin: 0; }
 .admin-photos__toolbar p { margin: 8px 0 0; color: #a4b8ca; font-size: 12px; }
-.admin-photos__tabs { display: flex; gap: 8px; padding-bottom: 18px; }
-.admin-photos__tabs button[aria-pressed='true'] { border-color: var(--color-accent); background: #193a55; }
+.admin-photos__tabs { display: flex; gap: 4px; margin-bottom: 18px; border-bottom: 1px solid #293948; }
 .admin-photos .admin-page__message { margin-bottom: 16px; font-size: 13px; line-height: 1.6; }
 .admin-photos__layout { display: grid; grid-template-columns: minmax(170px, 0.8fr) minmax(0, 1.2fr); gap: 22px; align-items: start; }
 .admin-photos__collection { display: grid; gap: 14px; min-width: 0; }
+.admin-photos__filters { display: grid; grid-template-columns: minmax(0, 1fr) minmax(100px, 0.6fr); gap: 10px; }
 .admin-photos__items { display: grid; gap: 7px; }
 .admin-photos__items button { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px; border-color: #2d4053; background: #101f2e; text-align: left; text-transform: none; letter-spacing: normal; }
 .admin-photos__items button[aria-pressed='true'] { border-color: var(--color-accent); background: #19354b; }
@@ -62,16 +62,90 @@
 .admin-photos__editor details > label, .admin-photos__editor details > div { margin-block: 12px; }
 .admin-photos__editor summary { padding-block: 8px; cursor: pointer; }
 .admin-photos__file { display: grid; gap: 10px; font-size: 12px; overflow-wrap: anywhere; }
+.admin-photos__upload { display: grid; gap: 12px; margin-bottom: 20px; }
+.admin-photos__queue { display: grid; gap: 14px; max-height: 360px; margin: 0; padding: 0; overflow-y: auto; list-style: none; }
+.admin-photos__queue:empty { display: none; }
+.admin-photos__queue li { display: grid; gap: 10px; padding: 4px 4px 14px; border-bottom: 1px solid #293948; }
+.admin-photos__queue li > button { justify-self: start; }
+.admin-photos__queue-heading { display: flex; justify-content: space-between; gap: 12px; color: #b3c2d1; font-size: 12px; }
+.admin-photos__queue-heading > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.admin-photos__queue-heading > span:last-child { flex: none; }
+.admin-photos__upload-error { margin: 0; color: #ffb5a4; font-size: 12px; line-height: 1.5; }
 .admin-photos__placeholder { padding: 30px 12px; color: #9fb2c7; font-size: 13px; line-height: 1.7; }
 .admin-photos__placeholder h2 { color: #e4edf6; font-size: 20px; line-height: 1.3; }
+
+.mission-control :is(button, input, select, textarea, summary):focus-visible { outline: 2px solid #70c3ff; outline-offset: 3px; }
+.mission-control .admin-page :is(button, input, select, textarea),
+.mission-control .guestbook button { min-height: 36px; border-radius: 6px; font-size: 13px; font-weight: 400; letter-spacing: normal; text-transform: none; }
+.mission-control .admin-page button,
+.mission-control .guestbook button { max-width: 100%; padding: 7px 12px; border: 1px solid #3b4d60; background: #172331; color: #dbe8f5; line-height: 1.4; }
+.mission-control .admin-page button:hover:not(:disabled),
+.mission-control .guestbook button:hover:not(:disabled) { background: #223449; border-color: #6b8299; }
+.mission-control .admin-page :is(.admin-page__primary, button[type='submit']) { justify-self: start; border-color: #c96d34; background: #fb7f33; color: #211107; font-weight: 600; }
+.mission-control .admin-page :is(.admin-page__primary, button[type='submit']):hover:not(:disabled) { background: #ff9859; border-color: #ff9859; }
+.mission-control .admin-page label { min-width: 0; gap: 6px; color: #b3c2d1; font-size: 12px; font-weight: 500; letter-spacing: normal; text-transform: none; }
+.mission-control .admin-page :is(input, select, textarea) { min-width: 0; max-width: 100%; padding: 7px 10px; border: 1px solid #394858; background: #0a121c; color: #edf3fa; color-scheme: dark; }
+.mission-control .admin-page select { appearance: auto; }
+.mission-control .admin-page textarea { min-height: 88px; line-height: 1.6; }
+.mission-control .admin-page input[type='checkbox'] { width: 16px; min-height: 16px; height: 16px; margin: 0; accent-color: #fb7f33; }
+.mission-control .admin-page input[type='file'] { padding: 6px; font-size: 12px; }
+.mission-control .admin-page input::file-selector-button { margin-right: 8px; padding: 5px 8px; border: 0; border-radius: 3px; background: #26384a; color: #edf3fa; }
+.mission-control .admin-page .admin-page__toggle { display: flex; gap: 8px; min-height: 36px; }
+.mission-control .admin-page :is(.admin-page__header, .admin-page__panel, .admin-page__actions, fieldset) { min-width: 0; gap: 14px; padding: 16px; border-radius: 8px; background: #101b27; box-shadow: none; }
+.mission-control .admin-page .admin-page__panel-title,
+.mission-control .admin-page .admin-page__actions,
+.mission-control .admin-page .admin-page__button-group { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 8px; }
+.mission-control .admin-page .admin-page__row { display: flex; flex-direction: row; align-items: start; gap: 12px; }
+.mission-control .admin-page .admin-page__row > label { min-width: 0; }
+.mission-control .admin-page :is(.admin-page__panel-title h2, .admin-page__panel h3) { color: #edf3fa; font-size: 16px; letter-spacing: -0.02em; }
+.mission-control .admin-page .admin-page__hint { font-size: 12px; line-height: 1.6; }
+.mission-control .admin-page .admin-page__message { padding: 10px 12px; border-radius: 6px; font-size: 12px; line-height: 1.6; }
+.mission-control .admin-page .admin-page__post-button { flex-direction: row; align-items: center; min-height: 44px; text-align: left; }
+.mission-control .admin-page .admin-page__post-button small { flex: none; }
+.mission-control .admin-page fieldset > button { justify-self: start; }
+.mission-control .admin-page__overview > div { padding: 14px 12px; }
+.mission-control .admin-page__overview dd { font-size: 25px; }
+.device-window__content .mission-control :is(.admin-page, .guestbook) h1 { margin: 0; color: #edf3fa; font-size: 24px; line-height: 1.2; letter-spacing: -0.035em; }
+.mission-control .admin-page__header h1 { margin-block: 6px; }
+.mission-control .admin-calendar__toolbar { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 14px; margin-bottom: 20px; }
+.mission-control .admin-calendar__toolbar p { margin: 8px 0 0; font-size: 12px; }
+.mission-control .admin-photos__items button { display: flex; padding: 8px; text-align: left; }
+.mission-control .admin-photos__items button > span { min-width: 0; }
+.mission-control :is(.admin-photos__items, .admin-calendar__items) button[aria-pressed='true'] { border-color: #5798c6; background: #19354b; }
+.mission-control :is(.admin-photos__tabs, .admin-guestbook__tabs) button { padding: 8px 12px 10px; border: 0; border-bottom: 2px solid transparent; border-radius: 0; background: transparent; color: #a4b8ca; }
+.mission-control :is(.admin-photos__tabs, .admin-guestbook__tabs) button[aria-pressed='true'] { border-bottom-color: #65b8f0; background: transparent; color: #edf3fa; font-weight: 600; }
+.mission-control .admin-guestbook { min-height: 0; padding: 0; background: transparent; font-size: 13px; }
+.mission-control .admin-guestbook .guestbook__header { margin-bottom: 18px; }
+.mission-control .admin-guestbook .guestbook__header > span { display: block; margin-bottom: 8px; font-size: 9px; }
+.mission-control .admin-guestbook .guestbook__header p { max-width: 65ch; margin: 8px 0 0; font-size: 12px; }
+.mission-control .admin-guestbook__tabs { margin: 0 0 14px; gap: 4px; border-bottom: 1px solid #293948; }
+.mission-control .admin-guestbook__toolbar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+.mission-control .admin-guestbook__toolbar .guestbook__actions { margin: 0; }
+.mission-control .admin-guestbook__status { margin: 0; color: #aec4d7; font-size: 12px; }
+.mission-control .admin-guestbook__empty { margin: 20px 0 0; padding: 32px 16px; border-block: 1px solid #293948; color: #a4b8ca; text-align: center; }
+.mission-control .admin-guestbook .guestbook__entry { padding: 16px 0; }
+.mission-control .admin-guestbook .guestbook__entry > header > span { color: #a4b8ca; font-size: 11px; }
+.mission-control .admin-guestbook nav { justify-content: space-between; margin-top: 16px; }
 
 @container (max-width: 800px) {
   .mission-control { grid-template-columns: 148px minmax(0, 1fr); }
   .mission-control__content { padding: 18px; }
   .admin-photos__layout { grid-template-columns: 1fr; }
   .admin-photos__items { max-height: 245px; overflow-y: auto; }
-  .admin-photos__toolbar { align-items: flex-start; flex-direction: column; }
   .mission-control__destinations button { padding: 17px; }
+}
+
+@container app-viewport (max-width: 440px) {
+  .mission-control .admin-page .admin-page__row { flex-direction: column; align-items: stretch; }
+  .mission-control .admin-page .admin-page__post-button { flex-wrap: wrap; }
+  .mission-control .admin-page :is(.admin-page__header, .admin-page__panel, .admin-page__actions, fieldset) { padding: 12px; }
+  .admin-photos__filters { grid-template-columns: 1fr; }
+}
+
+@media (pointer: coarse) {
+  .mission-control .admin-page :is(button, input, select), .mission-control .guestbook button { min-height: 44px; }
+  .mission-control .admin-page :is(input, select, textarea) { font-size: 16px; }
+  .mission-control .admin-page input[type='checkbox'] { min-height: 16px; }
 }
 
 @container (max-width: 600px) {

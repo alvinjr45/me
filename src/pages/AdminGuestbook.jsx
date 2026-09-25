@@ -49,16 +49,18 @@ export default function AdminGuestbook({ secret, onBusy }) {
     finally { if (!controller.signal.aborted) { setSaving(false); onBusy(false); } }
   }
 
-  return <section className="guestbook" aria-label="Manage guestbook">
+  return <section className="guestbook admin-guestbook" aria-label="Manage guestbook">
     <header className="guestbook__header"><span>COMMUNITY</span><h1>Guestbook</h1><p>Each conversation is a public message board. Messages publish after spam checks and profanity masking, without approvals.</p></header>
-    <div className="guestbook__actions" role="group" aria-label="Guestbook management views">{['messages', 'conversations'].map((view) => <button type="button" key={view} aria-pressed={mode === view} disabled={saving} onClick={() => { setMode(view); setOffset(0); setEntries([]); setNotice(''); }}>{view === 'messages' ? 'Messages' : 'Conversations'}</button>)}</div>
-    <div className="guestbook__actions">
-      <button type="button" disabled={loading || saving} onClick={() => setReload((value) => value + 1)}>Refresh messages</button>
-      <button type="button" disabled={open === null || loading || saving} onClick={() => change({ action: 'pause', open: !open })}>{open === false ? 'Resume submissions' : 'Pause submissions'}</button>
+    <div className="guestbook__actions admin-guestbook__tabs" role="group" aria-label="Guestbook management views">{['messages', 'conversations'].map((view) => <button type="button" key={view} aria-pressed={mode === view} disabled={saving} onClick={() => { setMode(view); setOffset(0); setEntries([]); setNotice(''); }}>{view === 'messages' ? 'Messages' : 'Conversations'}</button>)}</div>
+    <div className="admin-guestbook__toolbar">
+      {open !== null && <p className="admin-guestbook__status">Submissions are {open ? 'open' : 'paused'}.</p>}
+      <div className="guestbook__actions">
+        <button type="button" disabled={loading || saving} onClick={() => setReload((value) => value + 1)}>Refresh messages</button>
+        <button type="button" disabled={open === null || loading || saving} onClick={() => change({ action: 'pause', open: !open })}>{open === false ? 'Resume submissions' : 'Pause submissions'}</button>
+      </div>
     </div>
-    {open !== null && <p>Submissions are {open ? 'open' : 'paused'}.</p>}
     {loading && <p role="status">Loading guestbook...</p>}{error && <p role="alert">{error}</p>}{notice && <p role="status">{notice}</p>}
-    {!loading && !error && !entries.length && <p>No messages on this page.</p>}
+    {!loading && !error && !entries.length && <p className="admin-guestbook__empty">No messages on this page.</p>}
     {entries.map((entry) => <article className="guestbook__entry" key={entry.id}>
       <header><strong>{mode === 'conversations' ? entry.title : entry.display_name}</strong><span>{entry.is_hidden || entry.conversation?.is_hidden ? 'Hidden' : 'Public'} / {new Date(entry.created_at).toLocaleDateString()}</span></header>
       {mode === 'messages' && <><p>{entry.message}</p><small>Conversation: {entry.conversation?.title || 'The Guestbook'}{entry.conversation?.is_hidden ? ' (hidden)' : ''}</small></>}

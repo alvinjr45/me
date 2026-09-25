@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import GuestbookConversation from '../components/GuestbookConversation';
+import GuestbookParticipation, { canParticipate } from '../components/GuestbookParticipation';
+import PolicyLinks from '../components/PolicyLinks';
 import { getConversations } from '../lib/guestbook';
 import './Guestbook.css';
 
@@ -20,6 +22,8 @@ export default function Guestbook() {
   const [reload, setReload] = useState(0);
   const [hasMore, setHasMore] = useState(false);
   const [participant, setParticipant] = useState(null);
+  const [joining, setJoining] = useState(true);
+  const [participationError, setParticipationError] = useState('');
   const [drafts, setDrafts] = useState({});
   const [ownIds, setOwnIds] = useState(new Set());
   const [busy, setBusy] = useState(false);
@@ -29,6 +33,7 @@ export default function Guestbook() {
   const draftKey = creating ? 'new' : selected?.id;
 
   useEffect(() => {
+    if (joining) return undefined;
     let mounted = true;
     async function refresh() {
       const current = ++request.current;
@@ -47,7 +52,27 @@ export default function Guestbook() {
     window.addEventListener('ajt3-guestbook-updated', refresh);
     window.addEventListener('focus', refresh);
     return () => { mounted = false; request.current += 1; clearTimeout(timeout); clearInterval(poll); window.removeEventListener('ajt3-guestbook-updated', refresh); window.removeEventListener('focus', refresh); };
-  }, [search, reload]);
+  }, [search, reload, joining]);
+
+  function updateParticipant(next, blockedMessage = '') {
+    setParticipant(next);
+    setParticipationError(blockedMessage);
+    setJoining(!canParticipate(next) || Boolean(blockedMessage));
+    if (canParticipate(next) && !blockedMessage && !chatOpen) {
+      requestAnimationFrame(() => newButton.current?.focus({ preventScroll: true }));
+    }
+  }
+
+  function openParticipation() {
+    setJoining(true);
+  }
+
+  function browseConversations() {
+    setParticipant((current) => current ? { name: current.name } : null);
+    setJoining(false);
+    setChatOpen(false);
+    requestAnimationFrame(() => newButton.current?.focus({ preventScroll: true }));
+  }
 
   async function loadMore() {
     const current = ++request.current;
@@ -67,6 +92,11 @@ export default function Guestbook() {
     requestAnimationFrame(() => (creating ? newButton.current : selectedButton.current)?.focus());
   }
 
+  if (joining) return <main className="guestbook-messages guestbook-messages--welcome">
+    <header className="guestbook-messages__welcome-header"><span>GUESTBOOK</span><h1>Messages</h1><p>A little corner of the internet for public conversations.</p></header>
+    <GuestbookParticipation participant={participant} onContinue={updateParticipant} onBrowse={browseConversations} blockedMessage={participationError} />
+  </main>;
+
   return <main className={`guestbook-messages${chatOpen ? ' guestbook-messages--chat-open' : ''}`}>
     <aside className="guestbook-messages__sidebar" aria-label="Conversation browser">
       <header className="guestbook-messages__sidebar-header"><div><span>GUESTBOOK</span><h1>Messages</h1></div><button ref={newButton} className="guestbook-messages__compose-button" type="button" aria-label="New conversation" disabled={busy} onClick={() => { setCreating(true); setChatOpen(true); }}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5H5v15h15v-9M11 13l1-4 8-8 3 3-8 8-4 1Z" /></svg></button></header>
@@ -81,7 +111,7 @@ export default function Guestbook() {
         </button>)}
         {hasMore && !error && <button className="guestbook-messages__more" disabled={loading} type="button" onClick={loadMore}>More conversations</button>}
       </nav>
-      <footer className="guestbook-messages__sidebar-footer">A little corner of the internet.<br />Read freely. Posting is for ages 18+.</footer>
+      <footer className="guestbook-messages__sidebar-footer">A little corner of the internet.<br />Read freely. Posting is for ages 18+.<button className="guestbook-messages__join-button" type="button" disabled={busy} onClick={openParticipation}>{canParticipate(participant) ? 'Your details and policies' : 'Join the guestbook'}</button><PolicyLinks /></footer>
     </aside>
     {creating || selected ? (
       <GuestbookConversation
@@ -91,7 +121,8 @@ export default function Guestbook() {
         draft={drafts[draftKey] || { title: '', message: '' }}
         onDraft={(draft) => setDrafts((current) => ({ ...current, [draftKey]: draft }))}
         participant={participant}
-        onParticipant={setParticipant}
+        onParticipant={updateParticipant}
+        onJoin={openParticipation}
         ownIds={ownIds}
         onSent={(entry) => setOwnIds((current) => new Set([...current, entry.id]))}
         onCreated={(entry) => {

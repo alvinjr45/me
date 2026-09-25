@@ -100,7 +100,7 @@
 .guestbook-messages__identity strong { color: #f2f2f7; overflow-wrap: anywhere; }
 .guestbook-messages__identity button { flex: none; margin-left: auto; min-height: 36px; padding: 5px 9px; border: 1px solid #51535f; border-radius: 7px; background: #2c2d33; color: #a1d4ff; font-size: 0.7rem; }
 .guestbook-messages__participation { flex: 0 1 auto; min-height: 0; max-height: 65%; margin: 0; padding: 18px 22px; border-top: 1px solid #3a3b40; overflow-y: auto; background: #202126; }
-.guestbook-messages__participation h3 { margin: 0 0 8px; color: #fff; font-size: 1rem; }
+.guestbook-messages__participation h2 { margin: 0 0 8px; color: #fff; font-size: 1.25rem; }
 .guestbook-messages__participation p { margin: 8px 0 12px; color: #c5c7d1; font-size: 0.78rem; line-height: 1.6; }
 .guestbook-messages__join-name { display: block; margin: 12px 0 7px; font-size: 0.8rem; }
 .guestbook-messages__participation > input { display: block; width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid #62636c; border-radius: 9px; background: #2c2d33; color: #fff; font: inherit; font-size: 1rem; }
@@ -110,10 +110,26 @@
 .guestbook-messages__terms { margin: 8px 0; padding: 10px 12px; border: 1px solid #51535f; border-radius: 8px; }
 .guestbook-messages__terms summary { padding: 5px 0; color: #9cd0ff; cursor: pointer; font-size: 0.78rem; }
 .guestbook-messages__terms summary:focus-visible { outline: 2px solid #ff9b52; outline-offset: 3px; }
-.guestbook-messages__terms p { max-height: 220px; overflow-y: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.guestbook-messages__terms p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .guestbook-messages__terms small { color: #b5b7c4; font-size: 0.65rem; }
 .guestbook-messages__participation .guestbook-messages__terms-pending { padding: 10px 12px; border-left: 3px solid #ff9b52; background: #2e2b29; }
 .guestbook-messages__participation > button { min-height: 44px; margin-top: 10px; padding: 10px 16px; border: 0; border-radius: 20px; background: #0868cf; color: #fff; font-size: 0.82rem; }
+.guestbook-messages--welcome { display: flex; flex-direction: column; overflow-y: auto; background: #17181c; }
+.guestbook-messages__welcome-header { flex: none; width: 100%; max-width: 760px; margin: 0 auto; padding: 28px 24px 20px; }
+.guestbook-messages__welcome-header > span { color: #ff9b52; font: 0.7rem var(--font-mono); letter-spacing: 0.12em; }
+.guestbook-messages__welcome-header h1 { margin: 8px 0; color: #fff; font-size: 2rem; }
+.guestbook-messages__welcome-header p { margin: 0; color: #bfc0cb; font-size: 0.85rem; line-height: 1.6; }
+.guestbook-messages--welcome .guestbook-messages__participation { flex: none; width: 100%; max-width: 760px; max-height: none; margin: 0 auto; padding: 24px; overflow: visible; background: transparent; }
+.guestbook-messages__participation .guestbook-messages__browse-button { display: block; background: transparent; color: #9cd0ff; border: 1px solid #51535f; }
+.guestbook-messages__join-prompt { flex: none; padding: 16px 22px; border-top: 1px solid #34353b; background: #202126; }
+.guestbook-messages__join-prompt p { margin: 0 0 8px; color: #c5c7d1; font-size: 0.78rem; line-height: 1.6; }
+.guestbook-messages__join-button { display: block; min-height: 44px; padding: 8px 12px; border: 1px solid #51535f; border-radius: 8px; background: #26364a; color: #9cd0ff; }
+.guestbook-messages__sidebar-footer .guestbook-messages__join-button { margin-top: 10px; }
+@container guestbook (max-width: 650px) {
+  .guestbook-messages__welcome-header { padding: 24px 16px 18px; }
+  .guestbook-messages--welcome .guestbook-messages__participation { padding: 20px 16px 28px; }
+  .guestbook-messages--welcome .guestbook-messages__participation > button { width: 100%; }
+}
 .guestbook-messages__composer > p[role] { margin: 8px 0 0; font-size: 0.75rem; line-height: 1.5; }
 .guestbook-messages .guestbook__trap { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 .guestbook-messages [role='alert'] { color: #ffb5a4; overflow-wrap: anywhere; }

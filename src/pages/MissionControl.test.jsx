@@ -228,6 +228,35 @@ test('retains unsaved photo details after a failed save', async () => {
   expect(screen.getByRole('button', { name: 'Drake Published / Drake & Josh' })).toBeInTheDocument();
 });
 
+test('uploads multiple photos and preserves an open photo draft', async () => {
+  const originalCrypto = global.crypto;
+  let sequence = 0;
+  global.crypto = { randomUUID: () => `batch-photo-${++sequence}` };
+  try {
+    openApp('/admin/photos');
+    await signIn();
+    fireEvent.click(await screen.findByRole('button', { name: 'Drake Published / Drake & Josh' }));
+    fireEvent.change(screen.getByLabelText('Caption'), { target: { value: 'Keep this draft' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Upload photos' }));
+    const files = ['first.jpg', 'second.jpg'].map((name) => new File(['photo'], name, { type: 'image/jpeg' }));
+    fireEvent.change(screen.getByLabelText('Choose photos'), { target: { files } });
+    for (const file of files) fireEvent.change(screen.getByLabelText(`Alt text for ${file.name}`), { target: { value: `Description of ${file.name}` } });
+    fireEvent.click(screen.getByRole('button', { name: 'Upload 2 photos' }));
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeDisabled();
+    await screen.findByText('2 photos uploaded. All selected photos are saved.');
+    fireEvent.click(screen.getByRole('button', { name: 'Done' }));
+    expect(screen.getByRole('button', { name: 'first Published / Drake & Josh' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'second Published / Drake & Josh' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Caption')).toHaveValue('Keep this draft');
+    expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled();
+    const uploads = global.fetch.mock.calls.filter(([, options]) => options.body instanceof FormData);
+    expect(uploads).toHaveLength(2);
+    for (const [, request] of uploads) expect(request.headers['x-admin-secret']).toBe('test-password');
+  } finally {
+    global.crypto = originalCrypto;
+  }
+});
+
 test('keeps blog management usable when photo setup is unavailable', async () => {
   const implementation = global.fetch.getMockImplementation();
   global.fetch.mockImplementation((url, options) => url.endsWith('admin-photo-library') ? Promise.resolve(response(503, { error: 'Apply the photo-library migration.' })) : implementation(url, options));

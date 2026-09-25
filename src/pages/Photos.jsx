@@ -33,7 +33,7 @@ function Photos() {
   const [collection, setCollection] = useState('library');
   const [view, setView] = useState('library');
   const [query, setQuery] = useState('');
-  const [size, setSize] = useState('comfortable');
+  const [size, setSize] = useState('compact');
   const [favorites, setFavorites] = useState(readFavorites);
   const [selectedId, setSelectedId] = useState(null);
   const [viewerIds, setViewerIds] = useState([]);

@@ -203,7 +203,7 @@ function Admin({ access, section = 'posts', onBusy }) {
               <h2>Posts</h2>
               <div className="admin-page__button-group">
                 <button type="button" onClick={async () => { try { await access.refreshPosts(); setPostMessage('Posts refreshed.'); } catch (error) { setPostMessage(error.message); } }}>Refresh</button>
-                <button type="button" onClick={() => navigate('/admin/new')}>
+                <button className="admin-page__primary" type="button" onClick={() => navigate('/admin/new')}>
                   New post
                 </button>
               </div>
@@ -232,7 +232,7 @@ function Admin({ access, section = 'posts', onBusy }) {
             <div className="admin-page__panel-title">
               <h2>Dog incident</h2>
               <div className="admin-page__button-group">
-                <button type="button" onClick={handleIncidentSubmit} disabled={incidentStatus === 'saving' || incidentStatus === 'loading' || !incidentUrl}>
+                <button className="admin-page__primary" type="button" onClick={handleIncidentSubmit} disabled={incidentStatus === 'saving' || incidentStatus === 'loading' || !incidentUrl}>
                   {incidentStatus === 'saving' ? 'Saving...' : 'Save incident'}
                 </button>
               </div>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { normalizeUploadFile } from '../lib/adminPostEditor';
 import { notifyPhotoLibraryChanged, requestPhotoLibrary } from '../lib/adminPhotoLibrary';
+import AdminPhotoUpload from './AdminPhotoUpload';
 
 const emptyPhoto = { id: '', title: '', album_id: '', image_url: '', alt_text: '', caption: '', sort_order: 0, width: '', height: '', is_published: true };
 const emptyAlbum = { id: '', title: '', description: '', sort_order: 0 };
@@ -17,6 +18,7 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
   const [albumDirty, setAlbumDirty] = useState(false);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
+  const [uploadOpen, setUploadOpen] = useState(false);
   const working = status === 'saving' || status === 'preparing';
 
   useEffect(() => {
@@ -128,14 +130,19 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
 
   return (
     <main className="admin-page admin-page--mission-control admin-photos">
-      <header className="admin-photos__toolbar"><div><h1>Photo library</h1><p>Make room for the moments worth keeping.</p></div><div className="admin-page__button-group"><button type="button" disabled={working} onClick={() => { setMode('photos'); selectPhoto(null); }}>Add photo</button><button type="button" disabled={working} onClick={() => { setMode('albums'); selectAlbum(null); }}>New album</button></div></header>
+      <header className="admin-photos__toolbar"><div><h1>Photo library</h1><p>Make room for the moments worth keeping.</p></div><div className="admin-page__button-group"><button className="admin-page__primary" type="button" disabled={working || uploadOpen || !library.albums.length} onClick={() => { setMode('photos'); setUploadOpen(true); }}>Upload photos</button><button type="button" disabled={working || uploadOpen} onClick={() => { setMode('photos'); selectPhoto(null); }}>Add photo</button><button type="button" disabled={working || uploadOpen} onClick={() => { setMode('albums'); selectAlbum(null); }}>New album</button></div></header>
+      {!library.albums.length && <p className="admin-page__hint">Create an album to start uploading photos.</p>}
+      {uploadOpen && <AdminPhotoUpload secret={secret} library={library} onChange={onChange} onBusy={(busy) => { setStatus(busy ? 'saving' : 'idle'); onBusy(busy); }} onClose={() => setUploadOpen(false)} />}
+      <div hidden={uploadOpen}>
       <div className="admin-photos__tabs" aria-label="Photo management view"><button type="button" disabled={working} aria-pressed={mode === 'photos'} onClick={() => setMode('photos')}>Photos ({library.photos.length})</button><button type="button" disabled={working} aria-pressed={mode === 'albums'} onClick={() => setMode('albums')}>Albums ({library.albums.length})</button></div>
       {message && <p className={`admin-page__message admin-page__message--${status}`} role={status === 'error' ? 'alert' : 'status'}>{message}</p>}
       {mode === 'photos' ? (
         <div className="admin-photos__layout">
           <section className="admin-photos__collection" aria-label="Manage photos">
-            <label>Search photos<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
-            <label>Visibility<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All photos</option><option value="published">Published</option><option value="hidden">Hidden</option></select></label>
+            <div className="admin-photos__filters">
+              <label>Search photos<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
+              <label>Visibility<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All photos</option><option value="published">Published</option><option value="hidden">Hidden</option></select></label>
+            </div>
             <div className="admin-photos__items">{matching.map((item) => <button type="button" key={item.id} disabled={working} aria-pressed={photo?.id === item.id} onClick={() => selectPhoto(item)}><img src={item.image_url} alt="" loading="lazy" /><span><strong>{item.title}</strong><small>{item.is_published ? 'Published' : 'Hidden'} / {library.albums.find((entry) => entry.id === item.album_id)?.title || 'Album'}</small></span></button>)}</div>
             {!matching.length && <p className="admin-page__hint">{library.photos.length ? 'No matching photos.' : 'Start your library with a photo.'}</p>}
           </section>
@@ -169,6 +176,7 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
           {album ? <form className="admin-photos__editor" onSubmit={saveAlbum}><fieldset disabled={working}><legend>{album.id ? 'Edit album' : 'New album'}</legend><label>Album title<input required maxLength={120} value={album.title} onChange={(event) => { setAlbum({ ...album, title: event.target.value }); setAlbumDirty(true); }} /></label><label>Description<textarea maxLength={1000} value={album.description} onChange={(event) => { setAlbum({ ...album, description: event.target.value }); setAlbumDirty(true); }} /></label><label>Display order<input type="number" min="0" max="1000000" step="1" required value={album.sort_order} onChange={(event) => { setAlbum({ ...album, sort_order: event.target.value }); setAlbumDirty(true); }} /></label><p className="admin-page__hint">Lower numbers appear first. Add published photos to make this album visible.</p><button type="submit">{status === 'saving' ? 'Saving album...' : 'Save album'}</button></fieldset></form> : <div className="admin-photos__placeholder"><h2>Put a collection together.</h2><p>Create an album, then assign photos to it.</p></div>}
         </div>
       )}
+      </div>
     </main>
   );
 }

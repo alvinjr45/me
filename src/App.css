@@ -14,15 +14,34 @@
 
 .App--device::before { display: none; }
 
-@media (max-width: 1024px), (max-height: 500px) {
-  .App--device { overflow-y: auto; }
-}
-
 body.device-page,
 body.device-page #root {
   height: 100svh;
   min-height: 0;
   overflow: hidden;
+}
+
+@media (max-width: 1024px), (max-height: 500px) {
+  html.device-page--scene-entry { --device-scene-entry-offset: 80px; }
+
+  /* Let Safari carry page content beneath its translucent browser controls. */
+  html.device-page,
+  body.device-page {
+    overflow-x: clip;
+    overflow-y: visible;
+    background-color: var(--scene-wall-light, var(--color-background));
+  }
+
+  body.device-page,
+  body.device-page #root,
+  .App--device {
+    height: auto;
+    min-height: 100svh;
+    min-height: 100dvh;
+  }
+
+  body.device-page #root { overflow: visible; }
+  .App--device { overflow: clip; }
 }
 
 .App::before {

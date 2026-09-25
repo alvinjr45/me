@@ -75,7 +75,7 @@ function AdminCalendar({ secret, onBusy }) {
 
   return (
     <main className="admin-page admin-page--mission-control admin-calendar">
-      <header className="admin-calendar__toolbar"><div><h1>Calendar events</h1><p>Give the next good thing a place on the calendar.</p></div><button type="button" disabled={loading || Boolean(loadError) || saving} onClick={() => selectEvent(null)}>Add event</button></header>
+      <header className="admin-calendar__toolbar"><div><h1>Calendar events</h1><p>Give the next good thing a place on the calendar.</p></div><button className="admin-page__primary" type="button" disabled={loading || Boolean(loadError) || saving} onClick={() => selectEvent(null)}>Add event</button></header>
       {loading && <p role="status">Loading your events...</p>}
       {loadError && <div role="alert"><p>{loadError}</p><button type="button" onClick={() => setReload((value) => value + 1)}>Retry calendar</button></div>}
       {error && <p role="alert" className="admin-page__message admin-page__message--error">{error}</p>}

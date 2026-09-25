@@ -173,6 +173,13 @@ export function SceneWindow({ background = 'alpine' }) {
 }
 
 function SceneBackground({ background = 'alpine' }) {
+  React.useLayoutEffect(() => {
+    const themeClass = `scene-theme--${background}`;
+    const root = document.documentElement;
+    root.classList.add('scene-theme', themeClass);
+    return () => root.classList.remove('scene-theme', themeClass);
+  }, [background]);
+
   return (
     <div className={`scene-background scene-theme scene-theme--${background}`} aria-hidden="true">
       <SceneWindow background={background} />

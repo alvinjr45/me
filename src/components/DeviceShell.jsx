@@ -25,17 +25,17 @@ import './DeviceShell.css';
 import './AppWorkspace.css';
 
 export const desktopApps = [
-  { key: 'tech', label: 'Build', path: 'https://ajt3.website', description: 'Projects & experiments', external: true },
-  { key: 'music', label: 'Music', path: '/music', description: 'The current rotation' },
-  { key: 'dogs', label: 'Dogs', path: '/dogs', description: 'Drake & Josh' },
-  { key: 'blog', label: 'Blog', path: '/blog', description: 'Notes from the build' },
-  { key: 'photos', label: 'Photos', path: '/photos', description: 'A little of my world' },
-  { key: 'instagram', label: 'Instagram', path: 'https://www.instagram.com/_ajt3_/', description: 'Follow me on Instagram', external: true },
-  { key: 'calendar', label: 'Calendar', path: '/calendar', description: 'Make time for what matters', utility: true },
-  { key: 'store', label: 'App Store', path: '/app-store', description: 'Find your next favorite', utility: true },
   { key: 'guestbook', label: 'Guestbook', path: '/guestbook', description: 'Leave a little note' },
-  { key: 'admin', label: 'Mission Control', path: '/admin', description: 'Behind the scenes', utility: true },
+  { key: 'photos', label: 'Photos', path: '/photos', description: 'A little of my world' },
+  { key: 'blog', label: 'Blog', path: '/blog', description: 'Notes from the build' },
+  { key: 'calendar', label: 'Calendar', path: '/calendar', description: 'Make time for what matters', utility: true },
+  { key: 'music', label: 'Music', path: '/music', description: 'The current rotation' },
+  { key: 'store', label: 'App Store', path: '/app-store', description: 'Find your next favorite', utility: true },
+  { key: 'dogs', label: 'Dogs', path: '/dogs', description: 'Drake & Josh' },
+  { key: 'instagram', label: 'Instagram', path: 'https://www.instagram.com/_ajt3_/', description: 'Follow me on Instagram', external: true },
   { key: 'terminal', label: 'Terminal', path: '/terminal', description: 'Command center', utility: true },
+  { key: 'admin', label: 'Mission Control', path: '/admin', description: 'Behind the scenes', utility: true },
+  { key: 'tech', label: 'Build', path: 'https://ajt3.website', description: 'Projects & experiments', external: true },
   { key: 'settings', label: 'Settings', path: '/settings', description: 'Make it yours', utility: true }
 ];
 
@@ -227,11 +227,6 @@ function DeviceWindow({ app, state, isRoute, onClose, onMinimize, onMaximize, on
         </div>
         <span className="device-window__title">{app.label}</span>
         <span className="device-window__path">ajt3://{app.key}</span>
-      </header>
-      <header className="device-window__mobile-bar">
-        <Link to="/" aria-label={`Close ${app.label} and return home`}><span aria-hidden="true">&lsaquo;</span> Home</Link>
-        <strong>{app.label}</strong>
-        <span />
       </header>
       <div className={`device-window__content${app.key === 'terminal' ? ' device-window__content--terminal' : ''}`} ref={contentRef}>
         {children}
@@ -445,6 +440,87 @@ function SystemScreen({ state, isPhone, time, date, access, onGuestLogin, onPowe
       </form>
     </section>
   );
+}
+
+function DeviceDock({ isPhone, motion, children }) {
+  const dockRef = useRef(null);
+
+  useEffect(() => {
+    if (isPhone || !motion) return;
+
+    const dock = dockRef.current;
+    const media = window.matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)');
+    const items = Array.from(dock.querySelectorAll('a')).map((element) => ({ element, value: 0, target: 0, width: element.offsetWidth }));
+    let frame = null;
+    let lastTime = null;
+
+    const animate = (time) => {
+      const blend = 1 - Math.exp(-Math.min(lastTime === null ? 16 : time - lastTime, 64) / 70);
+      lastTime = time;
+      let moving = false;
+      items.forEach((item) => {
+        item.value += (item.target - item.value) * blend;
+        if (Math.abs(item.target - item.value) < 0.001) item.value = item.target;
+        else moving = true;
+      });
+
+      const expansion = items.reduce((total, item) => total + item.width * 0.48 * item.value, 0);
+      let offset = -expansion / 2;
+      items.forEach((item) => {
+        const extra = item.width * 0.48 * item.value;
+        item.element.style.setProperty('--dock-shift', `${offset + extra / 2}px`);
+        item.element.style.setProperty('--dock-lift', `${-8 * item.value}px`);
+        item.element.style.setProperty('--dock-scale', 1 + 0.48 * item.value);
+        offset += extra;
+      });
+      frame = moving ? window.requestAnimationFrame(animate) : null;
+      if (!moving) lastTime = null;
+    };
+
+    const update = (x) => {
+      items.forEach((item) => {
+        // Layout positions stay stable while the icons transform around the pointer.
+        const center = item.element.offsetLeft + item.width / 2;
+        const distance = x === null ? 1 : Math.min(Math.abs(center - x) / 125, 1);
+        item.target = (1 + Math.cos(distance * Math.PI)) / 2;
+      });
+      if (frame === null) frame = window.requestAnimationFrame(animate);
+    };
+    const onPointerMove = (event) => {
+      if (!media.matches || event.pointerType === 'touch') return;
+      update(event.clientX - dock.getBoundingClientRect().left - dock.clientLeft);
+    };
+    const reset = () => update(null);
+    const clear = () => {
+      window.cancelAnimationFrame(frame);
+      frame = null;
+      lastTime = null;
+      items.forEach((item) => {
+        item.value = 0;
+        item.target = 0;
+        item.width = item.element.offsetWidth;
+        ['--dock-shift', '--dock-lift', '--dock-scale'].forEach((property) => item.element.style.removeProperty(property));
+      });
+    };
+
+    dock.addEventListener('pointermove', onPointerMove);
+    dock.addEventListener('pointerleave', reset);
+    dock.addEventListener('pointercancel', reset);
+    window.addEventListener('blur', clear);
+    window.addEventListener('resize', clear);
+    media.addEventListener('change', clear);
+    return () => {
+      clear();
+      dock.removeEventListener('pointermove', onPointerMove);
+      dock.removeEventListener('pointerleave', reset);
+      dock.removeEventListener('pointercancel', reset);
+      window.removeEventListener('blur', clear);
+      window.removeEventListener('resize', clear);
+      media.removeEventListener('change', clear);
+    };
+  }, [isPhone, motion]);
+
+  return <nav ref={dockRef} className="device-screen__dock" aria-label="App dock">{children}</nav>;
 }
 
 function DeviceShell({ children, home }) {
@@ -827,7 +903,7 @@ function DeviceShell({ children, home }) {
               );
             })}
 
-            <nav className="device-screen__dock" aria-label="App dock">
+            <DeviceDock isPhone={isPhone} motion={motion}>
               {!isPhone && <>
               <Link className={`device-screen__dock-home${isHome ? ' device-screen__dock-home--active' : ''}`} to="/" aria-label="Show desktop" onClick={showDesktop}>A/3</Link>
               <span className="device-screen__dock-divider" aria-hidden="true" />
@@ -838,7 +914,7 @@ function DeviceShell({ children, home }) {
                   <span className="device-screen__dock-label">{app.label}</span>
                 </Link>
               ))}
-            </nav>
+            </DeviceDock>
             <Link className="device-screen__home-indicator" to="/" aria-label="Return to phone home screen" onClick={showDesktop} />
             </>}
             {guestDenied && <GuestAccessDialog onDismiss={() => navigate('/', { replace: true })} onLogout={() => runSystemAction('logout')} />}

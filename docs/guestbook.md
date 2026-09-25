@@ -21,7 +21,16 @@ hide/show for whole boards, per-message hide/show and confirmed permanent
 deletion, pagination, and a global pause/resume switch. Hiding a board hides its
 messages and previews and blocks new replies; it does not delete its contents.
 
-## Participation gate and pending terms
+## Participation gate and site policies
+
+Opening Messages starts on a dedicated "Before you join" screen. It contains
+the display name, age declaration, readable policies, and terms agreement.
+"Continue to messages" opens the conversation browser after those requirements
+are met. "Read conversations without joining" allows browsing without any
+declarations or bot challenge. Conversation fetching starts only after leaving
+the entry screen. Read-only visitors can return through "Join the guestbook"
+or "Join conversation". "Change details" returns to the same full entry screen,
+preserving conversation drafts. Closing and reopening the app shows entry again.
 
 Before any message or new conversation title can be entered, visitors must give
 a nonblank display name and explicitly check two initially unchecked boxes:
@@ -31,15 +40,18 @@ last only while this Guestbook app instance is open; they are not saved to
 browser storage. Switching conversations retains them. "Change details" resets
 both checkboxes and locks the composer while preserving unsent drafts.
 
-The terms have **not been written**. `src/data/guestbookTerms.js` intentionally
-contains no version or text. The UI labels them pending, disables acceptance,
-and keeps message entry locked instead of requesting acceptance of nonexistent
-terms. Do not add placeholder legal text or enable acceptance before publication.
+The Terms and Conditions are in `src/data/guestbookTerms.js`; the Privacy Policy
+is in `src/data/privacyPolicy.js`. Both use version `2026-09-25` and are available
+at `/terms` and `/privacy`, inline before joining, and through links in the
+guestbook sidebar and Settings > System. Policy links open a separate tab to
+preserve guestbook drafts and declarations on phones as well as desktop.
+The policy pages currently use the site's existing public Instagram contact.
+Confirm the contact method and the deployed host's logging, backups, and any
+additional tracking before publishing; those settings cannot be inferred from
+this repository. No jurisdiction-specific governing-law clause is assumed.
 
-To publish later, add the actual terms as plain text to `guestbookTerms.content`
-and assign a nonblank `guestbookTerms.version`. Set the matching server setting
-`GUESTBOOK_TERMS_VERSION` only when that content is ready to publish. Deploy the
-frontend and updated `guestbook` function together. Change the version whenever
+Set `GUESTBOOK_TERMS_VERSION=2026-09-25` on the server when publishing this
+frontend and the `guestbook` function together. Change the version whenever
 the terms change. Missing server configuration closes posting; outdated or
 missing client versions are rejected with a reload/re-accept message. This
 participation change needs no additional database migration.
@@ -91,7 +103,20 @@ budget as a reply. The chat-like layout does not relax the existing spam limits.
 
 ## Setup (user-owned)
 
-No migration, secret changes, deployment, server, or build has been run by Codex.
+On September 25, 2026, browser setup created the managed "AJT3 Guestbook"
+Turnstile widget for `ajt3.me`, saved its private `TURNSTILE_SECRET_KEY` in the
+AJT3 Supabase project, and saved `REACT_APP_TURNSTILE_SITE_KEY` in the Vercel
+`me` project's **Production** environment. `GUESTBOOK_TERMS_VERSION=2026-09-25`
+was also saved in Supabase. Existing guestbook origin, hostname, and hash-secret
+settings were present. No private key is stored in this repository.
+The database's `submissions_open` setting was verified as `false` and left paused
+until the updated frontend is deployed and live submission checks are complete.
+
+The live frontend still showed pending terms at the time of setup. A new
+frontend build/deployment is required to include the policies, entry screen,
+and public site key. Production keys are not configured for local preview
+origins. Use a separate development widget if testing real submissions locally.
+No migrations, deployments, servers, or builds were run by Codex during this work.
 New installations start with submissions **paused** until setup is verified.
 
 1. Create a Cloudflare Turnstile widget for your actual site hostnames. Keep
@@ -110,7 +135,7 @@ New installations start with submissions **paused** until setup is verified.
    - `GUESTBOOK_HOSTNAMES`: comma-separated Turnstile-verified hostnames, without
      scheme, port, or path.
    - `GUESTBOOK_TERMS_VERSION`: must match the version of the actual published
-     terms in `src/data/guestbookTerms.js`. Leave unset while terms are pending.
+     terms in `src/data/guestbookTerms.js`: `2026-09-25` for this release.
    - Existing `ADMIN_POST_SECRET`: used only for management requests, not visitors.
    - Optional `GUESTBOOK_BLOCKED_WORDS`: extra comma-separated English words,
      letters only, 3-30 characters each. Core list is in `content.ts`.
@@ -129,13 +154,15 @@ New installations start with submissions **paused** until setup is verified.
    JWT verification for this public endpoint; admin actions still require the
    server-checked admin secret, and publication always requires Turnstile.
 5. Run your normal frontend build/deployment with the new site key.
-6. Verify the checklist below in a non-production environment, resolve the
-   existing admin login issue, then use Mission Control to resume submissions.
+6. Verify the checklist below in a non-production environment, resolve
+   any admin login issues, then use Mission Control > Guestbook > Resume
+   submissions. Having policies in source does not enable a paused database.
 
 ## Required live verification
 
-- Before publication of terms, verify boards are readable but no composer can
-  open and direct submissions are rejected. With actual published terms, verify
+- Open `/terms` and `/privacy` directly and from the guestbook on desktop and
+  phone. Verify both policies can be read before checking any boxes, and that
+  opening their separate tabs preserves an unsent guestbook draft. Verify
   a name plus both declarations are needed before typing. Check whitespace-only
   names, unchecked boxes, missing/false/string-valued declarations, and old terms
   versions on both reply and new-board requests. Changing details or reloading
@@ -212,3 +239,6 @@ References: [Turnstile server-side validation](https://developers.cloudflare.com
 [explicit widget rendering](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/),
 [Supabase RLS and invoker-security views](https://supabase.com/docs/guides/database/postgres/row-level-security),
 [Turnstile interaction-only appearance](https://developers.cloudflare.com/turnstile/get-started/client-side-rendering/widget-configurations/).
+
+Policy references: [Cloudflare Turnstile Privacy Addendum](https://www.cloudflare.com/turnstile-privacy-policy/)
+and [FTC consumer privacy guidance](https://www.ftc.gov/business-guidance/privacy-security/consumer-privacy).

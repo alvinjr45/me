@@ -149,7 +149,8 @@ test('a server-rejected session offers entry verification without losing the mes
   await screen.findByText('Hello!');
   fillMessage();
   fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
-  fireEvent.click(await screen.findByRole('button', { name: 'Verify to continue' }));
+  await screen.findByRole('alert');
+  fireEvent.click(screen.getByRole('button', { name: 'Change details' }));
   joinGuestbook();
   expect(await screen.findByLabelText('Message')).toHaveValue('Hello there!');
   expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
@@ -299,7 +300,7 @@ test('session expiry returns verification to the entry screen and preserves the 
     expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
     expect(screen.getByLabelText('Message')).toHaveValue('Still writing');
     expect(screen.queryByRole('button', { name: 'Complete bot check' })).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Verify to continue' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Change details' }));
     joinGuestbook();
     await act(async () => { jest.advanceTimersByTime(0); });
     expect(screen.getByLabelText('Message')).toHaveValue('Still writing');

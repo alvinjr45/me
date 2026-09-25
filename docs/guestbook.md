@@ -35,8 +35,8 @@ preserving conversation drafts. Closing and reopening the app shows entry again.
 Continue exchanges a Turnstile token with the server for a signed, one-hour
 posting session. The session stays in memory and is reused across conversations
 and messages. No Cloudflare widget runs in the composer. After expiry,
-"Verify to continue" returns to entry while preserving drafts
-and current declarations. Changing details retains a valid bot session.
+"Change details" returns to entry while preserving drafts and lets the visitor
+verify again. Changing details retains a valid bot session.
 The server checks the signature, expiry, origin, and current terms on each post.
 The signed session carries the original limiter identity so routing and network
 changes neither invalidate verification nor reset that session's counters.

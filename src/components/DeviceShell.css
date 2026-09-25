@@ -1228,6 +1228,8 @@
   .device-screen__menu { display: none; }
 
   .device-screen {
+    --phone-safe-top: 53px;
+    --phone-safe-bottom: 36px;
     height: 100%;
     aspect-ratio: auto;
     border-radius: 42px;
@@ -1307,8 +1309,30 @@
 
   .device-screen--app .device-window__content > main {
     min-height: 100%;
-    padding-top: 53px;
-    padding-bottom: 28px;
+    padding-top: var(--app-safe-top, var(--phone-safe-top));
+    padding-bottom: var(--app-safe-bottom, var(--phone-safe-bottom));
+  }
+
+  .device-screen--app .device-screen__phone-status {
+    pointer-events: none;
+    background: rgba(8, 12, 18, 0.5);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    text-shadow: 0 1px 3px #0008;
+  }
+
+  .device-screen--app::after {
+    content: '';
+    position: absolute;
+    z-index: 19;
+    inset: auto 0 0;
+    height: var(--phone-safe-bottom);
+    pointer-events: none;
+    background: rgba(8, 12, 18, 0.4);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+    -webkit-mask-image: linear-gradient(transparent, #000 45%);
+    mask-image: linear-gradient(transparent, #000 45%);
   }
 
   .device-screen--app .device-screen__dock { display: none; }

@@ -1,4 +1,5 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { DeviceSettingsContext } from '../components/deviceSettings';
 import { getPhotoLibrary } from '../data/photos';
 import './Photos.css';
 
@@ -25,6 +26,7 @@ function readFavorites() {
 }
 
 function Photos() {
+  const isPhone = useContext(DeviceSettingsContext)?.isPhone;
   const [library, setLibrary] = useState({ photos: [], albums: [] });
   const { photos, albums: photoAlbums } = library;
   const [libraryStatus, setLibraryStatus] = useState('loading');
@@ -190,7 +192,7 @@ function Photos() {
           </footer>
         </section>
       ) : (
-        <>
+        <div className="photos-app__browser" ref={isPhone ? scrollRef : undefined}>
           <aside className="photos-app__sidebar">
             <div className="photos-app__identity"><span className="photos-app__monogram">AJ</span><div><strong>Photos</strong><span>A little of my world.</span></div></div>
             <nav className="photos-app__navigation" aria-label="Photo collections">
@@ -210,7 +212,7 @@ function Photos() {
               </div>
               <label className="photos-app__search"><PhotoIcon name="search" /><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search photos" aria-label="Search photos" /></label>
             </header>
-            <div className="photos-app__scroll" ref={scrollRef}>
+            <div className="photos-app__scroll" ref={isPhone ? undefined : scrollRef}>
               {libraryStatus === 'loading' && <p className="photos-app__library-message" role="status">Loading photos...</p>}
               {libraryStatus === 'error' && <div className="photos-app__library-message" role="alert"><p>{libraryError}</p><button type="button" onClick={() => setReload((value) => value + 1)}>Retry</button></div>}
               <header className="photos-app__heading">
@@ -232,7 +234,7 @@ function Photos() {
               <footer className="photos-app__count" aria-live="polite">{visiblePhotos.length} {visiblePhotos.length === 1 ? 'photo' : 'photos'}<span>{collection === 'favorites' ? 'Saved in this browser' : 'A collection by AJ Thompson'}</span></footer>
             </div>
           </div>
-        </>
+        </div>
       )}
     </main>
   );

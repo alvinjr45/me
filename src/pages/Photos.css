@@ -11,6 +11,7 @@
 }
 
 .photos-app button { color: inherit; }
+.photos-app__browser { display: contents; }
 .photos-app svg { width: 20px; height: 20px; flex: none; }
 .photos-app__sidebar { width: 185px; flex: none; padding: 24px 12px 16px; overflow-y: auto; background: #1b1c20; border-right: 1px solid #2d2e32; }
 .photos-app__identity { display: flex; align-items: center; gap: 10px; margin: 0 4px 26px; }
@@ -124,4 +125,20 @@
 
 @media (prefers-reduced-motion: reduce) {
   .photos-app__tile-title { transition: none; }
+}
+
+@media (max-width: 1024px), (max-height: 500px) {
+  .photos-app { --app-safe-top: 0px; --app-safe-bottom: 0px; }
+  .photos-app__browser {
+    display: block;
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-block: var(--phone-safe-top) var(--phone-safe-bottom);
+    scroll-padding-block: calc(var(--phone-safe-top) + 8px) calc(var(--phone-safe-bottom) + 8px);
+  }
+  .photos-app__library { display: block; }
+  .photos-app__scroll { overflow: visible; }
+  .photos-viewer { padding-block: var(--phone-safe-top) var(--phone-safe-bottom); }
 }

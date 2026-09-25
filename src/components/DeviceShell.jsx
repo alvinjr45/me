@@ -12,6 +12,7 @@ import Settings from '../pages/Settings';
 import AppStore from '../pages/AppStore';
 import MissionControl from '../pages/MissionControl';
 import SceneBackground from './SceneBackground';
+import PhoneHomeIndicator from './PhoneHomeIndicator';
 import useAdminAccess from '../lib/useAdminAccess';
 import useAdminProfile from '../lib/useAdminProfile';
 import {
@@ -516,7 +517,7 @@ function SystemScreen({ state, isPhone, time, date, access, profileImage, onGues
   );
 }
 
-function DeviceDock({ isPhone, motion, children }) {
+function DeviceDock({ isPhone, motion, inactive = false, children }) {
   const dockRef = useRef(null);
 
   useEffect(() => {
@@ -594,7 +595,7 @@ function DeviceDock({ isPhone, motion, children }) {
     };
   }, [isPhone, motion]);
 
-  return <nav ref={dockRef} className="device-screen__dock" aria-label="App dock">{children}</nav>;
+  return <nav ref={dockRef} className="device-screen__dock" aria-label="App dock" inert={inactive ? '' : undefined} aria-hidden={inactive ? true : undefined}>{children}</nav>;
 }
 
 function DeviceShell({ children, home }) {
@@ -959,6 +960,9 @@ function DeviceShell({ children, home }) {
             </div>
 
             {isHome ? children : phoneLocked ? home : isPhone && !guestDenied ? null : home}
+            {isPhone && !isHome && !phoneLocked && !guestDenied && (
+              <div className="device-screen__home-preview" inert="" aria-hidden="true">{home}</div>
+            )}
 
             {isPhone ? (!phoneLocked && !isHome && activeApp && !guestDenied ? (
               <DeviceWindow
@@ -999,7 +1003,7 @@ function DeviceShell({ children, home }) {
               );
             })}
 
-            <DeviceDock isPhone={isPhone} motion={motion}>
+            <DeviceDock isPhone={isPhone} motion={motion} inactive={isPhone && !isHome}>
               {!isPhone && <>
               <Link className={`device-screen__dock-home${isHome ? ' device-screen__dock-home--active' : ''}`} to="/" aria-label="Show desktop" onClick={showDesktop}>A/3</Link>
               <span className="device-screen__dock-divider" aria-hidden="true" />
@@ -1011,7 +1015,13 @@ function DeviceShell({ children, home }) {
                 </Link>
               ))}
             </DeviceDock>
-            <Link className="device-screen__home-indicator" to="/" aria-label="Return to phone home screen" onClick={showDesktop} />
+            {isPhone ? <PhoneHomeIndicator
+              key={pathname}
+              screenRef={screenRef}
+              hasApp={!isHome && !guestDenied}
+              motion={motion}
+              onHome={() => { showDesktop(); navigate('/'); }}
+            /> : <Link className="device-screen__home-indicator" to="/" aria-label="Return to phone home screen" onClick={showDesktop} />}
             </div>}
             {guestDenied && <GuestAccessDialog onDismiss={() => navigate('/', { replace: true })} onLogout={() => runSystemAction('logout')} />}
             <SystemScreen

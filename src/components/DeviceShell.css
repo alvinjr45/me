@@ -1098,27 +1098,66 @@
 
   .device-screen--app .device-screen__dock { display: none; }
 
+  .device-screen__home-preview {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+  }
+
+  .device-screen--home-gesture .device-window {
+    z-index: 10;
+    transform-origin: 50% 65%;
+    transform: translate3d(0, calc(var(--home-offset, 0px) * -0.45), 0) scale(calc(1 - var(--home-progress, 0) * 0.85));
+    border-radius: calc(var(--home-progress, 0) * 36px);
+    opacity: calc(1 - var(--home-progress, 0));
+    pointer-events: none;
+    will-change: transform, opacity;
+  }
+
+  .device-screen--home-gesture .device-screen__home-preview {
+    opacity: var(--home-progress, 0);
+    transform: scale(calc(0.94 + var(--home-progress, 0) * 0.06));
+    will-change: transform, opacity;
+  }
+
+  .device-screen--app.device-screen--home-gesture .device-screen__dock {
+    display: flex;
+    opacity: var(--home-progress, 0);
+    pointer-events: none;
+  }
+
   .device-screen__home-indicator {
     position: absolute;
     z-index: 20;
     left: 50%;
     bottom: 0;
-    width: 140px;
-    height: 28px;
+    width: min(200px, 70%);
+    height: 36px;
     display: block;
     transform: translateX(-50%);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
   }
 
   .device-screen__home-indicator::after {
     content: '';
     position: absolute;
-    left: 15px;
-    right: 15px;
+    left: 50%;
+    width: 110px;
     bottom: 9px;
     height: 5px;
     border-radius: 99px;
     background: white;
     box-shadow: 0 1px 5px #000;
+    transform: translateX(-50%);
+  }
+
+  .device-screen--home-gesture .device-screen__home-indicator::after {
+    transform: translate(-50%, calc(var(--home-offset, 0px) * -0.45));
+    opacity: calc(1 - var(--home-progress, 0));
   }
 }
 

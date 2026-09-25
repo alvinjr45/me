@@ -16,7 +16,7 @@
   padding: 0 1rem;
   border-bottom: 1px solid var(--color-line);
   background: #0d1118;
-  color: var(--color-muted);
+  color: #9299a3;
   font-family: var(--font-mono);
   font-size: 0.72rem;
 }
@@ -59,6 +59,7 @@
 
 .command-terminal__line {
   min-height: 1.7em;
+  white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
 
@@ -69,7 +70,7 @@
 }
 
 .command-terminal__line--muted {
-  color: var(--color-muted-strong);
+  color: #aab3bf;
 }
 
 .command-terminal__line--accent {
@@ -94,13 +95,24 @@
   outline: 0;
   padding: 0;
   background: transparent;
-  color: var(--color-text);
+  color: #dfe8f1;
   caret-color: var(--color-accent);
   font: inherit;
 }
 
 .command-terminal__form input:focus-visible {
-  outline: 0;
+  outline: 1px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+.command-terminal__form input::placeholder {
+  color: #9299a3;
+  opacity: 1;
+}
+
+.command-terminal__form > span,
+.command-terminal__cursor {
+  flex-shrink: 0;
 }
 
 .command-terminal__cursor {
@@ -133,6 +145,15 @@
 }
 
 @container app-viewport (max-width: 560px) {
+  .command-terminal__form {
+    flex-wrap: wrap;
+    column-gap: 0.4rem;
+  }
+
+  .command-terminal__form > span:first-of-type {
+    flex-basis: 100%;
+  }
+
   .command-terminal {
     border-radius: var(--radius-sm) var(--radius-sm) 0 0;
   }

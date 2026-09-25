@@ -113,9 +113,9 @@ function Dogs() {
 
           <div className="dogs-app__dashboard">
             <section className="dogs-app__pack" aria-label="Drake and Josh">
-              {dogs.map((dog, index) => (
+              {dogs.map((dog) => (
                 <figure key={dog.name} className="dogs-app__dog">
-                  <div className="dogs-app__portrait"><img src={dog.image} alt={`${dog.name} portrait`} /><span className="dogs-app__badge">PACK / 0{index + 1}</span></div>
+                  <div className="dogs-app__portrait"><img src={dog.image} alt={`${dog.name} portrait`} /></div>
                   <figcaption><h2>{dog.name}</h2><p>{dog.role}</p></figcaption>
                 </figure>
               ))}
@@ -124,17 +124,19 @@ function Dogs() {
             <section className="dogs-app__watch" aria-labelledby="dogs-incident-title" aria-busy={incidentStatus === 'loading'}>
               <div className="dogs-app__streak">
                 <p className="dogs-app__eyebrow">The good behavior department</p>
-                <h2 id="dogs-incident-title">Days since last incident</h2>
                 <strong className="dogs-app__counter">{incidentDays === null ? '--' : String(incidentDays).padStart(2, '0')}</strong>
+                <h2 id="dogs-incident-title">Days since last incident</h2>
                 <span className="dogs-app__counter-caption">{incidentDays === null ? 'Awaiting a report' : incidentDays === 0 ? 'A fresh start. Again.' : 'And counting. Paws crossed.'}</span>
               </div>
               <div className="dogs-app__report">
                 {incidentStatus === 'loading' ? <p role="status">Checking the incident log...</p> : incidentStatus === 'error' ? (
                   <div role="alert"><h3>Report unavailable</h3><p>We couldn't load the latest incident.</p><button type="button" className="dogs-app__text-button" onClick={() => setReload((value) => value + 1)}>Try again <DogIcon name="arrow" /></button></div>
                 ) : incident ? <>
-                  <span className="dogs-app__eyebrow">Latest incident</span>
-                  <h3>{incident.culprit}</h3>
-                  <time dateTime={incident.incidentAt}>{formatIncidentDate(incident.incidentAt)}</time>
+                  <div className="dogs-app__report-label"><DogIcon name="notes" /><span className="dogs-app__eyebrow">Latest incident</span></div>
+                  <div className="dogs-app__report-meta">
+                    <h3>{incident.culprit}</h3>
+                    <time dateTime={incident.incidentAt}>{formatIncidentDate(incident.incidentAt)}</time>
+                  </div>
                   <p>{incident.incident}</p>
                   {incidentCount && <small>{incidentCount}</small>}
                 </> : <><h3>No incidents on file</h3><p>A clean record. Suspicious, but we'll take it.</p></>}

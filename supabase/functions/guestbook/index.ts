@@ -7,12 +7,27 @@ function required(name: string) {
   return value;
 }
 
-async function digest(value: string) {
+async function signingKey() {
   const secret = required('GUESTBOOK_HASH_SECRET');
   if (secret.length < 32) throw new Error('Hash secret too short');
-  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  const bytes = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(value));
+  return crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign', 'verify']);
+}
+
+async function digest(value: string) {
+  const bytes = await crypto.subtle.sign('HMAC', await signingKey(), new TextEncoder().encode(value));
   return [...new Uint8Array(bytes)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+}
+
+const sessionLifetime = 60 * 60 * 1000;
+const sessionMessage = (expires: number, actor: string, origin: string, terms: string) => JSON.stringify(['guestbook-session-v1', expires, actor, origin, terms]);
+
+async function verifySession(session: unknown, actor: string, origin: string, terms: string) {
+  if (typeof session !== 'string' || !/^\d{13}\.[a-f0-9]{64}$/.test(session)) return false;
+  const [timestamp, signature] = session.split('.');
+  const expires = Number(timestamp);
+  if (expires <= Date.now() || expires > Date.now() + sessionLifetime) return false;
+  const bytes = Uint8Array.from(signature.match(/../g)!, (byte) => parseInt(byte, 16));
+  return crypto.subtle.verify('HMAC', await signingKey(), bytes, new TextEncoder().encode(sessionMessage(expires, actor, origin, terms)));
 }
 
 async function readBody(request: Request) {
@@ -64,7 +79,7 @@ Deno.serve(async (request: Request) => {
     try { body = await readBody(request); } catch { return respond({ error: 'Invalid or oversized request.' }, 400); }
     if (!body || typeof body !== 'object' || Array.isArray(body)) return respond({ error: 'Invalid request.' }, 400);
     const { action } = body;
-    if (action !== 'submit') {
+    if (action !== 'submit' && action !== 'verify') {
       const secret = request.headers.get('x-admin-secret');
       if (!secret || secret !== required('ADMIN_POST_SECRET')) return respond({ error: 'Sign in to manage the guestbook.' }, 401);
     }
@@ -94,7 +109,7 @@ Deno.serve(async (request: Request) => {
       if (result.error) throw new Error('Message could not be changed');
       return respond({ ok: true });
     }
-    if (action !== 'submit') return respond({ error: 'Unknown action.' }, 400);
+    if (action !== 'submit' && action !== 'verify') return respond({ error: 'Unknown action.' }, 400);
 
     const termsVersion = Deno.env.get('GUESTBOOK_TERMS_VERSION')?.trim();
     if (!termsVersion) return respond({ error: 'Messaging is unavailable until the Terms and Conditions are published.', code: 'terms_unavailable' }, 503);
@@ -114,29 +129,42 @@ Deno.serve(async (request: Request) => {
     if (limit.data.error === 'limited') return respond({ error: 'Too many attempts. Please try again later.' }, 429);
     if (!limit.data.ok) throw new Error('Rate limiter unavailable');
     if (body.website) return respond({ error: 'Unable to accept this message.' }, 400);
-    if (typeof body.token !== 'string' || !body.token || body.token.length > 2048) return respond({ error: 'Complete the bot check before posting.' }, 400);
+    const usesSession = action === 'submit' && body.session != null;
+    if (usesSession && !await verifySession(body.session, actor, origin, termsVersion)) {
+      return respond({ error: 'Your verification expired. Verify again to continue.', code: 'verification_required' }, 401);
+    }
+    if (!usesSession && (typeof body.token !== 'string' || !body.token || body.token.length > 2048)) return respond({ error: 'Complete the bot check before posting.', code: 'verification_required' }, 400);
     let name;
     let message;
     let title = null;
     let conversationId = null;
     try {
       name = cleanText(body.name, 40, 'Name');
-      message = cleanText(body.message, 500, 'Message');
-      if (body.conversationId != null) {
-        if (typeof body.conversationId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.conversationId) || body.title != null) throw new Error('Choose one conversation to reply to.');
-        conversationId = body.conversationId;
-      } else {
-        title = cleanText(body.title, 80, 'Conversation title');
+      if (action === 'submit') {
+        message = cleanText(body.message, 500, 'Message');
+        if (body.conversationId != null) {
+          if (typeof body.conversationId !== 'string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.conversationId) || body.title != null) throw new Error('Choose one conversation to reply to.');
+          conversationId = body.conversationId;
+        } else {
+          title = cleanText(body.title, 80, 'Conversation title');
+        }
       }
     } catch (error) { return respond({ error: (error as Error).message }, 400); }
-    const verification = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
-      method: 'POST', headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret: turnstileSecret, response: body.token }),
-      signal: AbortSignal.timeout(8000)
-    });
-    if (!verification.ok) throw new Error('Bot verification unavailable');
-    const challenge = await verification.json();
-    if (challenge.success !== true || challenge.action !== 'guestbook' || !hostnames.includes(challenge.hostname)) return respond({ error: 'Bot verification expired or failed. Please try again.' }, 400);
+    if (!usesSession) {
+      const verification = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ secret: turnstileSecret, response: body.token }),
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!verification.ok) throw new Error('Bot verification unavailable');
+      const challenge = await verification.json();
+      if (challenge.success !== true || challenge.action !== 'guestbook' || !hostnames.includes(challenge.hostname)) return respond({ error: 'Bot verification expired or failed. Please try again.' }, 400);
+    }
+    if (action === 'verify') {
+      const expiresAt = Date.now() + sessionLifetime;
+      const signature = await digest(sessionMessage(expiresAt, actor, origin, termsVersion));
+      return respond({ session: `${expiresAt}.${signature}`, expiresAt });
+    }
     const extra = Deno.env.get('GUESTBOOK_BLOCKED_WORDS') || '';
     const safeName = scrubProfanity(name, extra);
     const safeMessage = scrubProfanity(message, extra);

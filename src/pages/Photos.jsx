@@ -49,12 +49,20 @@ function Photos() {
   useEffect(() => {
     let mounted = true;
     let request = 0;
+    const photoOrder = new Map();
     const refresh = async () => {
       const current = ++request;
       try {
         const next = await getPhotoLibrary();
         if (!mounted || current !== request) return;
-        setLibrary(next);
+        // Preserve the shuffled order when focus or admin changes refresh the library.
+        next.photos.forEach((photo) => {
+          if (!photoOrder.has(photo.id)) photoOrder.set(photo.id, Math.random());
+        });
+        setLibrary({
+          ...next,
+          photos: [...next.photos].sort((a, b) => photoOrder.get(a.id) - photoOrder.get(b.id))
+        });
         setLibraryStatus('ready');
         setLibraryError('');
         setSelectedId((id) => next.photos.some((photo) => photo.id === id) ? id : null);
@@ -102,7 +110,7 @@ function Photos() {
   const visiblePhotos = photos.filter((photo) => {
     const inCollection = collection === 'library' || (collection === 'favorites' ? favorites.includes(photo.id) : photo.album === collection);
     const albumTitle = photoAlbums.find((item) => item.id === photo.album)?.title || '';
-    return inCollection && `${photo.title} ${photo.alt} ${albumTitle}`.toLowerCase().includes(search);
+    return inCollection && `${photo.title} ${albumTitle}`.toLowerCase().includes(search);
   });
   const selectedPhoto = photos.find((photo) => photo.id === selectedId);
   const selectedIndex = viewerIds.indexOf(selectedId);
@@ -163,7 +171,7 @@ function Photos() {
               if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) movePhoto(dx < 0 ? 1 : -1);
             }}
           >
-            <img key={selectedPhoto.id} src={selectedPhoto.src} alt={selectedPhoto.alt} />
+            <img key={selectedPhoto.id} src={selectedPhoto.src} alt="" />
             <button type="button" className="photos-viewer__previous photos-app__icon-button" aria-label="Previous photo" disabled={selectedIndex === 0} onClick={() => movePhoto(-1)}><PhotoIcon name="back" /></button>
             <button type="button" className="photos-viewer__next photos-app__icon-button" aria-label="Next photo" disabled={selectedIndex === viewerIds.length - 1} onClick={() => movePhoto(1)}><PhotoIcon name="next" /></button>
           </div>
@@ -218,7 +226,7 @@ function Photos() {
                 })}</div>
               ) : (
                 <div className={`photos-app__grid photos-app__grid--${size}`}>
-                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${favorites.includes(photo.id) ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><img src={photo.src} alt={photo.alt} loading="lazy" width={photo.width} height={photo.height} /><span className="photos-app__tile-title">{photo.title}</span>{favorites.includes(photo.id) && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
+                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${favorites.includes(photo.id) ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><img src={photo.src} alt="" loading="lazy" width={photo.width} height={photo.height} /><span className="photos-app__tile-title">{photo.title}</span>{favorites.includes(photo.id) && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
                 </div>
               )}
               <footer className="photos-app__count" aria-live="polite">{visiblePhotos.length} {visiblePhotos.length === 1 ? 'photo' : 'photos'}<span>{collection === 'favorites' ? 'Saved in this browser' : 'A collection by AJ Thompson'}</span></footer>

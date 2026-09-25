@@ -294,7 +294,9 @@ test('requires verified AJ Thompson login, opens Mission Control, and clears acc
   expect(window.sessionStorage.getItem('ajt3_admin_secret')).toBeNull();
   openMissionControl();
   await screen.findByRole('heading', { name: 'Recent posts' });
-  fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+  fireEvent.click(within(screen.getByRole('navigation', { name: 'App dock' })).getByRole('link', { name: 'Open Settings' }));
+  fireEvent.click(screen.getByRole('button', { name: 'General' }));
+  fireEvent.click(screen.getByRole('button', { name: /Log out Close the current session/ }));
   expect(screen.getByLabelText('Admin password')).toHaveValue('');
   expect(screen.queryByRole('heading', { name: 'Welcome back.' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('radio', { name: 'Guest Visitor' }));
@@ -334,7 +336,7 @@ test('updates the admin profile photo in Mission Control, Settings, and the sign
     expect(await screen.findByAltText('Administrator')).toHaveAttribute('src', 'https://example.test/old.jpg');
     fireEvent.change(screen.getByLabelText('Choose admin profile photo'), { target: { files: [new File(['photo'], 'profile.jpg', { type: 'image/jpeg' })] } });
     fireEvent.click(await screen.findByRole('button', { name: 'Save' }));
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '02 Blog posts' })).toBeDisabled();
     await screen.findByText('Profile photo updated.');
     expect(screen.getByAltText('Administrator')).toHaveAttribute('src', 'https://example.test/new.jpg');
     fireEvent.click(within(screen.getByRole('navigation', { name: 'App dock' })).getByRole('link', { name: 'Open Settings' }));

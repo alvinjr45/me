@@ -20,7 +20,7 @@ const response = (status, data) => ({ status, ok: status >= 200 && status < 300,
 function TestDesktop() {
   const navigate = useNavigate();
   const access = useAdminAccess();
-  return <DeviceSettingsContext.Provider value={{ adminAccess: access }}><button onClick={() => navigate('/music')}>Switch to Music</button><button onClick={() => navigate('/admin/new?slug=first-post')}>Return to editor</button>{access.session ? <MissionControl /> : <AdminLogin access={access} />}</DeviceSettingsContext.Provider>;
+  return <DeviceSettingsContext.Provider value={{ adminAccess: access }}><button onClick={() => navigate('/music')}>Switch to Music</button><button onClick={() => navigate('/admin/new?slug=first-post')}>Return to editor</button><button onClick={access.logout}>Log out of desktop</button>{access.session ? <MissionControl /> : <AdminLogin access={access} />}</DeviceSettingsContext.Provider>;
 }
 
 function openApp(route = '/admin') {
@@ -43,6 +43,11 @@ beforeEach(() => {
     if (url.endsWith('admin-dog-incident')) return response(200, { incident: null });
     if (url.endsWith('admin-photo-library')) {
       const body = options.body instanceof FormData ? Object.fromEntries(options.body.entries()) : JSON.parse(options.body);
+      if (body.action === 'remove_from_album') {
+        const saved = { ...photoRows.find((item) => item.id === body.id), album_id: null };
+        photoRows = photoRows.map((item) => item.id === saved.id ? saved : item);
+        return response(200, { photo: saved });
+      }
       if (body.action === 'save_photo') {
         const saved = { ...body, id: body.id || 'new-photo', is_published: body.is_published === 'true', sort_order: Number(body.sort_order), image_url: body.file ? 'https://example.test/upload.jpg' : body.image_url };
         photoRows = [...photoRows.filter((item) => item.id !== saved.id), saved];
@@ -87,7 +92,7 @@ test('keeps the dashboard locked until the server accepts the password, and sign
   expect(await screen.findByRole('heading', { name: 'Posts' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'First post Published' })).toBeInTheDocument();
   expect(window.sessionStorage.getItem('ajt3_admin_secret')).toBeNull();
-  fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Log out of desktop' }));
   expect(screen.getByLabelText('Admin password')).toHaveValue('');
   expect(screen.queryByRole('heading', { name: 'Posts' })).not.toBeInTheDocument();
   expect(window.sessionStorage.getItem('ajt3_admin_secret')).toBeNull();
@@ -199,6 +204,42 @@ test('creates an album and makes it available in the photo editor without anothe
   expect(global.fetch.mock.calls.filter(([url]) => url.endsWith('admin-blog-post'))).toHaveLength(1);
 });
 
+test('removes album membership immediately while preserving library photos and unsaved drafts', async () => {
+  openApp('/admin/photos');
+  await signIn();
+  fireEvent.click(await screen.findByRole('button', { name: 'Drake Published / Drake & Josh' }));
+  fireEvent.change(screen.getByLabelText('Photo title'), { target: { value: 'Unsaved photo title' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Albums (1)' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Drake & Josh 1 photos' }));
+  fireEvent.change(screen.getByLabelText('Album title'), { target: { value: 'Unsaved album title' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Remove Drake from album' }));
+  await screen.findByText('Photo removed from this album. It is still in your photo library.');
+  expect(screen.getByText('No photos in this album.')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Drake & Josh 0 photos' })).toBeInTheDocument();
+  expect(screen.getByLabelText('Album title')).toHaveValue('Unsaved album title');
+  fireEvent.click(screen.getByRole('button', { name: 'Photos (1)' }));
+  expect(screen.getByRole('button', { name: 'Drake Published / No album' })).toBeInTheDocument();
+  expect(screen.getByLabelText('Photo title')).toHaveValue('Unsaved photo title');
+  expect(screen.getByLabelText('Album')).toHaveValue('');
+  fireEvent.click(screen.getByRole('button', { name: 'Save photo' }));
+  await screen.findByText('Photo saved and published to your camera roll.');
+  const [, request] = global.fetch.mock.calls.find(([, options]) => options.body instanceof FormData);
+  expect(request.body.get('album_id')).toBe('');
+});
+
+test('retains photos in the album after a failed removal and allows retry', async () => {
+  openApp('/admin/photos');
+  await signIn();
+  fireEvent.click(await screen.findByRole('button', { name: 'Albums (1)' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Drake & Josh 1 photos' }));
+  global.fetch.mockResolvedValueOnce(response(500, { error: 'Unable to remove the photo.' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Remove Drake from album' }));
+  expect(await screen.findByRole('alert')).toHaveTextContent('Unable to remove the photo.');
+  expect(screen.getByRole('button', { name: 'Drake & Josh 1 photos' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Remove Drake from album' }));
+  await screen.findByText('No photos in this album.');
+});
+
 test('uploads a new image through the authenticated photo endpoint', async () => {
   openApp('/admin/photos');
   await signIn();
@@ -207,12 +248,12 @@ test('uploads a new image through the authenticated photo endpoint', async () =>
   fireEvent.change(screen.getByLabelText('Upload image'), { target: { files: [file] } });
   await screen.findByText('Image ready. Save the photo to upload it.');
   fireEvent.change(screen.getByLabelText('Photo title'), { target: { value: 'New memory' } });
-  expect(screen.getByLabelText('Alt text (optional)')).not.toBeRequired();
+  expect(screen.queryByLabelText(/Alt text/)).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Save photo' }));
   await screen.findByText('Photo saved and published to your camera roll.');
   const [, request] = global.fetch.mock.calls.find(([, options]) => options.body instanceof FormData);
   expect(request.body.get('file').name).toBe('new-image.jpg');
-  expect(request.body.get('alt_text')).toBe('');
+  expect(request.body.has('alt_text')).toBe(false);
   expect(request.headers['Content-Type']).toBeUndefined();
   expect(screen.getByRole('button', { name: 'New memory Published / Drake & Josh' })).toBeInTheDocument();
 });
@@ -241,15 +282,14 @@ test('uploads multiple photos and preserves an open photo draft', async () => {
     fireEvent.click(screen.getByRole('button', { name: 'Upload photos' }));
     const files = ['first.jpg', 'second.jpg'].map((name) => new File(['photo'], name, { type: 'image/jpeg' }));
     fireEvent.change(screen.getByLabelText('Choose photos'), { target: { files } });
-    for (const file of files) fireEvent.change(screen.getByLabelText(`Alt text for ${file.name}`), { target: { value: `Description of ${file.name}` } });
     fireEvent.click(screen.getByRole('button', { name: 'Upload 2 photos' }));
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '02 Blog posts' })).toBeDisabled();
     await screen.findByText('2 photos uploaded. All selected photos are saved.');
     fireEvent.click(screen.getByRole('button', { name: 'Done' }));
     expect(screen.getByRole('button', { name: 'first Published / Drake & Josh' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'second Published / Drake & Josh' })).toBeInTheDocument();
     expect(screen.getByLabelText('Caption')).toHaveValue('Keep this draft');
-    expect(screen.getByRole('button', { name: 'Sign out' })).toBeEnabled();
+    expect(screen.getByRole('button', { name: '02 Blog posts' })).toBeEnabled();
     const uploads = global.fetch.mock.calls.filter(([, options]) => options.body instanceof FormData);
     expect(uploads).toHaveLength(2);
     for (const [, request] of uploads) expect(request.headers['x-admin-secret']).toBe('test-password');
@@ -290,6 +330,6 @@ test('creates calendar events and keeps unsaved details when switching sections'
   const [, request] = global.fetch.mock.calls.find(([url, options]) => url.endsWith('admin-calendar') && JSON.parse(options.body).action === 'save');
   expect(request.headers['x-admin-secret']).toBe('test-password');
   expect(JSON.parse(request.body)).toMatchObject({ title: 'Studio session', is_published: true });
-  fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Log out of desktop' }));
   expect(screen.queryByRole('heading', { name: 'Calendar events' })).not.toBeInTheDocument();
 });

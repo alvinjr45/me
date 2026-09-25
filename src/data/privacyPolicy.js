@@ -4,7 +4,7 @@ export const privacyPolicy = {
 AJT3 is AJ Thompson's personal website. This policy explains the information used to display the site, remember your preferences, and operate its public guestbook. Contact AJ Thompson using the contact method linked on this page for privacy questions or requests.
 
 2. Information you submit
-The guestbook receives your display name, conversation title or selected conversation, message, age confirmation, acceptance of the terms, terms version, and a bot-verification token. Published names, titles, messages, identifiers, and timestamps are stored in Supabase. Only the text remaining after filtering is saved in the guestbook database. The original submission is still processed by the service to validate and filter it.
+The guestbook receives your display name, conversation title or selected conversation, message, age confirmation, acceptance of the terms, terms version, and a bot-verification token or temporary posting session. Published names, titles, messages, identifiers, and timestamps are stored in Supabase. Only the text remaining after filtering is saved in the guestbook database. The original submission is still processed by the service to validate and filter it.
 Your age confirmation is a self-declaration. The guestbook does not ask for a date of birth, identity document, email address, or visitor account. Age and terms declarations are checked for each submission but are not saved as a separate, durable consent record.
 
 3. Public information
@@ -15,7 +15,7 @@ The guestbook processes a network address to enforce spam limits. It stores a ke
 The website host and service providers may separately process network addresses, browser information, request details, and operational logs to deliver and protect their services. Their logging and backup retention are separate from the guestbook's database cleanup.
 
 5. Cloudflare Turnstile and Supabase
-Supabase provides the database and server functions used by the guestbook and other site features. Cloudflare Turnstile provides bot verification when the posting form is available after joining. Cloudflare processes technical signals such as a network address, browser headers, and the site origin to detect bots and improve its detection service. The guestbook server also verifies the challenge token with Cloudflare. Links to these providers' privacy notices appear below.
+Supabase provides the database and server functions used by the guestbook and other site features. Cloudflare Turnstile provides bot verification on the entry screen. Cloudflare processes technical signals such as a network address, browser headers, and the site origin to detect bots and improve its detection service. The guestbook server verifies the challenge token with Cloudflare and issues a signed posting session that expires after one hour. This session is kept in app memory, tied to a keyed hash of your network address and the site origin, and checked when you post. It is not saved in browser storage or the guestbook database. Links to these providers' privacy notices appear below.
 
 6. Browser storage and embedded content
 The site uses local browser storage for features such as appearance and wallpaper preferences, photo favorites, and App Store selections. You can clear these through your browser's site-data controls; doing so resets saved preferences. Guestbook drafts, your chosen name, and participation declarations stay in the open guestbook's memory and are discarded when it closes or the page reloads.

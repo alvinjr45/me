@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { guestbookTerms } from '../data/guestbookTerms';
 import { privacyPolicy } from '../data/privacyPolicy';
 import GuestbookChallenge from './GuestbookChallenge';
+import { verifyGuestbook } from '../lib/guestbook';
 
 export function areGuestbookTermsPublished() {
   return typeof guestbookTerms.version === 'string' && Boolean(guestbookTerms.version.trim())
@@ -15,21 +16,42 @@ export function canParticipate(participant) {
     && participant.termsVersion === guestbookTerms.version;
 }
 
-export default function GuestbookParticipation({ participant, onContinue, blockedMessage = '', token, onToken }) {
+export default function GuestbookParticipation({ participant, onContinue, blockedMessage = '', session }) {
   const heading = useRef(null);
   const [name, setName] = useState(participant?.name || '');
-  const [ageConfirmed, setAgeConfirmed] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [ageConfirmed, setAgeConfirmed] = useState(canParticipate(participant));
+  const [termsAccepted, setTermsAccepted] = useState(canParticipate(participant));
+  const [token, setToken] = useState('');
+  const [verifying, setVerifying] = useState(false);
+  const [error, setError] = useState('');
+  const [challengeKey, setChallengeKey] = useState(0);
+  const controller = useRef(null);
   const published = areGuestbookTermsPublished();
   const nextParticipant = { name: name.trim(), ageConfirmed, termsAccepted, termsVersion: guestbookTerms.version };
   const sitekey = process.env.REACT_APP_TURNSTILE_SITE_KEY;
-  const ready = canParticipate(nextParticipant) && Boolean(sitekey && token) && !blockedMessage;
+  const sessionReady = Boolean(session?.token && session.expiresAt > Date.now());
+  const ready = canParticipate(nextParticipant) && (sessionReady || Boolean(sitekey && token)) && !blockedMessage && !verifying;
 
   useEffect(() => { heading.current?.focus({ preventScroll: true }); }, []);
+  useEffect(() => () => controller.current?.abort(), []);
 
-  function continueToMessages(event) {
+  async function continueToMessages(event) {
     event.preventDefault();
-    if (ready) onContinue(nextParticipant);
+    if (!ready) return;
+    if (sessionReady) { onContinue(nextParticipant, session); return; }
+    const pending = new AbortController();
+    controller.current = pending;
+    setVerifying(true); setError('');
+    try {
+      const result = await verifyGuestbook(nextParticipant, token, pending.signal);
+      if (pending.signal.aborted) return;
+      if (typeof result.session !== 'string' || !result.session || !Number.isFinite(result.expiresAt) || result.expiresAt <= Date.now()) throw new Error('Verification could not be confirmed. Please retry.');
+      onContinue(nextParticipant, { token: result.session, expiresAt: result.expiresAt });
+    } catch (failure) {
+      if (!pending.signal.aborted) setError(failure.message);
+    } finally {
+      if (!pending.signal.aborted) { setVerifying(false); setToken(''); setChallengeKey((value) => value + 1); }
+    }
   }
 
   return <form className="guestbook-messages__participation" aria-labelledby="guestbook-join-title" onSubmit={continueToMessages}>
@@ -45,12 +67,13 @@ export default function GuestbookParticipation({ participant, onContinue, blocke
       <label className="guestbook-messages__agreement"><input type="checkbox" required checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} /><span>I confirm that I am at least 18 years old.</span></label>
       <label className="guestbook-messages__agreement"><input type="checkbox" required disabled={!published} checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} /><span>I have read and agree to the Terms and Conditions.</span></label>
     </fieldset>
-    {sitekey ? <>
-      <GuestbookChallenge sitekey={sitekey} onToken={onToken} appearance="always" />
+    {sessionReady ? <p className="guestbook-messages__join-hint">Your bot verification is still active.</p> : sitekey ? <>
+      <GuestbookChallenge sitekey={sitekey} onToken={setToken} resetKey={challengeKey} appearance="always" />
       <p className="guestbook-messages__join-hint" role="status">{token ? 'Bot check complete.' : 'Complete the Cloudflare verification to continue.'}</p>
     </> : <p role="status">Joining is unavailable until spam protection is configured.</p>}
     {blockedMessage && <p role="alert">{blockedMessage}</p>}
-    <button type="submit" disabled={!ready}>Continue to messages</button>
+    {error && <p role="alert">{error}</p>}
+    <button type="submit" disabled={!ready}>{verifying ? 'Verifying...' : 'Continue to messages'}</button>
     <p className="guestbook-messages__join-hint">Age is self-declared. No date of birth or ID is collected.</p>
   </form>;
 }

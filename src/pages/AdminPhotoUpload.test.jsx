@@ -37,7 +37,6 @@ function openUpload(overrides = {}) {
 
 function choosePhotos(files = [new File(['one'], 'first-photo.jpg', { type: 'image/jpeg' }), new File(['two'], 'second_photo.png', { type: 'image/png' })]) {
   fireEvent.change(screen.getByLabelText('Choose photos'), { target: { files } });
-  for (const file of files) fireEvent.change(screen.getByLabelText(`Alt text for ${file.name}`), { target: { value: `Description of ${file.name}` } });
 }
 
 test('uploads every selected photo with shared settings and individual metadata', async () => {
@@ -57,7 +56,7 @@ test('uploads every selected photo with shared settings and individual metadata'
     expect(body.get('action')).toBe('save_photo');
     return Object.fromEntries(body);
   });
-  expect(first).toMatchObject({ id: 'photo-1', title: 'A weekend away', alt_text: 'Description of first-photo.jpg', sort_order: '5' });
+  expect(first).toMatchObject({ id: 'photo-1', title: 'A weekend away', sort_order: '5' });
   expect(second).toMatchObject({ id: 'photo-2', title: 'second photo', sort_order: '6' });
   expect(first.file.name).toBe('first-photo.jpg');
   expect(second.file.name).toBe('second_photo.png');
@@ -135,19 +134,14 @@ test('requires photo titles and allows removing or discarding queued files', () 
   expect(props.onClose).toHaveBeenCalledTimes(1);
 });
 
-test('uploads photos with empty or whitespace-only alt text', async () => {
+test('uploads photos without alt text fields or metadata', async () => {
   openUpload();
   choosePhotos();
-  const firstAlt = screen.getByLabelText('Alt text for first-photo.jpg');
-  const secondAlt = screen.getByLabelText('Alt text for second_photo.png');
-  expect(firstAlt).not.toBeRequired();
-  expect(secondAlt).not.toBeRequired();
-  fireEvent.change(firstAlt, { target: { value: '' } });
-  fireEvent.change(secondAlt, { target: { value: ' ' } });
+  expect(screen.queryByLabelText(/Alt text/)).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Upload 2 photos' }));
   await screen.findByText('2 photos uploaded. All selected photos are saved.');
   expect(requestPhotoLibrary).toHaveBeenCalledTimes(2);
-  for (const [, body] of requestPhotoLibrary.mock.calls) expect(body.get('alt_text')).toBe('');
+  for (const [, body] of requestPhotoLibrary.mock.calls) expect(body.has('alt_text')).toBe(false);
 });
 
 test('requires an existing album before uploading', () => {

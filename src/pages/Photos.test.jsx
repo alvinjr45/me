@@ -34,6 +34,20 @@ test('refreshes after an admin change and closes a viewer for a hidden photo', a
   expect(screen.queryByRole('button', { name: 'Open New memory' })).not.toBeInTheDocument();
 });
 
+test('refreshes album membership while keeping an unassigned photo in All Photos', async () => {
+  const other = { ...photo, id: 'other-photo', title: 'Another memory' };
+  getPhotoLibrary.mockResolvedValue({ photos: [photo, other], albums: [album] });
+  render(<Photos />);
+  fireEvent.click(await screen.findByRole('button', { name: 'Weekends' }));
+  expect(screen.getByRole('button', { name: 'Open New memory' })).toBeInTheDocument();
+  getPhotoLibrary.mockResolvedValue({ photos: [{ ...photo, album: null }, other], albums: [album] });
+  fireEvent(window, new Event('ajt3-photos-updated'));
+  await waitFor(() => expect(screen.queryByRole('button', { name: 'Open New memory' })).not.toBeInTheDocument());
+  expect(screen.getByRole('button', { name: 'Open Another memory' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'All Photos 2' }));
+  expect(screen.getByRole('button', { name: 'Open New memory' })).toBeInTheDocument();
+});
+
 test('shows a retryable error without repopulating hidden photos from static data', async () => {
   getPhotoLibrary.mockRejectedValue(new Error('Library unavailable'));
   render(<Photos />);

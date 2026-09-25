@@ -8,15 +8,19 @@ const ts = require('typescript');
 const source = readFileSync(join(__dirname, 'index.ts'), 'utf8').replace(/^import .*?;\n/, '');
 const compiled = ts.transpileModule(source, { compilerOptions: { target: ts.ScriptTarget.ES2020, module: ts.ModuleKind.CommonJS } }).outputText;
 
-function service({ failSave = false, failUpload = false, missingAlbum = false } = {}) {
-  const state = { clients: 0, writes: [], uploads: [], removals: [] };
+function service({ failSave = false, failUpload = false, missingAlbum = false, missingPhoto = false } = {}) {
+  const state = { clients: 0, writes: [], uploads: [], removals: [], filters: [] };
   const client = {
     from(table) {
       let row;
       const query = {
-        select() { return query; }, order() { return query; }, eq() { return query; },
+        select() { return query; }, order() { return query; }, eq(key, value) { state.filters.push([key, value]); return query; },
+        update(value) { row = value; state.writes.push({ table, row }); return query; },
         upsert(value) { row = value; state.writes.push({ table, row }); return query; },
-        async maybeSingle() { return { data: missingAlbum ? null : { id: 'dogs' }, error: null }; },
+        async maybeSingle() {
+          if (row) return { data: missingPhoto ? null : { ...validPhoto, ...row }, error: failSave ? { message: 'Database unavailable' } : null };
+          return { data: missingAlbum ? null : { id: 'dogs' }, error: null };
+        },
         async single() { return { data: row, error: failSave ? { message: 'Database unavailable' } : null }; },
         then(resolve, reject) { return Promise.resolve({ data: [], error: null }).then(resolve, reject); }
       };
@@ -45,7 +49,7 @@ const validPhoto = { action: 'save_photo', id: 'drake', title: 'Drake', album_id
 
 test('requires the admin secret before any database or storage access', async () => {
   const { send, state } = service();
-  for (const action of ['list', 'save_photo', 'save_album', 'save_profile']) assert.equal((await send({ action }, 'wrong')).status, 401);
+  for (const action of ['list', 'save_photo', 'save_album', 'save_profile', 'remove_from_album']) assert.equal((await send({ action }, 'wrong')).status, 401);
   assert.equal(state.clients, 0);
   assert.equal(state.writes.length, 0);
 });
@@ -58,24 +62,24 @@ test('lists library records and supports CORS preflight without writes', async (
   assert.equal(state.writes.length, 0);
 });
 
-test('validates URL, order, dimensions, visibility, title and alt text before saving', async () => {
+test('validates URL, order, dimensions, visibility and title before saving', async () => {
   const { send, state } = service();
-  for (const fields of [{ image_url: 'javascript:alert(1)' }, { image_url: '//untrusted.test/a.jpg' }, { sort_order: -1 }, { width: 0 }, { is_published: 'maybe' }, { title: '' }, { alt_text: 'a'.repeat(501) }]) {
+  for (const fields of [{ image_url: 'javascript:alert(1)' }, { image_url: '//untrusted.test/a.jpg' }, { sort_order: -1 }, { width: 0 }, { is_published: 'maybe' }, { title: '' }]) {
     assert.equal((await send({ ...validPhoto, ...fields })).status, 400);
   }
   assert.equal(state.writes.length, 0);
 });
 
-test('accepts blank or omitted alt text for photo edits and uploads', async () => {
+test('ignores legacy alt text for photo edits and accepts uploads without it', async () => {
   const { send, state } = service();
-  for (const alt_text of ['', '   ', undefined]) {
+  for (const alt_text of ['', 'Portrait of Drake', 'a'.repeat(501), undefined]) {
     assert.equal((await send({ ...validPhoto, alt_text })).status, 200);
-    assert.equal(state.writes.at(-1).row.alt_text, '');
+    assert.equal(Object.hasOwn(state.writes.at(-1).row, 'alt_text'), false);
   }
   const form = uploadForm();
   form.delete('alt_text');
   assert.equal((await send(form)).status, 200);
-  assert.equal(state.writes.at(-1).row.alt_text, '');
+  assert.equal(Object.hasOwn(state.writes.at(-1).row, 'alt_text'), false);
 });
 
 test('persists hidden status and rejects unknown albums', async () => {
@@ -92,6 +96,42 @@ test('saves albums and rejects unsupported actions', async () => {
   assert.equal((await send({ action: 'save_album', title: 'Weekends', description: '', sort_order: 2 })).status, 200);
   assert.equal(state.writes[0].table, 'ajt3_photo_albums');
   assert.equal((await send({ action: 'delete_everything' })).status, 400);
+});
+
+test('removes only album membership and scopes the update to the expected photo and album', async () => {
+  const { send, state } = service();
+  const result = await send({ action: 'remove_from_album', id: 'drake', album_id: 'dogs' });
+  assert.equal(result.status, 200);
+  const { photo } = await result.json();
+  assert.equal(photo.album_id, null);
+  assert.equal(photo.image_url, validPhoto.image_url);
+  assert.equal(photo.is_published, true);
+  assert.equal(state.writes[0].table, 'ajt3_photos');
+  assert.deepEqual(Object.keys(state.writes[0].row), ['album_id']);
+  assert.deepEqual(state.filters, [['id', 'drake'], ['album_id', 'dogs']]);
+  assert.equal(state.removals.length, 0);
+});
+
+test('rejects incomplete, stale and failed album removals', async () => {
+  const { send, state } = service();
+  for (const fields of [{ id: 'drake' }, { album_id: 'dogs' }]) {
+    assert.equal((await send({ action: 'remove_from_album', ...fields })).status, 400);
+  }
+  assert.equal(state.writes.length, 0);
+  const removal = { action: 'remove_from_album', id: 'drake', album_id: 'dogs' };
+  assert.equal((await service({ missingPhoto: true }).send(removal)).status, 409);
+  assert.equal((await service({ failSave: true }).send(removal)).status, 500);
+});
+
+test('saves photos without an album while preserving visibility', async () => {
+  const { send } = service({ missingAlbum: true });
+  for (const album_id of [null, '']) {
+    const result = await send({ ...validPhoto, album_id, is_published: false });
+    assert.equal(result.status, 200);
+    const { photo } = await result.json();
+    assert.equal(photo.album_id, null);
+    assert.equal(photo.is_published, false);
+  }
 });
 
 function uploadForm(type = 'image/jpeg') {

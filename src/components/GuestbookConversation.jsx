@@ -1,9 +1,8 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import GuestbookChallenge from './GuestbookChallenge';
 import { canParticipate } from './GuestbookParticipation';
 import { getGuestbook, guestbookRequest, notifyGuestbookChanged } from '../lib/guestbook';
 
-export default function GuestbookConversation({ conversation, focusChat, draft, onDraft, participant, onParticipant, onJoin, entryToken, onEntryToken, ownIds, onSent, onCreated, onBack, onBusy }) {
+export default function GuestbookConversation({ conversation, focusChat, draft, onDraft, participant, onParticipant, onJoin, session, onSessionExpired, ownIds, onSent, onCreated, onBack, onBusy }) {
   const [entries, setEntries] = useState([]);
   const [title, setTitle] = useState(conversation?.title || 'New conversation');
   const [loading, setLoading] = useState(Boolean(conversation));
@@ -11,10 +10,7 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
   const [error, setError] = useState('');
   const [hasMore, setHasMore] = useState(false);
   const [reload, setReload] = useState(0);
-  const [refreshedToken, setToken] = useState('');
-  const token = entryToken || refreshedToken;
   const [website, setWebsite] = useState('');
-  const [challengeKey, setChallengeKey] = useState(0);
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState('');
   const [feedback, setFeedback] = useState('');
@@ -26,8 +22,8 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
   const heading = useRef(null);
   const composerInput = useRef(null);
   const conversationId = conversation?.id;
-  const sitekey = process.env.REACT_APP_TURNSTILE_SITE_KEY;
-  const configured = Boolean(sitekey && process.env.REACT_APP_SUPABASE_URL && process.env.REACT_APP_SUPABASE_ANON_KEY);
+  const configured = Boolean(process.env.REACT_APP_SUPABASE_URL && process.env.REACT_APP_SUPABASE_ANON_KEY);
+  const sessionReady = Boolean(session?.token && session.expiresAt > Date.now());
   const participationReady = canParticipate(participant);
 
   useEffect(() => { if (focusChat) heading.current?.focus({ preventScroll: true }); }, [focusChat]);
@@ -79,7 +75,7 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
 
   async function submit(event) {
     event.preventDefault();
-    if (posting || !configured || !token || unavailable || !participationReady) return;
+    if (posting || !configured || !sessionReady || unavailable || !participationReady) return;
     const pending = new AbortController();
     controller.current = pending;
     setPosting(true); onBusy(true); setPostError(''); setFeedback('');
@@ -87,7 +83,7 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
       const result = await guestbookRequest({
         action: 'submit', name: participant.name, ageConfirmed: participant.ageConfirmed,
         termsAccepted: participant.termsAccepted, termsVersion: participant.termsVersion,
-        message: draft.message, website, token, ...(conversationId ? { conversationId } : { title: draft.title })
+        message: draft.message, website, session: session.token, ...(conversationId ? { conversationId } : { title: draft.title })
       }, null, pending.signal);
       if (pending.signal.aborted) return;
       if (!result.entry?.id || !result.entry.conversation_id) throw new Error('Your message could not be confirmed. Refresh before retrying.');
@@ -100,13 +96,14 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
     } catch (failure) {
       if (!pending.signal.aborted) {
         setPostError(failure.message);
+        if (failure.code === 'verification_required') onSessionExpired();
         if (['participation_required', 'terms_changed', 'terms_unavailable'].includes(failure.code)) {
           onBusy(false);
           onParticipant({ name: participant.name }, failure.code === 'participation_required' ? '' : failure.message);
         }
       }
     }
-    finally { if (!pending.signal.aborted) { setPosting(false); onBusy(false); onEntryToken(''); setToken(''); setChallengeKey((value) => value + 1); } }
+    finally { if (!pending.signal.aborted) { setPosting(false); onBusy(false); } }
   }
 
   return <section className="guestbook-messages__chat" aria-label={conversationId ? 'Conversation' : 'New conversation'}>
@@ -128,11 +125,11 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
       <fieldset disabled={posting || !configured || unavailable}>
         {!conversationId && <label className="guestbook-messages__identity">Topic<input ref={composerInput} aria-label="Conversation title" value={draft.title} onChange={(event) => onDraft({ ...draft, title: event.target.value })} maxLength={80} required placeholder="Give this conversation a name" /></label>}
         <div className="guestbook-messages__identity"><span>Sending as <strong>{participant.name}</strong></span><button type="button" disabled={posting} onClick={() => onParticipant({ name: participant.name })}>Change details</button></div>
-        <div className="guestbook-messages__input-row"><label className="sr-only" htmlFor="guestbook-message">Message</label><textarea ref={conversationId ? composerInput : null} id="guestbook-message" value={draft.message} onChange={(event) => onDraft({ ...draft, message: event.target.value })} maxLength={500} required rows={2} placeholder={conversationId ? 'Message this conversation' : 'Start the conversation'} /><button type="submit" className="guestbook-messages__send" aria-label={posting ? 'Sending message' : conversationId ? 'Send message' : 'Create conversation'} disabled={posting || !configured || !token || unavailable}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 11 6-6 6 6M12 5v15" /></svg></button></div>
+        <div className="guestbook-messages__input-row"><label className="sr-only" htmlFor="guestbook-message">Message</label><textarea ref={conversationId ? composerInput : null} id="guestbook-message" value={draft.message} onChange={(event) => onDraft({ ...draft, message: event.target.value })} maxLength={500} required rows={2} placeholder={conversationId ? 'Message this conversation' : 'Start the conversation'} /><button type="submit" className="guestbook-messages__send" aria-label={posting ? 'Sending message' : conversationId ? 'Send message' : 'Create conversation'} disabled={posting || !configured || !sessionReady || unavailable}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 11 6-6 6 6M12 5v15" /></svg></button></div>
         <div className="guestbook__trap" aria-hidden="true"><label htmlFor="guestbook-website">Leave empty</label><input id="guestbook-website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" /></div>
       </fieldset>
-      {configured && !unavailable && !entryToken && <GuestbookChallenge sitekey={sitekey} onToken={setToken} resetKey={challengeKey} />}
-      <div className="guestbook-messages__composer-note"><span>{configured ? token ? 'Ready to send. Profanity filtered.' : 'Complete bot verification to send.' : 'Posting is unavailable until spam protection is configured.'}</span><span>{draft.message.length}/500</span></div>
+      {configured && !unavailable && !sessionReady && <button type="button" className="guestbook-messages__join-button" disabled={posting} onClick={onJoin}>Verify to continue</button>}
+      <div className="guestbook-messages__composer-note"><span>{configured ? sessionReady ? 'Ready to send. Profanity filtered.' : 'Your verification expired. Your draft is saved.' : 'Posting is unavailable until the guestbook is connected.'}</span><span>{draft.message.length}/500</span></div>
       {postError && <p role="alert">{postError}</p>}{feedback && <p role="status">{feedback}</p>}
     </form>}
   </section>;

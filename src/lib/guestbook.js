@@ -58,3 +58,7 @@ export async function guestbookRequest(payload, secret, signal) {
 export function notifyGuestbookChanged() {
   window.dispatchEvent(new Event('ajt3-guestbook-updated'));
 }
+
+export function verifyGuestbook(participant, token, signal) {
+  return guestbookRequest({ action: 'verify', ...participant, token }, null, signal);
+}

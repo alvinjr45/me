@@ -32,11 +32,15 @@ after completing the entry screen. Both declarations are grouped together below
 the policy readers. "Change details" returns to the same full entry screen,
 preserving conversation drafts. Closing and reopening the app shows entry again.
 
-Continue also requires a Turnstile token. The entry token is kept in memory for
-the first message, where the server validates it before publishing. The client
-discards it after four minutes or any submission attempt; a fresh interaction-only
-check then runs in the composer. Drafts survive expiry and failed checks. This
-does not create a verified session or bypass server verification for later posts.
+Continue exchanges a Turnstile token with the server for a signed, one-hour
+posting session. The session stays in memory and is reused across conversations
+and messages. No Cloudflare widget runs in the composer. After expiry or a
+network change, "Verify to continue" returns to entry while preserving drafts
+and current declarations. Changing details retains a valid bot session.
+The server checks the signature, expiry, network hash, origin, and current terms
+on each post, along with all existing attempt and publishing limits. The signing
+key is the existing hash secret, with a separate session-specific signing prefix.
+Legacy frontends can still submit a fresh, single-use Turnstile token per post.
 Local previews without a Turnstile site key cannot continue past entry.
 
 Before any message or new conversation title can be entered, visitors must give
@@ -81,12 +85,13 @@ message storage remains unchanged. Do not describe the checkbox as verified age.
 2. Require the explicit 18+ and terms declarations for the published terms
    version, then record an attempt against shared database limits.
 3. Reject the hidden spam field, invalid text, links/email addresses, and missing
-   challenge tokens. Names are limited to 40 characters and messages to 500.
+   verification credentials. Names are limited to 40 characters and messages to 500.
    A new conversation requires an 80-character-max title; a reply requires an
    existing conversation ID. Providing both or neither is rejected.
-4. Validate Turnstile on the server, including success, action `guestbook`, and
-   an allowed hostname. Invalid, expired, replayed, or unavailable verification
-   never permits a post.
+4. Validate Turnstile at entry, including success, action `guestbook`, and an
+   allowed hostname, before issuing the signed posting session. Every post must
+   present a valid session or a fresh Turnstile token from a legacy frontend.
+   Invalid or expired verification never permits a post.
 5. Normalize and scrub names, messages, and new conversation titles; matching
    words become `***`. Only the
    scrubbed text is stored. Render all content as React text, never HTML.
@@ -114,7 +119,8 @@ budget as a reply. The chat-like layout does not relax the existing spam limits.
 
 The guestbook Edge Function was updated through the Supabase dashboard on
 September 25, 2026 to use `ajt3_guestbook_submit_v2` and enforce the current
-participation requirements. The older deployed function called the retired RPC,
+participation requirements. A follow-up deployment added the `verify` action and
+signed one-hour posting sessions. The older deployed function called the retired RPC,
 whose `upgrade_required` response was incorrectly displayed as a posting limit.
 Only an explicit `limited` result now produces a rate-limit response. A Vercel
 frontend deployment does not deploy this Supabase function.
@@ -192,7 +198,8 @@ New installations start with submissions **paused** until setup is verified.
   get different buckets. Do not enable posting if this proxy trust assumption
   fails; adapt the trusted ingress first. Missing/invalid addresses fail closed.
 - Verify real Turnstile passes only with the configured hostname and action.
-  Attempt direct requests with no token, reused tokens, wrong hosts/actions, a
+  Verify multiple messages reuse one session, and tampered/expired sessions fail.
+  Attempt direct requests with no session/token, reused Cloudflare tokens, wrong hosts/actions, a
   filled honeypot, links, long bodies, and offline verification: none may publish.
 - Check concurrent submissions from the same network: at most one new post per
   minute, five per rolling day. Check global caps and duplicate rejection.

@@ -8,10 +8,9 @@
 .dogs-app__brand { display: flex; align-items: center; gap: 7px; margin-right: auto; font-size: 12px; letter-spacing: -0.02em; }
 .dogs-app__brand svg { color: var(--color-main); width: 18px; height: 18px; }
 .dogs-app__scroll { padding: 12px; }
-.dogs-app__heading { margin-bottom: 12px; }
+.dogs-app__heading { margin-bottom: 12px; text-align: center; }
 .dogs-app .dogs-app__eyebrow { margin: 0; color: var(--color-main); font: 10px/1.6 var(--font-mono); letter-spacing: 0.06em; }
 .dogs-app .dogs-app__heading h1 { margin: 3px 0; font-size: 20px; line-height: 1.2; letter-spacing: -0.035em; }
-.dogs-app__heading > p:last-child { margin: 0; color: #aab8c8; font-size: 12px; line-height: 1.5; }
 .dogs-app__dashboard { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; }
 .dogs-app__pack { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .dogs-app__dog { display: flex; flex-direction: column; align-items: center; gap: 12px; min-width: 0; margin: 0; text-align: center; }

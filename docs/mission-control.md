@@ -9,7 +9,7 @@ backend operations still require `ADMIN_POST_SECRET` independently of the UI.
 - `/admin`: publishing totals, photo totals, recent posts, and management links.
 - `/admin/posts`: search and filter published posts and drafts; open the editor.
 - `/admin/new?slug=...`: edit an existing post. Without a slug, create a new post.
-- `/admin/photos`: add or replace images, edit titles, alt text and captions,
+- `/admin/photos`: add or replace images, edit titles and captions,
   assign albums, adjust display order, and publish or hide photos. Create and
   rename albums and change their descriptions and order here too.
 - `/admin/dogs`: the existing dog incident editor.
@@ -77,6 +77,13 @@ Hiding a photo removes its row from public reads and the camera roll. Storage is
 public, so hiding is not a way to make an image URL private. This release does not
 permanently delete photos, albums, or their files.
 
+The album editor lists its photos with a Remove button. Removal saves immediately
+and keeps the photo in the main library, with its visibility unchanged. Photos
+without an album can be edited or assigned to another album. Before deploying
+this frontend, apply `supabase/migrations/20260928000000_allow_photos_without_album.sql`
+and redeploy `admin-photo-library`. The migration preserves all existing photos
+and album assignments.
+
 The public Photos app reads Supabase when it is configured. It uses the original
 static collection only when Supabase is not configured. An empty published
 library stays empty; failures display a retry message instead of restoring
@@ -99,7 +106,7 @@ uploads on the user-managed test deployment:
 
 1. Sign in as admin and open Mission Control. Guests must remain locked out.
 2. Create a draft post, edit it, publish it, and confirm the counts and blog update.
-3. Create an album, add a photo, edit its caption/alt text, and change its order.
+3. Create an album, add a photo, edit its caption, and change its order.
 4. Hide the photo and verify that it disappears from Photos (including an open
    viewer), then republish it. Empty albums should not appear publicly.
 5. Check that an anonymous photo query cannot return hidden rows or modify data.

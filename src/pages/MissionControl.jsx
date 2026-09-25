@@ -7,6 +7,7 @@ import AdminCalendar from './AdminCalendar';
 import AdminGuestbook from './AdminGuestbook';
 import AdminProfile from './AdminProfile';
 import { DeviceSettingsContext } from '../components/deviceSettings';
+import { AppIcon } from '../components/DeviceShell';
 import { requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 import './MissionControl.css';
 
@@ -83,7 +84,7 @@ function MissionControl() {
   return (
     <div className="mission-control">
       <aside className="mission-control__sidebar">
-        <div className="mission-control__brand"><span aria-hidden="true">M/C</span><strong>Mission<br />Control</strong></div>
+        <div className="mission-control__brand"><AppIcon name="admin" /><strong>Mission<br />Control</strong></div>
         <p className="mission-control__nav-label">WORKSPACE</p>
         <nav aria-label="Mission Control sections">{sections.map((section) => (
           <button type="button" key={section.path} disabled={busy} aria-current={activeSection.path === section.path ? 'page' : undefined} onClick={() => navigate(section.path)}><span>{section.mark}</span>{section.title}</button>
@@ -91,7 +92,6 @@ function MissionControl() {
         <p className="mission-control__sidebar-note">AJT3 / SITE MANAGEMENT</p>
       </aside>
       <div className="mission-control__workspace">
-        <header className="mission-control__toolbar"><div><span>YOUR PERSONAL SYSTEM</span><strong>{isEditor ? 'Post editor' : activeSection.title}</strong></div><button type="button" disabled={busy} onClick={access.logout}>Sign out</button></header>
         <div className="mission-control__content">
           {activeSection.path === '/admin' && !isEditor && (
             <main className="mission-control__overview">

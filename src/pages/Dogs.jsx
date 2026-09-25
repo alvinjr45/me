@@ -107,8 +107,7 @@ function Dogs() {
         <div className="dogs-app__scroll app-scroll" ref={scrollRef} tabIndex={-1}>
           <header className="dogs-app__heading">
             <p className="dogs-app__eyebrow">{'// life with Drake & Josh'}</p>
-            <h1>Good dogs. Great chaos.</h1>
-            <p>Two personalities. One very well-patrolled house.</p>
+            <h1>Great dogs. Plenty of chaos.</h1>
           </header>
 
           <div className="dogs-app__dashboard">
@@ -138,7 +137,7 @@ function Dogs() {
                     <time dateTime={incident.incidentAt}>{formatIncidentDate(incident.incidentAt)}</time>
                   </div>
                   <p>{incident.incident}</p>
-                  {incidentCount && <small>{incidentCount}</small>}
+                  {incidentCount && <small>{incident.culprit ? `${incident.culprit}'s ${incidentCount}` : incidentCount}</small>}
                 </> : <><h3>No incidents on file</h3><p>A clean record. Suspicious, but we'll take it.</p></>}
               </div>
             </section>

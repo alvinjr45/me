@@ -2,13 +2,13 @@ import React from 'react';
 import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import Guestbook from './Guestbook';
 import AdminGuestbook from './AdminGuestbook';
-import { getConversations, getGuestbook, guestbookRequest } from '../lib/guestbook';
+import { getConversations, getGuestbook, guestbookRequest, verifyGuestbook } from '../lib/guestbook';
 import { guestbookTerms } from '../data/guestbookTerms';
 
 jest.mock('../data/guestbookTerms', () => ({ guestbookTerms: { version: 'test-v1', content: 'Test-only terms fixture.' } }));
 
 jest.mock('../lib/guestbook', () => ({
-  getConversations: jest.fn(), getGuestbook: jest.fn(), guestbookRequest: jest.fn(),
+  getConversations: jest.fn(), getGuestbook: jest.fn(), guestbookRequest: jest.fn(), verifyGuestbook: jest.fn(),
   notifyGuestbookChanged: () => global.window.dispatchEvent(new Event('ajt3-guestbook-updated'))
 }));
 jest.mock('../components/GuestbookChallenge', () => function Challenge({ onToken, resetKey }) {
@@ -35,6 +35,7 @@ beforeEach(() => {
   getConversations.mockResolvedValue([conversation]);
   getGuestbook.mockResolvedValue({ entries: [entry], conversation });
   guestbookRequest.mockResolvedValue({ entry, scrubbed: false });
+  verifyGuestbook.mockImplementation(async () => ({ session: 'verified-session', expiresAt: Date.now() + 3600000 }));
   window.confirm = jest.fn(() => true);
 });
 afterEach(() => {
@@ -55,8 +56,7 @@ function joinGuestbook() {
   if (join) fireEvent.click(join);
   if (!screen.queryByRole('button', { name: 'Continue to messages' })) return;
   fireEvent.change(screen.getByLabelText('Display name'), { target: { value: 'A guest' } });
-  fireEvent.click(screen.getByRole('checkbox', { name: 'I confirm that I am at least 18 years old.' }));
-  fireEvent.click(screen.getByRole('checkbox', { name: 'I have read and agree to the Terms and Conditions.' }));
+  for (const checkbox of screen.getAllByRole('checkbox')) if (!checkbox.checked) fireEvent.click(checkbox);
   const challenge = screen.queryByRole('button', { name: 'Complete bot check' });
   if (challenge) fireEvent.click(challenge);
   fireEvent.click(screen.getByRole('button', { name: 'Continue to messages' }));
@@ -86,7 +86,7 @@ test('published policies unlock participation and remain accessible before joini
   }), null, expect.any(AbortSignal)));
 });
 
-test('requires a bot token, publishes without approval, and resets the token after submission', async () => {
+test('verifies once on entry and reuses the session across messages', async () => {
   guestbookRequest.mockResolvedValue({ entry, scrubbed: true });
   renderGuestbook();
   await screen.findByText('Hello!');
@@ -96,13 +96,17 @@ test('requires a bot token, publishes without approval, and resets the token aft
   fillMessage();
   fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
   expect(await screen.findByText('Sent. Filtered words were replaced with ***.')).toBeInTheDocument();
-  expect(guestbookRequest).toHaveBeenCalledWith(expect.objectContaining({ action: 'submit', conversationId: conversation.id, name: 'A guest', ageConfirmed: true, termsAccepted: true, termsVersion: 'test-v1', message: 'Hello there!', token: 'verified-token' }), null, expect.any(AbortSignal));
+  expect(guestbookRequest).toHaveBeenCalledWith(expect.objectContaining({ action: 'submit', conversationId: conversation.id, name: 'A guest', ageConfirmed: true, termsAccepted: true, termsVersion: 'test-v1', message: 'Hello there!', session: 'verified-session' }), null, expect.any(AbortSignal));
   expect(screen.getByText('A guest')).toBeInTheDocument();
   expect(screen.getByLabelText('Message')).toHaveValue('');
-  expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
+  fillMessage();
+  fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+  await waitFor(() => expect(guestbookRequest).toHaveBeenCalledTimes(2));
+  expect(verifyGuestbook).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole('button', { name: 'Complete bot check' })).not.toBeInTheDocument();
 });
 
-test('keeps text on failure, requests a fresh challenge, and never claims publication', async () => {
+test('keeps text and verification on posting failure and never claims publication', async () => {
   guestbookRequest.mockRejectedValue(new Error('Posting limit reached.'));
   renderGuestbook();
   await screen.findByText('Hello!');
@@ -112,19 +116,11 @@ test('keeps text on failure, requests a fresh challenge, and never claims public
   expect(screen.getByText('A guest')).toBeInTheDocument();
   expect(screen.getByLabelText('Message')).toHaveValue('Hello there!');
   expect(screen.queryByText(/Sent to the conversation/)).not.toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
+  expect(screen.queryByRole('button', { name: 'Complete bot check' })).not.toBeInTheDocument();
 });
 
-test('expired challenges and missing configuration cannot submit', async () => {
-  const { unmount } = renderGuestbook();
-  await screen.findByText('Hello!');
-  fillMessage();
-  fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
-  await screen.findByText('Sent to the conversation.');
-  fillMessage();
-  fireEvent.click(screen.getByRole('button', { name: 'Expire bot check' }));
-  expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
-  unmount();
+test('missing configuration prevents joining', () => {
   delete process.env.REACT_APP_TURNSTILE_SITE_KEY;
   guestbookRequest.mockClear();
   renderGuestbook(false);
@@ -132,6 +128,31 @@ test('expired challenges and missing configuration cannot submit', async () => {
   expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
   expect(guestbookRequest).not.toHaveBeenCalled();
+});
+
+test('failed server verification keeps entry closed and requires a fresh bot token', async () => {
+  verifyGuestbook.mockRejectedValueOnce(new Error('Bot verification expired or failed. Please try again.'));
+  renderGuestbook();
+  expect(await screen.findByRole('alert')).toHaveTextContent('Bot verification expired');
+  expect(getConversations).not.toHaveBeenCalled();
+  expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Complete bot check' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Continue to messages' }));
+  await screen.findByText('Hello!');
+  expect(verifyGuestbook).toHaveBeenCalledTimes(2);
+});
+
+test('a server-rejected session offers entry verification without losing the message', async () => {
+  guestbookRequest.mockRejectedValueOnce(Object.assign(new Error('Your verification expired.'), { code: 'verification_required' }));
+  renderGuestbook();
+  await screen.findByText('Hello!');
+  fillMessage();
+  fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+  fireEvent.click(await screen.findByRole('button', { name: 'Verify to continue' }));
+  joinGuestbook();
+  expect(await screen.findByLabelText('Message')).toHaveValue('Hello there!');
+  expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
 });
 
 test('renders visitor content as text, not markup or links, and refresh removes hidden posts', async () => {
@@ -261,22 +282,27 @@ test('changing participation details relocks the composer and preserves the unse
   expect(screen.getByRole('checkbox', { name: /have read and agree/ })).not.toBeChecked();
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
   joinGuestbook();
-  expect(screen.getByLabelText('Message')).toHaveValue('Hello there!');
+  expect(await screen.findByLabelText('Message')).toHaveValue('Hello there!');
   expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
 });
 
-test('entry token expires while reading and a fresh challenge preserves the draft', async () => {
+test('session expiry returns verification to the entry screen and preserves the draft', async () => {
   jest.useFakeTimers();
   let view;
   try {
     view = renderGuestbook();
+    await act(async () => { jest.advanceTimersByTime(0); });
     await act(async () => { jest.advanceTimersByTime(1); });
     fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Still writing' } });
     expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
-    await act(async () => { jest.advanceTimersByTime(240000); });
+    await act(async () => { jest.advanceTimersByTime(3600000); });
     expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
     expect(screen.getByLabelText('Message')).toHaveValue('Still writing');
-    fireEvent.click(screen.getByRole('button', { name: 'Complete bot check' }));
+    expect(screen.queryByRole('button', { name: 'Complete bot check' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Verify to continue' }));
+    joinGuestbook();
+    await act(async () => { jest.advanceTimersByTime(0); });
+    expect(screen.getByLabelText('Message')).toHaveValue('Still writing');
     expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
     expect(guestbookRequest).not.toHaveBeenCalled();
   } finally { view?.unmount(); jest.useRealTimers(); }

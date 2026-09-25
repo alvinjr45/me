@@ -30,7 +30,7 @@ test('normalizes text and rejects empty, oversized, non-string, and link submiss
 });
 
 function service(options = {}) {
-  const state = { rpc: [], clients: 0, challenges: [], mutations: [] };
+  const state = { rpc: [], clients: 0, challenges: [], mutations: [], now: Date.now() };
   const env = {
     GUESTBOOK_ORIGINS: 'https://site.test', GUESTBOOK_HOSTNAMES: 'site.test',
     GUESTBOOK_TERMS_VERSION: 'test-v1',
@@ -59,6 +59,7 @@ function service(options = {}) {
   let handler;
   runInNewContext(edge, {
     exports: {}, Request, Response, URL, crypto, TextEncoder, TextDecoder, Uint8Array, AbortSignal,
+    Date: class extends Date { static now() { return state.now; } },
     cleanText, scrubProfanity,
     Deno: { env: { get: (key) => env[key] }, serve: (fn) => { handler = fn; } },
     createClient: () => { state.clients += 1; return db; },
@@ -156,6 +157,53 @@ test('rejects failed, replayed, wrong-action, and wrong-host challenges', async 
     assert.equal((await send(valid)).status, 400);
     assert.equal(state.rpc.length, 1);
   }
+});
+
+test('one entry verification authorizes multiple posts while every post still checks limits', async () => {
+  const { send, state } = service();
+  const verification = await send({ ...valid, action: 'verify' });
+  assert.equal(verification.status, 200);
+  const session = await verification.json();
+  assert.equal(session.expiresAt, state.now + 3600000);
+  assert.equal(state.rpc.length, 1);
+  assert.equal(state.rpc[0].args.p_kind, 'attempt');
+  for (const message of ['First message', 'Second message']) {
+    assert.equal((await send({ ...valid, token: undefined, session: session.session, message })).status, 201);
+  }
+  assert.equal(state.challenges.length, 1);
+  assert.equal(state.rpc.filter(call => call.args.p_kind === 'attempt').length, 3);
+  assert.equal(state.rpc.filter(call => call.args.p_kind === 'post').length, 2);
+});
+
+test('sessions reject tampering, expiry, different networks, origins, and terms', async () => {
+  const { send, state } = service({ env: { GUESTBOOK_ORIGINS: 'https://site.test,https://other.test' } });
+  const { session } = await (await send({ ...valid, action: 'verify' })).json();
+  for (const invalid of ['', 'anything', `${session}0`, `${Number(session.split('.')[0]) + 1}.${session.split('.')[1]}`]) {
+    const result = await send({ ...valid, session: invalid });
+    assert.equal(result.status, 401);
+    assert.equal((await result.json()).code, 'verification_required');
+  }
+  assert.equal((await send({ ...valid, session }, { 'x-forwarded-for': '203.0.113.5' })).status, 401);
+  assert.equal((await send({ ...valid, session }, { origin: 'https://other.test' })).status, 401);
+  assert.equal((await service({ env: { GUESTBOOK_TERMS_VERSION: 'test-v2' } }).send({ ...valid, session, termsVersion: 'test-v2' })).status, 401);
+  state.now += 3600000;
+  assert.equal((await send({ ...valid, session })).status, 401);
+  assert.equal(state.challenges.length, 1);
+  assert.equal(state.rpc.filter(call => call.args.p_kind === 'post').length, 0);
+});
+
+test('entry checks cannot mint a session without valid terms, Turnstile, and rate limits', async () => {
+  for (const options of [
+    { challenge: { success: false } }, { challenge: { success: true, action: 'login', hostname: 'site.test' } },
+    { challenge: { success: true, action: 'guestbook', hostname: 'other.test' } },
+    { attempt: { error: 'limited' } }, { attempt: { error: 'paused' } }
+  ]) {
+    const response = await service(options).send({ ...valid, action: 'verify' });
+    assert.notEqual(response.status, 200);
+    assert.equal((await response.json()).session, undefined);
+  }
+  assert.equal((await service().send({ ...valid, action: 'verify', termsAccepted: false })).status, 400);
+  assert.equal((await service().send({ ...valid, action: 'verify', name: '' })).status, 400);
 });
 
 test('denied attempts never verify tokens or publish; final limits and duplicates are enforced', async () => {

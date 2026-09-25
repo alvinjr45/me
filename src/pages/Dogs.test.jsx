@@ -51,7 +51,7 @@ test('keeps notes usable when incident loading fails and retries without claimin
   fireEvent.click(screen.getByRole('button', { name: /Try again/ }));
   expect(await screen.findByText('Snack theft.')).toBeInTheDocument();
   expect(screen.getByText('03')).toBeInTheDocument();
-  expect(screen.getByText('2nd incident all-time')).toBeInTheDocument();
+  expect(screen.getByText("Josh's 2nd incident all-time")).toBeInTheDocument();
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();
 });
 

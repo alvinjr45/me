@@ -25,7 +25,7 @@ import './DeviceShell.css';
 import './AppWorkspace.css';
 
 export const desktopApps = [
-  { key: 'tech', label: 'Tech', path: '/tech', description: 'Projects & experiments' },
+  { key: 'tech', label: 'Build', path: 'https://ajt3.website', description: 'Projects & experiments', external: true },
   { key: 'music', label: 'Music', path: '/music', description: 'The current rotation' },
   { key: 'dogs', label: 'Dogs', path: '/dogs', description: 'Drake & Josh' },
   { key: 'blog', label: 'Blog', path: '/blog', description: 'Notes from the build' },

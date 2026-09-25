@@ -5,7 +5,7 @@ import './CommandTerminal.css';
 
 const routes = {
   home: '/',
-  tech: '/tech',
+  build: 'https://ajt3.website',
   music: '/music',
   dogs: '/dogs',
   blog: '/blog',
@@ -52,7 +52,14 @@ function CommandTerminal({ autoFocus = false, onNavigate, showIntro = true, vari
     const route = routes[normalized];
 
     if (!route) {
-      addLine(`No route named "${destination}". Try: tech, music, dogs, blog, photos, calendar, terminal, admin, or settings.`, 'error');
+      addLine(`No route named "${destination}". Try: build, music, dogs, blog, photos, calendar, terminal, admin, or settings.`, 'error');
+      return;
+    }
+
+    if (normalized === 'build') {
+      window.open(route, '_blank', 'noopener,noreferrer');
+      addLine(`Opening ${route} in a new tab...`, 'accent');
+      onNavigate?.();
       return;
     }
 
@@ -78,12 +85,12 @@ function CommandTerminal({ autoFocus = false, onNavigate, showIntro = true, vari
         addLine('Commands: ls, open <page>, cd <page>, whoami, pwd, date, clear, logout, restart, shutdown');
         break;
       case 'ls':
-        addLine('tech/   music/   dogs/   blog/   photos/   calendar/   admin/   terminal/   settings/');
+        addLine('build/   music/   dogs/   blog/   photos/   calendar/   admin/   terminal/   settings/');
         break;
       case 'open':
       case 'cd':
         if (!args[0]) {
-          addLine(`Usage: ${verb} <tech|music|dogs|blog|photos|calendar|admin|terminal|settings>`, 'error');
+          addLine(`Usage: ${verb} <build|music|dogs|blog|photos|calendar|admin|terminal|settings>`, 'error');
         } else {
           openRoute(args[0]);
         }

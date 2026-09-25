@@ -110,7 +110,7 @@ test('phone keeps four dock shortcuts and paginates every app to fit the availab
     );
     fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
     const dock = screen.getByRole('navigation', { name: 'App dock' });
-    expect(within(dock).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['/tech', '/music', '/dogs', '/blog']);
+    expect(within(dock).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['https://ajt3.website', '/music', '/dogs', '/blog']);
     const apps = screen.getByRole('navigation', { name: 'Open a site app' });
     expect(within(apps).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(desktopApps.map((app) => app.path));
     expect(within(apps).getAllByRole('group')).toHaveLength(Math.ceil(desktopApps.length / 8));

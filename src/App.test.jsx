@@ -49,14 +49,14 @@ function expectHomeUrl(historyLength) {
 test('opens multiple desktop apps and closes them without changing browser history', () => {
   const historyLength = window.history.length;
   render(<App />);
-  fireEvent.click(screen.getByRole('link', { name: 'Open Tech' }));
+  fireEvent.click(screen.getByRole('link', { name: 'Open Dogs' }));
   fireEvent.click(screen.getByRole('link', { name: 'Open Music' }));
-  expect(screen.getByRole('region', { name: 'Tech app' })).toBeInTheDocument();
+  expect(screen.getByRole('region', { name: 'Dogs app' })).toBeInTheDocument();
   expect(screen.getByRole('region', { name: 'Music app' })).toBeInTheDocument();
   expectHomeUrl(historyLength);
   fireEvent.click(screen.getByRole('button', { name: 'Close Music' }));
   expect(screen.queryByRole('region', { name: 'Music app' })).not.toBeInTheDocument();
-  expect(screen.getByRole('region', { name: 'Tech app' })).toBeInTheDocument();
+  expect(screen.getByRole('region', { name: 'Dogs app' })).toBeInTheDocument();
   expectHomeUrl(historyLength);
 });
 
@@ -88,8 +88,8 @@ test('terminal navigation opens an app without changing the home URL', async () 
   fireEvent.keyDown(document, { key: '`' });
   const terminal = screen.getByRole('region', { name: 'Terminal app' });
   const input = within(terminal).getByRole('textbox');
-  fireEvent.change(input, { target: { value: 'open tech' } });
+  fireEvent.change(input, { target: { value: 'open music' } });
   fireEvent.submit(input.closest('form'));
-  expect(await screen.findByRole('region', { name: 'Tech app' })).toBeInTheDocument();
+  expect(await screen.findByRole('region', { name: 'Music app' })).toBeInTheDocument();
   expectHomeUrl(historyLength);
 });

@@ -1199,7 +1199,7 @@
     height: var(--keyboard-login-height);
     grid-template-rows: auto;
     align-content: start;
-    padding-top: 53px;
+    padding-top: var(--phone-safe-top);
     overscroll-behavior: contain;
   }
 
@@ -1228,7 +1228,7 @@
   .device-screen__menu { display: none; }
 
   .device-screen {
-    --phone-safe-top: 53px;
+    --phone-safe-top: 44px;
     --phone-safe-bottom: 36px;
     height: 100%;
     aspect-ratio: auto;
@@ -1248,7 +1248,7 @@
     top: 0;
     left: 0;
     right: 0;
-    height: 53px;
+    height: var(--phone-safe-top);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -1315,7 +1315,7 @@
 
   .device-screen--app .device-screen__phone-status {
     pointer-events: none;
-    background: rgba(8, 12, 18, 0.5);
+    background: rgba(8, 12, 18, 0.62);
     -webkit-backdrop-filter: blur(10px);
     backdrop-filter: blur(10px);
     text-shadow: 0 1px 3px #0008;
@@ -1329,8 +1329,6 @@
     height: var(--phone-safe-bottom);
     pointer-events: none;
     background: rgba(8, 12, 18, 0.4);
-    -webkit-backdrop-filter: blur(8px);
-    backdrop-filter: blur(8px);
     -webkit-mask-image: linear-gradient(transparent, #000 45%);
     mask-image: linear-gradient(transparent, #000 45%);
   }

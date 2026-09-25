@@ -1,8 +1,9 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { canParticipate } from './GuestbookParticipation';
 import { getGuestbook, guestbookRequest, notifyGuestbookChanged } from '../lib/guestbook';
+import GuestbookAuthor from './GuestbookAuthor';
 
-export default function GuestbookConversation({ conversation, focusChat, draft, onDraft, participant, onParticipant, onJoin, session, onSessionExpired, ownIds, onSent, onCreated, onBack, onBusy }) {
+export default function GuestbookConversation({ conversation, focusChat, draft, onDraft, participant, onParticipant, onJoin, session, onSessionExpired, adminSecret = '', ownIds, onSent, onCreated, onBack, onBusy }) {
   const [entries, setEntries] = useState([]);
   const [title, setTitle] = useState(conversation?.title || 'New conversation');
   const [loading, setLoading] = useState(Boolean(conversation));
@@ -23,8 +24,8 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
   const composerInput = useRef(null);
   const conversationId = conversation?.id;
   const configured = Boolean(process.env.REACT_APP_SUPABASE_URL && process.env.REACT_APP_SUPABASE_ANON_KEY);
-  const sessionReady = Boolean(session?.token && session.expiresAt > Date.now());
-  const participationReady = canParticipate(participant);
+  const sessionReady = Boolean(adminSecret || (session?.token && session.expiresAt > Date.now()));
+  const participationReady = Boolean(adminSecret) || canParticipate(participant);
 
   useEffect(() => { if (focusChat) heading.current?.focus({ preventScroll: true }); }, [focusChat]);
   useEffect(() => { if (participationReady) composerInput.current?.focus({ preventScroll: true }); }, [participationReady]);
@@ -83,8 +84,8 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
       const result = await guestbookRequest({
         action: 'submit', name: participant.name, ageConfirmed: participant.ageConfirmed,
         termsAccepted: participant.termsAccepted, termsVersion: participant.termsVersion,
-        message: draft.message, website, session: session.token, ...(conversationId ? { conversationId } : { title: draft.title })
-      }, null, pending.signal);
+        message: draft.message, website, session: adminSecret ? undefined : session.token, ...(conversationId ? { conversationId } : { title: draft.title })
+      }, adminSecret || null, pending.signal);
       if (pending.signal.aborted) return;
       if (!result.entry?.id || !result.entry.conversation_id) throw new Error('Your message could not be confirmed. Refresh before retrying.');
       onSent(result.entry); onDraft({ title: '', message: '' }); setWebsite('');
@@ -118,13 +119,13 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
         const own = ownIds.has(entry.id);
         const previous = entries[index - 1];
         const newDay = !previous || new Date(previous.created_at).toDateString() !== new Date(entry.created_at).toDateString();
-        return <React.Fragment key={entry.id}>{newDay && <p className="guestbook-messages__date">{new Date(entry.created_at).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</p>}<article className={`guestbook-messages__message${own ? ' guestbook-messages__message--own' : ''}`} aria-label={`${own ? 'You' : entry.display_name}: ${entry.message}`}><span className="guestbook-messages__sender">{own ? `${entry.display_name} (you)` : entry.display_name}</span><p className="guestbook-messages__bubble">{entry.message}</p><time dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</time></article></React.Fragment>;
+        return <React.Fragment key={entry.id}>{newDay && <p className="guestbook-messages__date">{new Date(entry.created_at).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</p>}<article className={`guestbook-messages__message${own ? ' guestbook-messages__message--own' : ''}`} aria-label={`${own ? 'You' : entry.is_admin === true ? 'AJ (Administrator)' : entry.display_name}: ${entry.message}`}><span className="guestbook-messages__sender"><GuestbookAuthor name={entry.display_name} isAdmin={entry.is_admin === true} />{own && ' (you)'}</span><p className="guestbook-messages__bubble">{entry.message}</p><time dateTime={entry.created_at}>{new Date(entry.created_at).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</time></article></React.Fragment>;
       })}
     </div>
     {!participationReady ? <div className="guestbook-messages__join-prompt"><p>Complete the entry requirements to join the conversation.</p><button type="button" className="guestbook-messages__join-button" onClick={onJoin}>Join conversation</button></div> : <form className="guestbook-messages__composer" onSubmit={submit}>
       <fieldset disabled={posting || !configured || unavailable}>
         {!conversationId && <label className="guestbook-messages__identity">Topic<input ref={composerInput} aria-label="Conversation title" value={draft.title} onChange={(event) => onDraft({ ...draft, title: event.target.value })} maxLength={80} required placeholder="Give this conversation a name" /></label>}
-        <div className="guestbook-messages__identity"><span>Sending as <strong>{participant.name}</strong></span><button type="button" disabled={posting} onClick={() => onParticipant({ name: participant.name })}>Change details</button></div>
+        <div className="guestbook-messages__identity"><span>Sending as <strong><GuestbookAuthor name={participant.name} isAdmin={Boolean(adminSecret)} /></strong></span>{!adminSecret && <button type="button" disabled={posting} onClick={() => onParticipant({ name: participant.name })}>Change details</button>}</div>
         <div className="guestbook-messages__input-row"><label className="sr-only" htmlFor="guestbook-message">Message</label><textarea ref={conversationId ? composerInput : null} id="guestbook-message" value={draft.message} onChange={(event) => onDraft({ ...draft, message: event.target.value })} maxLength={500} required rows={2} placeholder={conversationId ? 'Message this conversation' : 'Start the conversation'} /><button type="submit" className="guestbook-messages__send" aria-label={posting ? 'Sending message' : conversationId ? 'Send message' : 'Create conversation'} disabled={posting || !configured || !sessionReady || unavailable}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 11 6-6 6 6M12 5v15" /></svg></button></div>
         <div className="guestbook__trap" aria-hidden="true"><label htmlFor="guestbook-website">Leave empty</label><input id="guestbook-website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" /></div>
       </fieldset>

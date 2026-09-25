@@ -95,6 +95,7 @@
 .guestbook-messages__composer-note { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; color: #bfc0cb; font-size: 0.64rem; line-height: 1.5; }
 .guestbook-messages__composer-note > span:last-child { flex: none; }
 .guestbook-messages__identity strong { color: #f2f2f7; overflow-wrap: anywhere; }
+.guestbook-messages__admin-label { color: #ff8585; }
 .guestbook-messages__identity button { flex: none; margin-left: auto; min-height: 30px; padding: 4px 8px; border: 1px solid #51535f; border-radius: 6px; background: #2c2d33; color: #a1d4ff; font-size: 0.7rem; }
 .guestbook-messages__participation { flex: 0 1 auto; min-height: 0; max-height: 65%; margin: 0; padding: 18px 22px; border-top: 1px solid #3a3b40; overflow-y: auto; background: #202126; }
 .guestbook-messages__participation h2 { margin: 0 0 4px; color: #fff; font-size: 1.15rem; }
@@ -112,7 +113,7 @@
 .guestbook-messages__participation .guestbook-messages__terms-pending { padding: 10px 12px; border-left: 3px solid #ff9b52; background: #2e2b29; }
 .guestbook-messages__participation > button { min-height: 44px; margin-top: 4px; padding: 10px 16px; border: 0; border-radius: 20px; background: #0868cf; color: #fff; font-size: 0.82rem; }
 .guestbook-messages--welcome { display: flex; flex-direction: column; overflow-y: auto; background: #17181c; }
-.guestbook-messages__welcome-header { flex: none; width: 100%; max-width: 760px; margin: 0 auto; padding: 16px 20px 10px; }
+.guestbook-messages__welcome-header { flex: none; width: 100%; max-width: 760px; margin: 0 auto; padding: 16px 20px 10px; text-align: center; }
 .guestbook-messages__welcome-header > span { color: #ff9b52; font: 0.7rem var(--font-mono); letter-spacing: 0.12em; }
 .guestbook-messages__welcome-header h1 { margin: 4px 0 0; color: #fff; font-size: 1.7rem; }
 .guestbook-messages--welcome .guestbook-messages__participation { flex: none; width: 100%; max-width: 760px; max-height: none; margin: 0 auto; padding: 14px 20px 18px; overflow: visible; background: transparent; }

@@ -87,7 +87,7 @@ test('publishes automatically, scrubs both fields, and stores no raw network add
   assert.equal(data.entry.message, 'This is *** nice');
   assert.equal(state.rpc[0].args.p_kind, 'attempt');
   assert.equal(state.rpc[1].args.p_kind, 'post');
-  assert.equal(state.rpc[1].name, 'ajt3_guestbook_submit_v2');
+  assert.equal(state.rpc[1].name, 'ajt3_guestbook_submit_v3');
   assert.equal(state.rpc[1].args.p_conversation, valid.conversationId);
   assert.match(state.rpc[1].args.p_actor, /^[a-f0-9]{64}$/);
   assert.doesNotMatch(JSON.stringify(state.rpc), /203\.0\.113|one-use-token|fucking|sh1t/);
@@ -218,6 +218,30 @@ test('entry checks cannot mint a session without valid terms, Turnstile, and rat
   }
   assert.equal((await service().send({ ...valid, action: 'verify', termsAccepted: false })).status, 400);
   assert.equal((await service().send({ ...valid, action: 'verify', name: '' })).status, 400);
+});
+
+test('only authenticated administrators skip verification and receive the forced admin identity', async () => {
+  const { send, state } = service({ env: { TURNSTILE_SECRET_KEY: '', GUESTBOOK_HOSTNAMES: '' } });
+  const response = await send({ action: 'submit', name: 'Someone else', message: 'Hello', conversationId: valid.conversationId }, { 'x-admin-secret': 'admin-test' });
+  assert.equal(response.status, 201);
+  assert.equal(state.challenges.length, 0);
+  assert.equal(state.rpc[1].args.p_name, 'AJ');
+  assert.equal(state.rpc[1].args.p_is_admin, true);
+  for (const error of ['limited', 'paused']) {
+    const result = await service({ post: { error } }).send(valid, { 'x-admin-secret': 'admin-test' });
+    assert.equal(result.status, error === 'limited' ? 429 : 503);
+  }
+});
+
+test('invalid credentials and client-supplied administrator flags never grant admin posting', async () => {
+  const rejected = service();
+  assert.equal((await rejected.send(valid, { 'x-admin-secret': 'wrong-secret' })).status, 401);
+  assert.equal(rejected.state.rpc.length, 0);
+  const guest = service();
+  assert.equal((await guest.send({ ...valid, is_admin: true, isAdmin: true, name: 'AJ (Administrator)' })).status, 201);
+  assert.equal(guest.state.rpc[1].args.p_is_admin, false);
+  assert.equal(guest.state.challenges.length, 1);
+  assert.equal((await service().send({ ...valid, is_admin: true, token: undefined })).status, 400);
 });
 
 test('denied attempts never verify tokens or publish; final limits and duplicates are enforced', async () => {

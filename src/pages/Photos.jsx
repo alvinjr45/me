@@ -224,11 +224,11 @@ function Photos() {
               ) : albumsView ? (
                 <div className="photos-app__albums">{photoAlbums.map((item) => {
                   const items = visiblePhotos.filter((photo) => photo.album === item.id);
-                  return items.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => { setCollection(item.id); setView('library'); }}><img src={items[0].src} alt="" loading="lazy" /><strong>{item.title}</strong><span>{items.length} {items.length === 1 ? 'photo' : 'photos'}</span></button> : null;
+                  return items.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => { setCollection(item.id); setView('library'); }}><span className="photos-app__album-cover"><img src={items[0].src} alt="" loading="lazy" /></span><strong>{item.title}</strong><span>{items.length} {items.length === 1 ? 'photo' : 'photos'}</span></button> : null;
                 })}</div>
               ) : (
                 <div className={`photos-app__grid photos-app__grid--${size}`}>
-                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${favorites.includes(photo.id) ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><img src={photo.src} alt="" loading="lazy" width={photo.width} height={photo.height} /><span className="photos-app__tile-title">{photo.title}</span>{favorites.includes(photo.id) && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
+                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${favorites.includes(photo.id) ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><img src={photo.src} alt="" loading="lazy" width={photo.width} height={photo.height} />{favorites.includes(photo.id) && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
                 </div>
               )}
               <footer className="photos-app__count" aria-live="polite">{visiblePhotos.length} {visiblePhotos.length === 1 ? 'photo' : 'photos'}<span>{collection === 'favorites' ? 'Saved in this browser' : 'A collection by AJ Thompson'}</span></footer>

@@ -4,7 +4,7 @@ import { getSupabaseFunctionHeaders, readResponsePayload } from './adminPostEdit
 export async function getConversations(offset = 0, search = '') {
   if (!supabase) throw new Error('The guestbook is not connected yet.');
   let query = supabase.from('ajt3_guestbook_conversation_list')
-    .select('id,title,created_at,last_message_at,last_message,last_author')
+    .select('id,title,created_at,last_message_at,last_message,last_author,last_author_is_admin')
     .order('last_message_at', { ascending: false }).order('id', { ascending: false });
   if (search.trim()) query = query.ilike('title', `%${search.trim().replace(/[\\%_]/g, '\\$&')}%`);
   const { data, error } = await query.range(offset, offset + 49);
@@ -16,7 +16,7 @@ export async function getGuestbook(conversationId, before = null) {
   if (!supabase) throw new Error('The guestbook is not connected yet.');
   if (!conversationId) throw new Error('Choose a conversation first.');
   let query = supabase.from('ajt3_guestbook')
-    .select('id,conversation_id,display_name,message,created_at').eq('is_hidden', false).eq('conversation_id', conversationId)
+    .select('id,conversation_id,display_name,is_admin,message,created_at').eq('is_hidden', false).eq('conversation_id', conversationId)
     .order('created_at', { ascending: false }).order('id', { ascending: false });
   if (before) {
     if (!/^[0-9a-f-]{36}$/i.test(before.id) || !/^[0-9T:.+Z-]+$/.test(before.created_at)) throw new Error('Invalid message cursor.');

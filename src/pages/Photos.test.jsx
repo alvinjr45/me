@@ -1,6 +1,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import Photos from './Photos';
+import { DeviceSettingsContext } from '../components/deviceSettings';
 import { getPhotoLibrary } from '../data/photos';
 
 jest.mock('../data/photos', () => ({ getPhotoLibrary: jest.fn() }));
@@ -22,6 +23,18 @@ test('loads managed photos, captions and albums and favorites new photo IDs', as
   fireEvent.click(screen.getByRole('button', { name: 'Back' }));
   fireEvent.click(screen.getByRole('button', { name: 'Albums' }));
   expect(screen.getByRole('button', { name: 'Weekends 1 photo' })).toBeInTheDocument();
+});
+
+test.each([false, true])('restores library scroll and photo focus after closing the viewer (phone: %s)', async (isPhone) => {
+  const { container } = render(<DeviceSettingsContext.Provider value={{ isPhone }}><Photos /></DeviceSettingsContext.Provider>);
+  const photoButton = await screen.findByRole('button', { name: 'Open New memory' });
+  const scrollSelector = isPhone ? '.photos-app__browser' : '.photos-app__scroll';
+  container.querySelector(scrollSelector).scrollTop = 240;
+  fireEvent.click(photoButton);
+  expect(screen.getByRole('region', { name: 'Photo viewer' })).toHaveFocus();
+  fireEvent.click(screen.getByRole('button', { name: 'Back' }));
+  expect(container.querySelector(scrollSelector).scrollTop).toBe(240);
+  expect(screen.getByRole('button', { name: 'Open New memory' })).toHaveFocus();
 });
 
 test('refreshes after an admin change and closes a viewer for a hidden photo', async () => {

@@ -80,10 +80,9 @@ Deno.serve(async (request: Request) => {
     try { body = await readBody(request); } catch { return respond({ error: 'Invalid or oversized request.' }, 400); }
     if (!body || typeof body !== 'object' || Array.isArray(body)) return respond({ error: 'Invalid request.' }, 400);
     const { action } = body;
-    if (action !== 'submit' && action !== 'verify') {
-      const secret = request.headers.get('x-admin-secret');
-      if (!secret || secret !== required('ADMIN_POST_SECRET')) return respond({ error: 'Sign in to manage the guestbook.' }, 401);
-    }
+    const secret = request.headers.get('x-admin-secret');
+    const isAdmin = Boolean(secret && secret === required('ADMIN_POST_SECRET'));
+    if ((secret && !isAdmin) || (!isAdmin && action !== 'submit' && action !== 'verify')) return respond({ error: 'Sign in again to manage or post as the administrator.', code: 'admin_required' }, 401);
     const db = createClient(required('SUPABASE_URL'), required('SUPABASE_SERVICE_ROLE_KEY'));
     if (action === 'list' || action === 'list_conversations') {
       const offset = Number.isInteger(body.offset) && body.offset >= 0 ? body.offset : 0;
@@ -112,20 +111,22 @@ Deno.serve(async (request: Request) => {
     }
     if (action !== 'submit' && action !== 'verify') return respond({ error: 'Unknown action.' }, 400);
 
-    const termsVersion = Deno.env.get('GUESTBOOK_TERMS_VERSION')?.trim();
-    if (!termsVersion) return respond({ error: 'Messaging is unavailable until the Terms and Conditions are published.', code: 'terms_unavailable' }, 503);
-    if (body.ageConfirmed !== true || body.termsAccepted !== true) {
-      return respond({ error: 'Enter your name, confirm that you are at least 18, and accept the Terms and Conditions before posting.', code: 'participation_required' }, 400);
+    const termsVersion = Deno.env.get('GUESTBOOK_TERMS_VERSION')?.trim() || '';
+    if (!isAdmin) {
+      if (!termsVersion) return respond({ error: 'Messaging is unavailable until the Terms and Conditions are published.', code: 'terms_unavailable' }, 503);
+      if (body.ageConfirmed !== true || body.termsAccepted !== true) {
+        return respond({ error: 'Enter your name, confirm that you are at least 18, and accept the Terms and Conditions before posting.', code: 'participation_required' }, 400);
+      }
+      if (body.termsVersion !== termsVersion) return respond({ error: 'The terms have changed. Reload the site to read and accept the current version before posting.', code: 'terms_changed' }, 409);
     }
-    if (body.termsVersion !== termsVersion) return respond({ error: 'The terms have changed. Reload the site to read and accept the current version before posting.', code: 'terms_changed' }, 409);
 
-    // No bypass: missing protection configuration keeps public writes closed.
-    const turnstileSecret = required('TURNSTILE_SECRET_KEY');
-    const hostnames = required('GUESTBOOK_HOSTNAMES').split(',').map((item) => item.trim());
-    const usesSession = action === 'submit' && body.session != null;
+    // Public posting requires bot verification; administrators authenticate with their server-checked secret.
+    const turnstileSecret = isAdmin ? '' : required('TURNSTILE_SECRET_KEY');
+    const hostnames = isAdmin ? [] : required('GUESTBOOK_HOSTNAMES').split(',').map((item) => item.trim());
+    const usesSession = !isAdmin && action === 'submit' && body.session != null;
     const sessionActor = usesSession ? await verifySession(body.session, origin, termsVersion) : null;
     // Reuse the signed counter identity when gateway routing or the visitor's network changes.
-    const actor = sessionActor || await digest(`address:${clientAddress(request)}`);
+    const actor = isAdmin ? await digest('administrator') : sessionActor || await digest(`address:${clientAddress(request)}`);
     const limit = await db.rpc('ajt3_guestbook_submit_v2', { p_actor: actor, p_kind: 'attempt' });
     if (limit.error || !limit.data) throw new Error('Rate limiter unavailable');
     if (limit.data.error === 'paused') return respond({ error: 'New messages are paused. Please check back later.' }, 503);
@@ -135,13 +136,13 @@ Deno.serve(async (request: Request) => {
     if (usesSession && !sessionActor) {
       return respond({ error: 'Your verification is no longer valid. Verify again to continue.', code: 'verification_required' }, 401);
     }
-    if (!usesSession && (typeof body.token !== 'string' || !body.token || body.token.length > 2048)) return respond({ error: 'Complete the bot check before posting.', code: 'verification_required' }, 400);
+    if (!isAdmin && !usesSession && (typeof body.token !== 'string' || !body.token || body.token.length > 2048)) return respond({ error: 'Complete the bot check before posting.', code: 'verification_required' }, 400);
     let name;
     let message;
     let title = null;
     let conversationId = null;
     try {
-      name = cleanText(body.name, 40, 'Name');
+      name = isAdmin ? 'AJ' : cleanText(body.name, 40, 'Name');
       if (action === 'submit') {
         message = cleanText(body.message, 500, 'Message');
         if (body.conversationId != null) {
@@ -152,7 +153,7 @@ Deno.serve(async (request: Request) => {
         }
       }
     } catch (error) { return respond({ error: (error as Error).message }, 400); }
-    if (!usesSession) {
+    if (!isAdmin && !usesSession) {
       const verification = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ secret: turnstileSecret, response: body.token }),
@@ -171,9 +172,10 @@ Deno.serve(async (request: Request) => {
     const safeName = scrubProfanity(name, extra);
     const safeMessage = scrubProfanity(message, extra);
     const safeTitle = title === null ? null : scrubProfanity(title, extra);
-    const result = await db.rpc('ajt3_guestbook_submit_v2', {
+    const result = await db.rpc('ajt3_guestbook_submit_v3', {
       p_actor: actor, p_kind: 'post', p_name: safeName, p_message: safeMessage,
       p_conversation: conversationId, p_title: safeTitle,
+      p_is_admin: isAdmin,
       p_content: await digest(`message:${safeMessage.toLowerCase().replace(/\s+/g, ' ')}`)
     });
     if (result.error || !result.data) throw new Error('Publication unavailable');

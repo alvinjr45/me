@@ -4,7 +4,7 @@ Guestbook is available from the home screen and dock at `/guestbook`. It now
 uses a Messages-style conversation list and a separate public group-chat board
 for each conversation. Visitors can create a topic with its first message or
 reply to an existing topic. Messages publish immediately after server-side checks;
-there is no approval queue. Names are unverified and all conversations are public,
+there is no approval queue. Guest names are unverified and all conversations are public,
 not private messages. Blue bubbles identify sends in the current app visit by
 their returned message IDs, never by matching a display name.
 
@@ -23,7 +23,16 @@ messages and previews and blocks new replies; it does not delete its contents.
 
 ## Participation gate and site policies
 
-Opening Messages starts on a dedicated "Before you join" screen. It contains
+Signed-in administrators open conversations directly using the existing shared
+admin session. Their sender name is fixed to `AJ`, followed by a red
+`(Administrator)` label. The server validates `ADMIN_POST_SECRET` on each send,
+forces the name, and stores a trusted `is_admin` flag. Guest-supplied names and
+role fields cannot create the badge. Existing posts are not retroactively marked.
+Administrators skip the guest declarations and Turnstile check; pause, rate,
+duplicate, and content checks still apply. Signing out restores the guest entry
+screen. Admin requests share a stable, keyed administrator counter identity.
+
+For guests, opening Messages starts on a dedicated "Before you join" screen. It contains
 the display name, age declaration, readable policies, terms agreement, and a
 visible Cloudflare Turnstile check.
 "Continue to messages" opens the conversation browser after those requirements
@@ -71,7 +80,7 @@ the terms change. Missing server configuration closes posting; outdated or
 missing client versions are rejected with a reload/re-accept message. This
 participation change needs no additional database migration.
 
-Every submission must carry `ageConfirmed: true`, `termsAccepted: true`, and the
+Every guest submission must carry `ageConfirmed: true`, `termsAccepted: true`, and the
 current `termsVersion`, in addition to a valid name. Strict booleans are required;
 strings such as `"true"` are rejected. Checks run in the Edge Function for both
 replies and new boards before publishing. Public database writes remain denied.
@@ -92,7 +101,7 @@ message storage remains unchanged. Do not describe the checkbox as verified age.
    existing conversation ID. Providing both or neither is rejected.
 4. Validate Turnstile at entry, including success, action `guestbook`, and an
    allowed hostname, before issuing the signed posting session. Every post must
-   present a valid session or a fresh Turnstile token from a legacy frontend.
+   from a guest must present a valid session or a fresh Turnstile token from a legacy frontend.
    Invalid or expired verification never permits a post.
 5. Normalize and scrub names, messages, and new conversation titles; matching
    words become `***`. Only the
@@ -127,6 +136,10 @@ whose `upgrade_required` response was incorrectly displayed as a posting limit.
 Only an explicit `limited` result now produces a rate-limit response. A Vercel
 frontend deployment does not deploy this Supabase function.
 
+The administrator author migration and v3 function update were applied through
+the Supabase dashboard on September 25, 2026. Frontend publishing remains
+user-owned. The administrator label and entry bypass need that frontend update.
+
 The session format was subsequently updated to carry its signed limiter identity
 instead of comparing it to each request's forwarded network address. An audit
 showed that consecutive requests had different network hashes. The redundant
@@ -146,7 +159,7 @@ The live frontend still showed pending terms at the time of setup. A new
 frontend build/deployment is required to include the policies, entry screen,
 and public site key. Production keys are not configured for local preview
 origins. Use a separate development widget if testing real submissions locally.
-No migrations, deployments, servers, or builds were run by Codex during this work.
+Frontend builds, repository operations, and server management remain user-owned.
 New installations start with submissions **paused** until setup is verified.
 
 1. Create a Cloudflare Turnstile widget for your actual site hostnames. Keep
@@ -166,7 +179,8 @@ New installations start with submissions **paused** until setup is verified.
      scheme, port, or path.
    - `GUESTBOOK_TERMS_VERSION`: must match the version of the actual published
      terms in `src/data/guestbookTerms.js`: `2026-09-25` for this release.
-   - Existing `ADMIN_POST_SECRET`: used only for management requests, not visitors.
+   - Existing `ADMIN_POST_SECRET`: authenticates management and administrator posts;
+     never included in guest requests.
    - Optional `GUESTBOOK_BLOCKED_WORDS`: extra comma-separated English words,
      letters only, 3-30 characters each. Core list is in `content.ts`.
 3. Review pending migrations with `supabase db push --dry-run`, then apply through
@@ -176,6 +190,10 @@ New installations start with submissions **paused** until setup is verified.
    migration preserves existing entries under "The Guestbook" and keeps the
    current paused/open setting. It adds the conversation foreign key, parent-aware
    RLS, and an invoker-security preview view (requires PostgreSQL 15+).
+   `supabase/migrations/20260928000000_guestbook_admin_author.sql` adds the public
+   author flag and a service-role-only v3 publishing wrapper that preserves the
+   v2 limits and atomically marks authenticated administrator posts. Apply it
+   before deploying the updated function and frontend.
    If the board is live, pause submissions during migration/deployment. The old
    RPC is retained but denies legacy posts lacking a conversation; deploy the
    updated function and frontend together before resuming. Do not reapply the

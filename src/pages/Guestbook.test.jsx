@@ -4,6 +4,7 @@ import Guestbook from './Guestbook';
 import AdminGuestbook from './AdminGuestbook';
 import { getConversations, getGuestbook, guestbookRequest, verifyGuestbook } from '../lib/guestbook';
 import { guestbookTerms } from '../data/guestbookTerms';
+import { DeviceSettingsContext } from '../components/deviceSettings';
 
 jest.mock('../data/guestbookTerms', () => ({ guestbookTerms: { version: 'test-v1', content: 'Test-only terms fixture.' } }));
 
@@ -86,6 +87,39 @@ test('published policies unlock participation and remain accessible before joini
   }), null, expect.any(AbortSignal)));
 });
 
+test('signed-in administrator skips entry and posts as AJ with the administrator label', async () => {
+  render(<DeviceSettingsContext.Provider value={{ adminAccess: { session: { secret: 'admin-test' } } }}><Guestbook /></DeviceSettingsContext.Provider>);
+  await screen.findByText('Hello!');
+  expect(screen.queryByText('Before you join')).not.toBeInTheDocument();
+  expect(screen.getByText('(Administrator)')).toHaveClass('guestbook-messages__admin-label');
+  expect(screen.queryByRole('button', { name: 'Change details' })).not.toBeInTheDocument();
+  expect(verifyGuestbook).not.toHaveBeenCalled();
+  fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Admin reply' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+  await waitFor(() => expect(guestbookRequest).toHaveBeenCalledWith(expect.objectContaining({ action: 'submit', name: 'AJ', message: 'Admin reply', session: undefined }), 'admin-test', expect.any(AbortSignal)));
+});
+
+test('signing out restores the visitor entry requirements', async () => {
+  const view = render(<DeviceSettingsContext.Provider value={{ adminAccess: { session: { secret: 'admin-test' } } }}><Guestbook /></DeviceSettingsContext.Provider>);
+  await screen.findByText('Hello!');
+  view.rerender(<DeviceSettingsContext.Provider value={{ adminAccess: { session: null } }}><Guestbook /></DeviceSettingsContext.Provider>);
+  expect(screen.getByText('Before you join')).toBeInTheDocument();
+  expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
+  expect(screen.queryByText('(Administrator)')).not.toBeInTheDocument();
+});
+
+test('only server-marked messages get the administrator label', async () => {
+  getGuestbook.mockResolvedValue({ conversation, entries: [
+    { ...entry, id: 'admin', display_name: 'AJ', is_admin: true, message: 'Official reply' },
+    { ...entry, id: 'guest', display_name: 'AJ (Administrator)', is_admin: false, message: 'Guest reply' }
+  ] });
+  renderGuestbook();
+  const admin = await screen.findByRole('article', { name: 'AJ (Administrator): Official reply' });
+  expect(within(admin).getByText('(Administrator)')).toHaveClass('guestbook-messages__admin-label');
+  const guest = screen.getByRole('article', { name: 'AJ (Administrator): Guest reply' });
+  expect(within(guest).getByText('AJ (Administrator)')).not.toHaveClass('guestbook-messages__admin-label');
+});
+
 test('verifies once on entry and reuses the session across messages', async () => {
   guestbookRequest.mockResolvedValue({ entry, scrubbed: true });
   renderGuestbook();
@@ -124,7 +158,6 @@ test('missing configuration prevents joining', () => {
   delete process.env.REACT_APP_TURNSTILE_SITE_KEY;
   guestbookRequest.mockClear();
   renderGuestbook(false);
-  expect(screen.getByText('Joining is unavailable until spam protection is configured.')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
   expect(guestbookRequest).not.toHaveBeenCalled();

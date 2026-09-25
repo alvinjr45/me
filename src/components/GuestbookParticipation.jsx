@@ -70,7 +70,7 @@ export default function GuestbookParticipation({ participant, onContinue, blocke
     {sessionReady ? <p className="guestbook-messages__join-hint">Your bot verification is still active.</p> : sitekey ? <>
       <GuestbookChallenge sitekey={sitekey} onToken={setToken} resetKey={challengeKey} appearance="always" />
       <p className="guestbook-messages__join-hint" role="status">{token ? 'Bot check complete.' : 'Complete the Cloudflare verification to continue.'}</p>
-    </> : <p role="status">Joining is unavailable until spam protection is configured.</p>}
+    </> : null}
     {blockedMessage && <p role="alert">{blockedMessage}</p>}
     {error && <p role="alert">{error}</p>}
     <button type="submit" disabled={!ready}>{verifying ? 'Verifying...' : 'Continue to messages'}</button>

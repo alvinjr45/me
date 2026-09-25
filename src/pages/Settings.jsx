@@ -1,4 +1,8 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import SettingsRounded from '@mui/icons-material/SettingsRounded';
+import ContrastRounded from '@mui/icons-material/ContrastRounded';
+import WallpaperRounded from '@mui/icons-material/WallpaperRounded';
+import LandscapeRounded from '@mui/icons-material/LandscapeRounded';
 import PolicyLinks from '../components/PolicyLinks';
 import {
   DeviceSettingsContext,
@@ -12,14 +16,15 @@ import { SceneWindow } from '../components/SceneBackground';
 import './Settings.css';
 
 const settingsCategories = [
-  { key: 'system', label: 'General', keywords: 'clock time format account logout restart shutdown power', icon: 'M4 6h16M4 12h16M4 18h16M8 3v6M16 9v6M10 15v6' },
-  { key: 'appearance', label: 'Appearance', keywords: 'theme light dark auto accent color motion animation speed brightness intensity', icon: 'M12 3a9 9 0 1 0 0 18V3Zm0 0a9 9 0 0 1 0 18' },
-  { key: 'wallpaper', label: 'Wallpaper', keywords: 'desktop aurora nebula tide ember synth sunset graphite', icon: 'M3 4h18v16H3zM3 16l5-5 4 4 3-3 6 6M16 8h.01' },
-  { key: 'background', label: 'Background', keywords: 'scene alpine lake coastal retreat desert forest cabin city winter snowbound northern lights garden', icon: 'M2 19 9 5l5 9 3-5 5 10H2ZM6 11l3 2 3-2' }
+  { key: 'system', label: 'General', keywords: 'clock time format account logout restart shutdown power', icon: SettingsRounded },
+  { key: 'appearance', label: 'Appearance', keywords: 'theme light dark auto accent color motion animation speed brightness intensity', icon: ContrastRounded },
+  { key: 'wallpaper', label: 'Wallpaper', keywords: 'desktop aurora nebula tide ember synth sunset graphite', icon: WallpaperRounded },
+  { key: 'background', label: 'Background', keywords: 'scene alpine lake coastal retreat desert forest cabin city winter snowbound northern lights garden', icon: LandscapeRounded }
 ];
 
 function SettingsIcon({ category }) {
-  return <span className={`settings-page__icon settings-page__icon--${category.key}`} aria-hidden="true"><svg viewBox="0 0 24 24"><path d={category.icon} /></svg></span>;
+  const Icon = category.icon;
+  return <span className={`settings-page__icon settings-page__icon--${category.key}`} aria-hidden="true"><Icon /></span>;
 }
 
 function Settings() {

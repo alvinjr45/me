@@ -18,7 +18,7 @@ import './Settings.css';
 const settingsCategories = [
   { key: 'system', label: 'General', keywords: 'clock time format account logout restart shutdown power', icon: SettingsRounded },
   { key: 'appearance', label: 'Appearance', keywords: 'theme light dark auto accent color motion animation speed brightness intensity', icon: ContrastRounded },
-  { key: 'wallpaper', label: 'Wallpaper', keywords: 'desktop aurora nebula tide ember synth sunset graphite', icon: WallpaperRounded },
+  { key: 'wallpaper', label: 'Wallpaper', keywords: `desktop ${wallpaperChoices.map((choice) => `${choice.label} ${choice.description}`).join(' ')}`, icon: WallpaperRounded },
   { key: 'background', label: 'Background', keywords: 'scene alpine lake coastal retreat desert forest cabin city winter snowbound northern lights garden', icon: LandscapeRounded }
 ];
 

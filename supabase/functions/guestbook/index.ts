@@ -19,15 +19,16 @@ async function digest(value: string) {
 }
 
 const sessionLifetime = 60 * 60 * 1000;
-const sessionMessage = (expires: number, actor: string, origin: string, terms: string) => JSON.stringify(['guestbook-session-v1', expires, actor, origin, terms]);
+const sessionMessage = (expires: number, actor: string, origin: string, terms: string) => JSON.stringify(['guestbook-session-v2', expires, actor, origin, terms]);
 
-async function verifySession(session: unknown, actor: string, origin: string, terms: string) {
-  if (typeof session !== 'string' || !/^\d{13}\.[a-f0-9]{64}$/.test(session)) return false;
-  const [timestamp, signature] = session.split('.');
+async function verifySession(session: unknown, origin: string, terms: string) {
+  if (typeof session !== 'string' || !/^\d{13}\.[a-f0-9]{64}\.[a-f0-9]{64}$/.test(session)) return null;
+  const [timestamp, actor, signature] = session.split('.');
   const expires = Number(timestamp);
-  if (expires <= Date.now() || expires > Date.now() + sessionLifetime) return false;
+  if (expires <= Date.now()) return null;
   const bytes = Uint8Array.from(signature.match(/../g)!, (byte) => parseInt(byte, 16));
-  return crypto.subtle.verify('HMAC', await signingKey(), bytes, new TextEncoder().encode(sessionMessage(expires, actor, origin, terms)));
+  const valid = await crypto.subtle.verify('HMAC', await signingKey(), bytes, new TextEncoder().encode(sessionMessage(expires, actor, origin, terms)));
+  return valid ? actor : null;
 }
 
 async function readBody(request: Request) {
@@ -121,17 +122,18 @@ Deno.serve(async (request: Request) => {
     // No bypass: missing protection configuration keeps public writes closed.
     const turnstileSecret = required('TURNSTILE_SECRET_KEY');
     const hostnames = required('GUESTBOOK_HOSTNAMES').split(',').map((item) => item.trim());
-    const address = clientAddress(request);
-    const actor = await digest(`address:${address}`);
+    const usesSession = action === 'submit' && body.session != null;
+    const sessionActor = usesSession ? await verifySession(body.session, origin, termsVersion) : null;
+    // Reuse the signed counter identity when gateway routing or the visitor's network changes.
+    const actor = sessionActor || await digest(`address:${clientAddress(request)}`);
     const limit = await db.rpc('ajt3_guestbook_submit_v2', { p_actor: actor, p_kind: 'attempt' });
     if (limit.error || !limit.data) throw new Error('Rate limiter unavailable');
     if (limit.data.error === 'paused') return respond({ error: 'New messages are paused. Please check back later.' }, 503);
     if (limit.data.error === 'limited') return respond({ error: 'Too many attempts. Please try again later.' }, 429);
     if (!limit.data.ok) throw new Error('Rate limiter unavailable');
     if (body.website) return respond({ error: 'Unable to accept this message.' }, 400);
-    const usesSession = action === 'submit' && body.session != null;
-    if (usesSession && !await verifySession(body.session, actor, origin, termsVersion)) {
-      return respond({ error: 'Your verification expired. Verify again to continue.', code: 'verification_required' }, 401);
+    if (usesSession && !sessionActor) {
+      return respond({ error: 'Your verification is no longer valid. Verify again to continue.', code: 'verification_required' }, 401);
     }
     if (!usesSession && (typeof body.token !== 'string' || !body.token || body.token.length > 2048)) return respond({ error: 'Complete the bot check before posting.', code: 'verification_required' }, 400);
     let name;
@@ -163,7 +165,7 @@ Deno.serve(async (request: Request) => {
     if (action === 'verify') {
       const expiresAt = Date.now() + sessionLifetime;
       const signature = await digest(sessionMessage(expiresAt, actor, origin, termsVersion));
-      return respond({ session: `${expiresAt}.${signature}`, expiresAt });
+      return respond({ session: `${expiresAt}.${actor}.${signature}`, expiresAt });
     }
     const extra = Deno.env.get('GUESTBOOK_BLOCKED_WORDS') || '';
     const safeName = scrubProfanity(name, extra);

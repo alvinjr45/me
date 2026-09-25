@@ -5,9 +5,22 @@ export const wallpaperChoices = [
   { key: 'nebula', label: 'Nebula', description: 'Deep-space color clouds' },
   { key: 'tide', label: 'Tide', description: 'Calm ocean currents' },
   { key: 'ember', label: 'Ember', description: 'Warm floating glow' },
-  { key: 'synth', label: 'Synth', description: 'A vivid retro horizon' },
   { key: 'sunset', label: 'Sunset', description: 'Soft evening gradients' },
-  { key: 'graphite', label: 'Graphite', description: 'A subtle moving grid' }
+  { key: 'cobalt', label: 'Cobalt', description: 'Flowing electric blue' },
+  { key: 'jade', label: 'Jade', description: 'Layered emerald silk' },
+  { key: 'bloom', label: 'Bloom', description: 'Rose and lilac light' },
+  { key: 'glacier', label: 'Glacier', description: 'Cool crystalline ridges' },
+  { key: 'dunes', label: 'Dunes', description: 'Sculpted desert sand' },
+  { key: 'lagoon', label: 'Lagoon', description: 'Sunlight beneath the surface' },
+  { key: 'eclipse', label: 'Eclipse', description: 'A quiet solar halo' },
+  { key: 'prism', label: 'Prism', description: 'Slow ribbons of color' },
+  { key: 'velvet', label: 'Velvet', description: 'Deep plum folds' },
+  { key: 'copper', label: 'Copper', description: 'Warm metallic contours' },
+  { key: 'fireflies', label: 'Fireflies', description: 'Tiny lights after dark' },
+  { key: 'rain', label: 'Rain', description: 'Silver rain at midnight' },
+  { key: 'horizon', label: 'Horizon', description: 'A still blue distance' },
+  { key: 'ink', label: 'Ink', description: 'Indigo drifting into black' },
+  { key: 'solstice', label: 'Solstice', description: 'Golden rays through dusk' }
 ];
 
 export const DeviceSettingsContext = createContext(null);

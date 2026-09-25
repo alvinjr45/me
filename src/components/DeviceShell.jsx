@@ -407,7 +407,7 @@ function PhoneLockScreen({ time, date, onUnlock, onSwitchUser }) {
           <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="10" width="12" height="11" rx="3" /><path d="M8 10V6a4 4 0 0 1 8 0v4" /></svg>
           <span>{date}</span>
           <time>{time}</time>
-          <h1 className="device-system-screen__site-title">AJ's Personal Site</h1>
+          <h1 className="device-system-screen__site-title"><span>AJ's</span> Personal Site</h1>
         </div>
         <div className="device-system-screen__unlock-actions">
           <button type="button" className="device-system-screen__switch-user" onClick={() => { if (!animationRef.current) onSwitchUser(); }}>Switch user</button>

@@ -181,32 +181,6 @@
   animation: wallpaper-rise 16s linear infinite;
 }
 
-.device-screen[data-wallpaper='synth'] .device-screen__wallpaper {
-  background: linear-gradient(180deg, #10032a, #4a145b 48%, #ff5364 49%, #1a0633 51%, #05020d);
-}
-
-.device-screen[data-wallpaper='synth'] .device-screen__wallpaper-layer--one {
-  inset: 18% 0 auto;
-  width: 25%;
-  aspect-ratio: 1;
-  margin: auto;
-  border-radius: 50%;
-  background: linear-gradient(#fff59a, #ff7a59 60%, #e92971);
-  box-shadow: 0 0 55px rgba(255, 96, 116, 0.72);
-  animation: wallpaper-sun 8s ease-in-out infinite alternate;
-}
-
-.device-screen[data-wallpaper='synth'] .device-screen__wallpaper-layer--two {
-  inset: 50% -20% -60%;
-  background-image:
-    linear-gradient(rgba(109, 78, 255, 0.65) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(109, 78, 255, 0.65) 1px, transparent 1px);
-  background-size: 8% 10%;
-  transform: perspective(220px) rotateX(58deg);
-  transform-origin: top;
-  animation: wallpaper-grid 5s linear infinite;
-}
-
 .device-screen[data-wallpaper='sunset'] .device-screen__wallpaper {
   background: linear-gradient(145deg, #182d5a, #936484 52%, #e8956c 77%, #3b4466);
 }
@@ -223,22 +197,206 @@
   animation: wallpaper-cloud 20s ease-in-out infinite alternate;
 }
 
-.device-screen[data-wallpaper='graphite'] .device-screen__wallpaper {
-  background: radial-gradient(circle at 75% 20%, #31251f, transparent 34%), linear-gradient(135deg, #141a22, #06080c 75%);
+.device-screen[data-wallpaper='cobalt'] .device-screen__wallpaper {
+  background: linear-gradient(140deg, #020919, #08265e 55%, #041229);
 }
 
-.device-screen[data-wallpaper='graphite'] .device-screen__wallpaper-layer--one {
-  inset: -20%;
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.055) 1px, transparent 1px);
-  background-size: 40px 40px;
-  animation: wallpaper-graphite 12s linear infinite;
+.device-screen[data-wallpaper='cobalt'] .device-screen__wallpaper-layer--one {
+  background: radial-gradient(ellipse at 32% 65%, #1757c2, transparent 40%);
 }
 
-.device-screen[data-wallpaper='graphite'] .device-screen__wallpaper-layer--two {
-  background: radial-gradient(circle at 60% 45%, rgba(251, 127, 51, 0.22), transparent 20%);
-  animation: wallpaper-float-reverse 18s ease-in-out infinite alternate;
+.device-screen[data-wallpaper='cobalt'] .device-screen__wallpaper-layer--two {
+  background: linear-gradient(125deg, transparent 36%, rgba(66, 162, 255, 0.4) 49%, transparent 59%);
+  animation: wallpaper-cloud 20s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='jade'] .device-screen__wallpaper {
+  background: linear-gradient(145deg, #021510, #0b3c2c 55%, #020c12);
+}
+
+.device-screen[data-wallpaper='jade'] .device-screen__wallpaper-layer--one {
+  background: conic-gradient(from 225deg at 65% 65%, transparent 0 20%, rgba(86, 194, 134, 0.42) 30%, transparent 43%);
+  animation: wallpaper-aurora 20s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='jade'] .device-screen__wallpaper-layer--two {
+  background: radial-gradient(ellipse at 35% 75%, rgba(31, 137, 109, 0.55), transparent 40%);
+}
+
+.device-screen[data-wallpaper='bloom'] .device-screen__wallpaper {
+  background: linear-gradient(135deg, #180b25, #472440 55%, #11162d);
+}
+
+.device-screen[data-wallpaper='bloom'] .device-screen__wallpaper-layer--one {
+  background: radial-gradient(ellipse at 38% 45%, rgba(229, 114, 159, 0.65), transparent 30%);
+}
+
+.device-screen[data-wallpaper='bloom'] .device-screen__wallpaper-layer--two {
+  background: radial-gradient(ellipse at 67% 62%, rgba(148, 127, 233, 0.65), transparent 32%);
+}
+
+.device-screen[data-wallpaper='glacier'] .device-screen__wallpaper {
+  background: linear-gradient(145deg, #071625, #23506a 55%, #0c273d);
+}
+
+.device-screen[data-wallpaper='glacier'] .device-screen__wallpaper-layer--one {
+  background: linear-gradient(135deg, transparent 38%, rgba(154, 222, 236, 0.36) 38.2%, rgba(76, 157, 191, 0.08) 61%, transparent 61.2%);
+}
+
+.device-screen[data-wallpaper='glacier'] .device-screen__wallpaper-layer--two {
+  background: linear-gradient(45deg, transparent 40%, rgba(122, 184, 219, 0.28) 40.2%, transparent 64%);
+}
+
+.device-screen[data-wallpaper='dunes'] .device-screen__wallpaper {
+  background: linear-gradient(180deg, #211b2d, #795244 62%, #24131a);
+}
+
+.device-screen[data-wallpaper='dunes'] .device-screen__wallpaper-layer--one {
+  background: radial-gradient(ellipse at 20% 110%, #a8734d 0 48%, transparent 48.2%);
+  animation: wallpaper-sunset 22s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='dunes'] .device-screen__wallpaper-layer--two {
+  background: radial-gradient(ellipse at 100% 115%, #523126 0 49%, transparent 49.2%);
+}
+
+.device-screen[data-wallpaper='lagoon'] .device-screen__wallpaper {
+  background: linear-gradient(160deg, #176c72, #073a4b 55%, #021723);
+}
+
+.device-screen[data-wallpaper='lagoon'] .device-screen__wallpaper-layer--one {
+  background: conic-gradient(from 145deg at 65% 0%, transparent 0 8%, rgba(137, 231, 196, 0.25) 12%, transparent 17% 25%, rgba(94, 214, 205, 0.2) 29%, transparent 34%);
+  animation: wallpaper-cloud 22s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='lagoon'] .device-screen__wallpaper-layer--two {
+  background: radial-gradient(ellipse at 32% 65%, rgba(25, 173, 157, 0.4), transparent 38%);
+}
+
+.device-screen[data-wallpaper='eclipse'] .device-screen__wallpaper {
+  background: radial-gradient(ellipse at 65% 43%, #242133, #050710 65%);
+}
+
+.device-screen[data-wallpaper='eclipse'] .device-screen__wallpaper-layer--one {
+  inset: 16% 18% auto auto;
+  width: 28%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #080b14;
+  box-shadow: 0 0 0 2px rgba(255, 205, 143, 0.65), 0 0 32px rgba(237, 143, 74, 0.4), 0 0 90px rgba(147, 116, 211, 0.25);
+  animation: wallpaper-sunset 22s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='eclipse'] .device-screen__wallpaper-layer--two {
+  background: radial-gradient(ellipse at 25% 80%, rgba(58, 78, 126, 0.25), transparent 38%);
+}
+
+.device-screen[data-wallpaper='prism'] .device-screen__wallpaper {
+  background: linear-gradient(135deg, #0c1128, #21152d 55%, #071a26);
+}
+
+.device-screen[data-wallpaper='prism'] .device-screen__wallpaper-layer--one {
+  background: linear-gradient(125deg, transparent 28%, rgba(54, 162, 200, 0.4) 37%, rgba(138, 88, 206, 0.45) 45%, rgba(230, 113, 139, 0.4) 53%, transparent 64%);
+  animation: wallpaper-cloud 22s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='prism'] .device-screen__wallpaper-layer--two {
+  background: linear-gradient(55deg, transparent 40%, rgba(239, 180, 101, 0.18) 49%, transparent 57%);
+}
+
+.device-screen[data-wallpaper='velvet'] .device-screen__wallpaper {
+  background: linear-gradient(135deg, #10091a, #32172e 55%, #0c0b1c);
+}
+
+.device-screen[data-wallpaper='velvet'] .device-screen__wallpaper-layer--one {
+  background: repeating-linear-gradient(115deg, transparent 0 12%, rgba(151, 74, 127, 0.22) 19%, transparent 27%);
+  animation: wallpaper-cloud 24s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='velvet'] .device-screen__wallpaper-layer--two {
+  background: radial-gradient(ellipse at 68% 35%, rgba(104, 66, 146, 0.35), transparent 38%);
+}
+
+.device-screen[data-wallpaper='copper'] .device-screen__wallpaper {
+  background: linear-gradient(145deg, #170d0b, #4e2b21 55%, #120e13);
+}
+
+.device-screen[data-wallpaper='copper'] .device-screen__wallpaper-layer--one {
+  background: repeating-radial-gradient(ellipse at 15% 90%, transparent 0 7%, rgba(202, 136, 91, 0.25) 7.2% 7.5%, transparent 7.8% 14%);
+}
+
+.device-screen[data-wallpaper='copper'] .device-screen__wallpaper-layer--two {
+  background: linear-gradient(120deg, transparent 30%, rgba(243, 179, 124, 0.18) 48%, transparent 66%);
+  animation: wallpaper-cloud 24s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='fireflies'] .device-screen__wallpaper {
+  background: radial-gradient(ellipse at 50% 85%, #173b2b, #030e14 75%);
+}
+
+.device-screen[data-wallpaper='fireflies'] .device-screen__wallpaper-layer--one {
+  background-image: radial-gradient(circle, rgba(224, 239, 137, 0.85) 0 1px, rgba(185, 216, 110, 0.12) 3px, transparent 7px);
+  background-size: 139px 113px;
+}
+
+.device-screen[data-wallpaper='fireflies'] .device-screen__wallpaper-layer--two {
+  background-image: radial-gradient(circle, rgba(150, 230, 160, 0.65) 0 1px, transparent 5px);
+  background-size: 191px 157px;
+  background-position: 53px 41px;
+}
+
+.device-screen[data-wallpaper='rain'] .device-screen__wallpaper {
+  background: linear-gradient(160deg, #172b3b, #0b1729 55%, #040912);
+}
+
+.device-screen[data-wallpaper='rain'] .device-screen__wallpaper-layer--one {
+  background-image: linear-gradient(105deg, transparent 48%, rgba(158, 188, 215, 0.25) 49%, transparent 50%);
+  background-size: 83px 137px;
+  animation: wallpaper-rain 17s linear infinite;
+}
+
+.device-screen[data-wallpaper='rain'] .device-screen__wallpaper-layer--two {
+  background-image: linear-gradient(105deg, transparent 48%, rgba(126, 166, 201, 0.14) 49%, transparent 50%);
+  background-size: 127px 191px;
+  animation: wallpaper-rain-distant 23s linear infinite;
+}
+
+.device-screen[data-wallpaper='horizon'] .device-screen__wallpaper {
+  background: linear-gradient(180deg, #101c33, #426077 49%, #719397 50%, #163343 51%, #07131f);
+}
+
+.device-screen[data-wallpaper='horizon'] .device-screen__wallpaper-layer--one {
+  background: radial-gradient(ellipse at 65% 49%, rgba(186, 210, 203, 0.2), transparent 30%);
+  animation: wallpaper-sunset 24s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='horizon'] .device-screen__wallpaper-layer--two {
+  background: linear-gradient(175deg, transparent 62%, rgba(103, 157, 175, 0.12) 64%, transparent 67%);
+}
+
+.device-screen[data-wallpaper='ink'] .device-screen__wallpaper {
+  background: linear-gradient(145deg, #05070d, #0e1428 60%, #05060b);
+}
+
+.device-screen[data-wallpaper='ink'] .device-screen__wallpaper-layer--one {
+  background: radial-gradient(ellipse at 38% 55%, rgba(55, 65, 115, 0.45), transparent 32%);
+}
+
+.device-screen[data-wallpaper='ink'] .device-screen__wallpaper-layer--two {
+  background: radial-gradient(ellipse at 68% 65%, rgba(31, 52, 74, 0.5), transparent 30%);
+}
+
+.device-screen[data-wallpaper='solstice'] .device-screen__wallpaper {
+  background: linear-gradient(145deg, #2b1720, #6b412b 50%, #191624);
+}
+
+.device-screen[data-wallpaper='solstice'] .device-screen__wallpaper-layer--one {
+  background: conic-gradient(from 100deg at 85% 20%, transparent 0 12%, rgba(250, 196, 110, 0.35) 18%, transparent 24% 33%, rgba(225, 150, 86, 0.25) 38%, transparent 44%);
+  animation: wallpaper-aurora 24s ease-in-out infinite alternate;
+}
+
+.device-screen[data-wallpaper='solstice'] .device-screen__wallpaper-layer--two {
+  background: radial-gradient(ellipse at 72% 28%, rgba(255, 213, 138, 0.35), transparent 22%);
 }
 
 .device-screen[data-wallpaper-speed='slow'] .device-screen__wallpaper-layer--one { animation-duration: 30s; }
@@ -281,12 +439,8 @@
 
 @keyframes wallpaper-rise { to { background-position: 18px -134px; } }
 
-@keyframes wallpaper-sun {
-  from { transform: translateY(3%) scale(0.94); }
-  to { transform: translateY(-7%) scale(1.04); }
-}
-
-@keyframes wallpaper-grid { to { background-position: 0 10%, 8% 0; } }
+@keyframes wallpaper-rain { to { background-position: -83px 274px; } }
+@keyframes wallpaper-rain-distant { to { background-position: -127px 382px; } }
 
 @keyframes wallpaper-sunset {
   from { transform: translate3d(-2%, 3%, 0) scale(0.98); }
@@ -297,8 +451,6 @@
   from { transform: translateX(-12%) skewX(-8deg); opacity: 0.45; }
   to { transform: translateX(14%) skewX(5deg); opacity: 0.8; }
 }
-
-@keyframes wallpaper-graphite { to { background-position: 40px 40px, 40px 40px; } }
 
 .device-screen[data-motion='off'] *,
 .device-screen[data-motion='off'] *::before,
@@ -782,13 +934,15 @@
 .device-system-screen__phone-clock time { font-size: clamp(2.6rem, 17cqw, 5.5rem); font-weight: 250; line-height: 1; letter-spacing: -0.05em; white-space: nowrap; }
 .device-system-screen__site-title {
   max-width: 100%;
-  margin: 8px 0 0;
-  color: #fff;
-  font-size: clamp(1rem, 5cqw, 1.4rem);
-  font-weight: 600;
-  line-height: 1.3;
+  margin: clamp(24px, 8cqw, 36px) 0 0;
+  color: #f9f9f9;
+  font-size: clamp(1.2rem, 6cqw, 1.75rem);
+  font-weight: 750;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
   overflow-wrap: anywhere;
 }
+.device-system-screen__site-title span { color: #ffab73; font-family: var(--font-mono); }
 .device-system-screen__unlock-actions { display: grid; justify-items: center; gap: 8px; width: 100%; }
 .device-system-screen__unlock-actions button { min-height: 44px; border: 0; background: transparent; color: #fff; cursor: pointer; font: inherit; }
 .device-system-screen__unlock-actions .device-system-screen__switch-user { padding: 8px 16px; font-size: 0.8rem; }
@@ -802,7 +956,7 @@
   .device-system-screen__phone-clock { gap: 4px; }
   .device-system-screen__phone-clock time { font-size: 2.6rem; }
   .device-system-screen__phone-clock svg { height: 20px; }
-  .device-system-screen__site-title { margin-top: 4px; font-size: 1rem; }
+  .device-system-screen__site-title { margin-top: 8px; font-size: 1.1rem; }
   .device-system-screen__unlock-actions { gap: 0; }
   .device-system-screen__swipe-unlock { gap: 4px; }
 }

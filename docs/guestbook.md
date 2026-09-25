@@ -34,11 +34,13 @@ preserving conversation drafts. Closing and reopening the app shows entry again.
 
 Continue exchanges a Turnstile token with the server for a signed, one-hour
 posting session. The session stays in memory and is reused across conversations
-and messages. No Cloudflare widget runs in the composer. After expiry or a
-network change, "Verify to continue" returns to entry while preserving drafts
+and messages. No Cloudflare widget runs in the composer. After expiry,
+"Verify to continue" returns to entry while preserving drafts
 and current declarations. Changing details retains a valid bot session.
-The server checks the signature, expiry, network hash, origin, and current terms
-on each post, along with all existing attempt and publishing limits. The signing
+The server checks the signature, expiry, origin, and current terms on each post.
+The signed session carries the original limiter identity so routing and network
+changes neither invalidate verification nor reset that session's counters.
+All existing attempt and publishing limits still apply. The signing
 key is the existing hash secret, with a separate session-specific signing prefix.
 Legacy frontends can still submit a fresh, single-use Turnstile token per post.
 Local previews without a Turnstile site key cannot continue past entry.
@@ -124,6 +126,12 @@ signed one-hour posting sessions. The older deployed function called the retired
 whose `upgrade_required` response was incorrectly displayed as a posting limit.
 Only an explicit `limited` result now produces a rate-limit response. A Vercel
 frontend deployment does not deploy this Supabase function.
+
+The session format was subsequently updated to carry its signed limiter identity
+instead of comparing it to each request's forwarded network address. An audit
+showed that consecutive requests had different network hashes. The redundant
+upper expiry bound was also removed so slight clock skew between servers cannot
+reject a newly issued session; the signed expiration time remains enforced.
 
 On September 25, 2026, browser setup created the managed "AJT3 Guestbook"
 Turnstile widget for `ajt3.me`, saved its private `TURNSTILE_SECRET_KEY` in the

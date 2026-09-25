@@ -175,21 +175,35 @@ test('one entry verification authorizes multiple posts while every post still ch
   assert.equal(state.rpc.filter(call => call.args.p_kind === 'post').length, 2);
 });
 
-test('sessions reject tampering, expiry, different networks, origins, and terms', async () => {
+test('sessions reject tampering, expiry, different origins, and terms', async () => {
   const { send, state } = service({ env: { GUESTBOOK_ORIGINS: 'https://site.test,https://other.test' } });
   const { session } = await (await send({ ...valid, action: 'verify' })).json();
-  for (const invalid of ['', 'anything', `${session}0`, `${Number(session.split('.')[0]) + 1}.${session.split('.')[1]}`]) {
+  const [expires, actor, signature] = session.split('.');
+  const changedActor = `${actor[0] === '0' ? '1' : '0'}${actor.slice(1)}`;
+  for (const invalid of ['', 'anything', `${session}0`, `${Number(expires) + 1}.${actor}.${signature}`, `${expires}.${changedActor}.${signature}`]) {
     const result = await send({ ...valid, session: invalid });
     assert.equal(result.status, 401);
     assert.equal((await result.json()).code, 'verification_required');
   }
-  assert.equal((await send({ ...valid, session }, { 'x-forwarded-for': '203.0.113.5' })).status, 401);
   assert.equal((await send({ ...valid, session }, { origin: 'https://other.test' })).status, 401);
   assert.equal((await service({ env: { GUESTBOOK_TERMS_VERSION: 'test-v2' } }).send({ ...valid, session, termsVersion: 'test-v2' })).status, 401);
   state.now += 3600000;
   assert.equal((await send({ ...valid, session })).status, 401);
   assert.equal(state.challenges.length, 1);
   assert.equal(state.rpc.filter(call => call.args.p_kind === 'post').length, 0);
+});
+
+test('fresh sessions survive routing changes and clock skew while sharing the original counters', async () => {
+  const { send, state } = service();
+  const { session } = await (await send({ ...valid, action: 'verify' })).json();
+  const originalActor = state.rpc[0].args.p_actor;
+  state.now -= 2000;
+  assert.equal((await send({ ...valid, token: undefined, session }, { 'x-forwarded-for': '203.0.113.5' })).status, 201);
+  assert.equal((await send({ ...valid, token: undefined, session }, { 'x-forwarded-for': '2001:db8::1' })).status, 201);
+  assert.equal(state.challenges.length, 1);
+  assert.ok(state.rpc.every(call => call.args.p_actor === originalActor));
+  const limited = service({ post: { error: 'limited' } });
+  assert.equal((await limited.send({ ...valid, session }, { 'x-forwarded-for': '203.0.113.5' })).status, 429);
 });
 
 test('entry checks cannot mint a session without valid terms, Turnstile, and rate limits', async () => {

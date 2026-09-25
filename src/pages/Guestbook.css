@@ -30,50 +30,51 @@
 @media (max-width: 480px) { .guestbook { padding: 16px 12px; } .guestbook__form { padding: 14px 10px; } .guestbook__submit { width: 100%; } }
 
 .device-window__content:has(> .guestbook-messages) { padding: 0; overflow: hidden; }
-.guestbook-messages { display: grid; grid-template-columns: 280px minmax(0, 1fr); width: 100%; height: 100%; min-height: 0; color: #f2f2f7; background: #17181c; container: guestbook / inline-size; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+.guestbook-messages { display: grid; grid-template-columns: 240px minmax(0, 1fr); width: 100%; height: 100%; min-height: 0; color: #f2f2f7; background: #17181c; container: guestbook / inline-size; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
 .guestbook-messages * { box-sizing: border-box; }
 .guestbook-messages button { color: inherit; font: inherit; cursor: pointer; }
 .guestbook-messages button:disabled { opacity: 0.5; cursor: not-allowed; }
 .guestbook-messages :is(button, input, textarea):focus-visible { outline: 2px solid #ff9b52; outline-offset: 3px; }
 .guestbook-messages button:focus-visible { position: relative; z-index: 1; }
 .guestbook-messages__sidebar { display: flex; flex-direction: column; min-height: 0; min-width: 0; border-right: 1px solid #3a3b40; background: #222328; }
-.guestbook-messages__sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 23px 18px 14px; }
+.guestbook-messages__sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px 8px; }
 .guestbook-messages__sidebar-header > div > span { color: #ff9b52; font: 600 0.6rem var(--font-mono); letter-spacing: 0.16em; }
 .device-window__content .guestbook-messages h1, .guestbook-messages h1 { margin: 5px 0 0; color: #fff; font-size: 1.7rem; line-height: 1.2; letter-spacing: -0.04em; }
+.device-window__content .guestbook-messages__sidebar-header h1, .guestbook-messages__sidebar-header h1 { margin-top: 3px; font-size: 1.3rem; }
 .guestbook-messages__compose-button { display: grid; place-items: center; width: 44px; height: 44px; padding: 10px; border: 0; border-radius: 10px; background: transparent; }
 .guestbook-messages__compose-button:hover { background: #323339; }
 .guestbook-messages svg { display: block; width: 24px; height: 24px; fill: none; stroke: #65b7ff; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
-.guestbook-messages__search { display: flex; align-items: center; gap: 8px; margin: 0 16px 15px; padding: 8px 10px; border-radius: 9px; background: #34353b; }
+.guestbook-messages__search { display: flex; align-items: center; gap: 8px; margin: 0 12px 6px; padding: 7px 9px; border-radius: 7px; background: #34353b; }
 .guestbook-messages__search svg { flex: none; width: 16px; height: 16px; stroke: #b5b6be; }
 .guestbook-messages__search input { width: 100%; min-width: 0; border: 0; background: transparent; color: #fff; font: inherit; font-size: 0.85rem; }
 .guestbook-messages input::placeholder, .guestbook-messages textarea::placeholder { color: #a4a5af; opacity: 1; }
-.guestbook-messages__list-heading { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 0 18px 10px; font-size: 0.67rem; color: #b6b7c1; }
-.guestbook-messages__list-heading button, .guestbook-messages__refresh { min-height: 32px; border: 0; background: none; color: #75beff; font-size: 0.72rem; }
+.guestbook-messages__list-heading { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 0 14px 4px; font-size: 0.67rem; color: #b6b7c1; }
+.guestbook-messages__list-heading button, .guestbook-messages .guestbook-messages__refresh { min-height: 32px; border: 0; background: none; color: #75beff; font-size: 0.72rem; }
 .guestbook-messages__list { flex: 1; min-height: 0; overflow-y: auto; padding: 0 8px; }
-.guestbook-messages__conversation { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 84px; padding: 12px 10px; border: 0; border-radius: 10px; background: transparent; text-align: left; }
+.guestbook-messages__conversation { display: flex; align-items: center; gap: 8px; width: 100%; min-height: 64px; padding: 8px; border: 0; border-radius: 8px; background: transparent; text-align: left; }
 .guestbook-messages__conversation:hover { background: #303138; }
 .guestbook-messages__conversation[aria-current='page'] { background: #245b97; }
-.guestbook-messages__avatar { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border-radius: 50%; background: #705074; color: #fff; font-size: 0.9rem; font-weight: 650; }
+.guestbook-messages__avatar { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: #705074; color: #fff; font-size: 0.75rem; font-weight: 650; }
 .guestbook-messages__avatar--1 { background: #477c79; }
 .guestbook-messages__avatar--2 { background: #8a644c; }
 .guestbook-messages__avatar--3 { background: #586b92; }
 .guestbook-messages__avatar--4 { background: #795d92; }
-.guestbook-messages__summary { display: grid; flex: 1; min-width: 0; gap: 6px; }
+.guestbook-messages__summary { display: grid; flex: 1; min-width: 0; gap: 3px; }
 .guestbook-messages__summary-heading { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
-.guestbook-messages__summary-heading strong { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.85rem; }
+.guestbook-messages__summary-heading strong { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 0.78rem; }
 .guestbook-messages__summary-heading time { flex: none; color: #c3c5ce; font-size: 0.62rem; }
 .guestbook-messages__preview { overflow: hidden; color: #c8c9d2; font-size: 0.76rem; line-height: 1.5; text-overflow: ellipsis; white-space: nowrap; }
 .guestbook-messages__chevron { color: #bfc4d0; }
 .guestbook-messages__chat { display: flex; flex-direction: column; min-width: 0; min-height: 0; background: #17181c; }
-.guestbook-messages__chat-header { display: flex; flex: none; align-items: center; gap: 12px; min-height: 78px; padding: 12px 22px; border-bottom: 1px solid #34353b; background: #202126; }
-.guestbook-messages__group-avatar { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(145deg, #647c91, #46536c); }
-.guestbook-messages__group-avatar svg { fill: #e6eef8; stroke: none; }
+.guestbook-messages__chat-header { display: flex; flex: none; align-items: center; gap: 9px; min-height: 60px; padding: 8px 16px; border-bottom: 1px solid #34353b; background: #202126; }
+.guestbook-messages__group-avatar { display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(145deg, #647c91, #46536c); }
+.guestbook-messages__group-avatar svg { width: 20px; height: 20px; fill: #e6eef8; stroke: none; }
 .guestbook-messages__chat-title { flex: 1; min-width: 0; }
-.guestbook-messages__chat-title h2 { margin: 0; color: #f2f2f7; font-size: 0.95rem; overflow-wrap: anywhere; }
+.guestbook-messages__chat-title h2 { margin: 0; color: #f2f2f7; font-size: 0.85rem; overflow-wrap: anywhere; }
 .guestbook-messages__chat-title p { margin: 5px 0 0; color: #b6b7c1; font-size: 0.65rem; line-height: 1.4; }
 .guestbook-messages__back { display: none; }
-.guestbook-messages__feed { flex: 1; min-height: 0; padding: 12px 24px 24px; overflow-y: auto; overscroll-behavior: contain; }
-.guestbook-messages__public-note { margin: 8px 0 24px; text-align: center; color: #b3b4c0; font-size: 0.67rem; line-height: 1.5; }
+.guestbook-messages__feed { flex: 1; min-height: 0; padding: 8px 16px 16px; overflow-y: auto; overscroll-behavior: contain; }
+.guestbook-messages__public-note { margin: 4px 0 12px; text-align: center; color: #b3b4c0; font-size: 0.67rem; line-height: 1.5; }
 .guestbook-messages__date { margin: 24px 0 18px; color: #b5b6c1; text-align: center; font-size: 0.66rem; font-weight: 600; }
 .guestbook-messages__message { display: flex; flex-direction: column; align-items: flex-start; margin: 0 0 14px; padding: 0; border: 0; }
 .guestbook-messages__message--own { align-items: flex-end; }
@@ -81,23 +82,22 @@
 .guestbook-messages__bubble { position: relative; max-width: min(85%, 520px); margin: 0; padding: 10px 15px; border-radius: 18px 18px 18px 5px; background: #35363e; color: #fafaff; font-size: 0.9rem; line-height: 1.5; overflow-wrap: anywhere; white-space: pre-wrap; }
 .guestbook-messages__message--own .guestbook-messages__bubble { border-radius: 18px 18px 5px 18px; background: #0868cf; }
 .guestbook-messages__message time { margin: 5px 10px 0; color: #a7a8b4; font-size: 0.59rem; }
-.guestbook-messages__welcome { padding: 35px 12px; text-align: center; color: #bfc0cb; }
-.guestbook-messages__welcome > span { color: #f2f2f7; font-size: 1.5rem; font-weight: 650; letter-spacing: -0.04em; }
+.guestbook-messages__welcome { padding: 18px 8px; text-align: center; color: #bfc0cb; }
+.guestbook-messages__welcome > span { color: #f2f2f7; font-size: 1.1rem; font-weight: 650; letter-spacing: -0.04em; }
 .guestbook-messages__welcome p { font-size: 0.8rem; line-height: 1.5; }
-.guestbook-messages__composer { flex: 0 1 auto; min-height: 0; max-height: 55%; padding: 12px 22px 14px; border-top: 1px solid #34353b; overflow-y: auto; background: #202126; }
-.guestbook-messages__composer fieldset { display: grid; gap: 10px; min-width: 0; padding: 0; margin: 0; border: 0; }
+.guestbook-messages__composer { flex: 0 1 auto; min-height: 0; max-height: 55%; padding: 8px 16px 10px; border-top: 1px solid #34353b; overflow-y: auto; background: #202126; }
+.guestbook-messages__composer fieldset { display: grid; gap: 6px; min-width: 0; padding: 0; margin: 0; border: 0; }
 .guestbook-messages__identity { display: flex; align-items: center; gap: 10px; color: #babcc6; font-size: 0.72rem; }
 .guestbook-messages__identity input { flex: 1; min-width: 0; min-height: 32px; padding: 5px 8px; border: 1px solid #51535f; border-radius: 7px; background: #2c2d33; color: #fff; font: inherit; }
-.guestbook-messages__input-row { display: flex; align-items: flex-end; gap: 8px; padding: 5px 6px 5px 14px; border: 1px solid #62636c; border-radius: 23px; background: #26272d; }
-.guestbook-messages__input-row textarea { flex: 1; min-width: 0; max-height: 110px; padding: 5px 0; resize: vertical; border: 0; background: transparent; color: #fff; font: inherit; font-size: 0.87rem; line-height: 1.5; }
-.guestbook-messages__input-row .guestbook-messages__send { display: grid; place-items: center; flex: none; width: 44px; height: 44px; padding: 10px; border: 0; border-radius: 50%; background: #0873e7; }
-.guestbook-messages__send svg { stroke: #fff; stroke-width: 2.5; }
+.guestbook-messages__input-row { display: flex; align-items: flex-end; gap: 6px; padding: 4px 5px 4px 11px; border: 1px solid #62636c; border-radius: 18px; background: #26272d; }
+.guestbook-messages__input-row textarea { flex: 1; min-width: 0; max-height: 110px; padding: 3px 0; resize: vertical; border: 0; background: transparent; color: #fff; font: inherit; font-size: 0.8rem; line-height: 1.4; }
+.guestbook-messages__input-row .guestbook-messages__send { display: grid; place-items: center; flex: none; width: 34px; height: 34px; padding: 7px; border: 0; border-radius: 50%; background: #0873e7; }
+.guestbook-messages__send svg { width: 20px; height: 20px; stroke: #fff; stroke-width: 2.5; }
 .guestbook-messages__composer .guestbook__challenge { margin: 4px 0; }
 .guestbook-messages__composer-note { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; color: #bfc0cb; font-size: 0.64rem; line-height: 1.5; }
 .guestbook-messages__composer-note > span:last-child { flex: none; }
-.guestbook-messages__privacy { margin: 7px 0 0; color: #aaacb8; font-size: 0.6rem; line-height: 1.5; }
 .guestbook-messages__identity strong { color: #f2f2f7; overflow-wrap: anywhere; }
-.guestbook-messages__identity button { flex: none; margin-left: auto; min-height: 36px; padding: 5px 9px; border: 1px solid #51535f; border-radius: 7px; background: #2c2d33; color: #a1d4ff; font-size: 0.7rem; }
+.guestbook-messages__identity button { flex: none; margin-left: auto; min-height: 30px; padding: 4px 8px; border: 1px solid #51535f; border-radius: 6px; background: #2c2d33; color: #a1d4ff; font-size: 0.7rem; }
 .guestbook-messages__participation { flex: 0 1 auto; min-height: 0; max-height: 65%; margin: 0; padding: 18px 22px; border-top: 1px solid #3a3b40; overflow-y: auto; background: #202126; }
 .guestbook-messages__participation h2 { margin: 0 0 4px; color: #fff; font-size: 1.15rem; }
 .guestbook-messages__participation p { margin: 4px 0 8px; color: #c5c7d1; font-size: 0.78rem; line-height: 1.5; }
@@ -119,7 +119,6 @@
 .guestbook-messages__welcome-header > span { color: #ff9b52; font: 0.7rem var(--font-mono); letter-spacing: 0.12em; }
 .guestbook-messages__welcome-header h1 { margin: 4px 0 0; color: #fff; font-size: 1.7rem; }
 .guestbook-messages--welcome .guestbook-messages__participation { flex: none; width: 100%; max-width: 760px; max-height: none; margin: 0 auto; padding: 14px 20px 18px; overflow: visible; background: transparent; }
-.guestbook-messages__policy-links .policy-links { margin-top: 0; gap: 0 16px; }
 .guestbook-messages__join-prompt { flex: none; padding: 16px 22px; border-top: 1px solid #34353b; background: #202126; }
 .guestbook-messages__join-prompt p { margin: 0 0 8px; color: #c5c7d1; font-size: 0.78rem; line-height: 1.6; }
 .guestbook-messages__join-button { display: block; min-height: 44px; padding: 8px 12px; border: 1px solid #51535f; border-radius: 8px; background: #26364a; color: #9cd0ff; }
@@ -150,4 +149,9 @@
   .guestbook-messages__feed { padding: 10px 15px 20px; }
   .guestbook-messages__composer { padding: 10px 12px 14px; }
   .guestbook-messages__participation { padding: 14px 16px; }
+}
+@media (pointer: coarse) {
+  .guestbook-messages__input-row .guestbook-messages__send { width: 44px; height: 44px; }
+  .guestbook-messages__identity button, .guestbook-messages__list-heading button, .guestbook-messages .guestbook-messages__refresh { min-height: 44px; }
+  .guestbook-messages__search input, .guestbook-messages__input-row textarea { font-size: 1rem; }
 }

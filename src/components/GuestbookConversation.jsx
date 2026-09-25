@@ -3,7 +3,7 @@ import GuestbookChallenge from './GuestbookChallenge';
 import { canParticipate } from './GuestbookParticipation';
 import { getGuestbook, guestbookRequest, notifyGuestbookChanged } from '../lib/guestbook';
 
-export default function GuestbookConversation({ conversation, focusChat, draft, onDraft, participant, onParticipant, onJoin, ownIds, onSent, onCreated, onBack, onBusy }) {
+export default function GuestbookConversation({ conversation, focusChat, draft, onDraft, participant, onParticipant, onJoin, entryToken, onEntryToken, ownIds, onSent, onCreated, onBack, onBusy }) {
   const [entries, setEntries] = useState([]);
   const [title, setTitle] = useState(conversation?.title || 'New conversation');
   const [loading, setLoading] = useState(Boolean(conversation));
@@ -11,7 +11,8 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
   const [error, setError] = useState('');
   const [hasMore, setHasMore] = useState(false);
   const [reload, setReload] = useState(0);
-  const [token, setToken] = useState('');
+  const [refreshedToken, setToken] = useState('');
+  const token = entryToken || refreshedToken;
   const [website, setWebsite] = useState('');
   const [challengeKey, setChallengeKey] = useState(0);
   const [posting, setPosting] = useState(false);
@@ -105,7 +106,7 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
         }
       }
     }
-    finally { if (!pending.signal.aborted) { setPosting(false); onBusy(false); setToken(''); setChallengeKey((value) => value + 1); } }
+    finally { if (!pending.signal.aborted) { setPosting(false); onBusy(false); onEntryToken(''); setToken(''); setChallengeKey((value) => value + 1); } }
   }
 
   return <section className="guestbook-messages__chat" aria-label={conversationId ? 'Conversation' : 'New conversation'}>
@@ -130,10 +131,9 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
         <div className="guestbook-messages__input-row"><label className="sr-only" htmlFor="guestbook-message">Message</label><textarea ref={conversationId ? composerInput : null} id="guestbook-message" value={draft.message} onChange={(event) => onDraft({ ...draft, message: event.target.value })} maxLength={500} required rows={2} placeholder={conversationId ? 'Message this conversation' : 'Start the conversation'} /><button type="submit" className="guestbook-messages__send" aria-label={posting ? 'Sending message' : conversationId ? 'Send message' : 'Create conversation'} disabled={posting || !configured || !token || unavailable}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 11 6-6 6 6M12 5v15" /></svg></button></div>
         <div className="guestbook__trap" aria-hidden="true"><label htmlFor="guestbook-website">Leave empty</label><input id="guestbook-website" value={website} onChange={(event) => setWebsite(event.target.value)} tabIndex={-1} autoComplete="off" /></div>
       </fieldset>
-      {configured && !unavailable && <GuestbookChallenge sitekey={sitekey} onToken={setToken} resetKey={challengeKey} />}
-      <div className="guestbook-messages__composer-note"><span>{configured ? token ? 'Ready to send. Profanity filtered; no links.' : 'Complete bot verification to send.' : 'Posting is unavailable until spam protection is configured.'}</span><span>{draft.message.length}/500</span></div>
+      {configured && !unavailable && !entryToken && <GuestbookChallenge sitekey={sitekey} onToken={setToken} resetKey={challengeKey} />}
+      <div className="guestbook-messages__composer-note"><span>{configured ? token ? 'Ready to send. Profanity filtered.' : 'Complete bot verification to send.' : 'Posting is unavailable until spam protection is configured.'}</span><span>{draft.message.length}/500</span></div>
       {postError && <p role="alert">{postError}</p>}{feedback && <p role="status">{feedback}</p>}
-      <p className="guestbook-messages__privacy">Public posts. No approval queue. Cloudflare bot checks and network-based spam limits apply.</p>
     </form>}
   </section>;
 }

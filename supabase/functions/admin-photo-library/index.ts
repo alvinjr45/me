@@ -79,7 +79,7 @@ Deno.serve(async (request) => {
         if (![true, false, 'true', 'false'].includes(visibility)) throw new Error('Choose whether the photo is published.');
         record = {
           id, title: text(value('title'), 160, true), album_id: text(value('album_id'), 100, true),
-          alt_text: text(value('alt_text'), 500, true), caption: text(value('caption'), 2000),
+          alt_text: text(value('alt_text'), 500), caption: text(value('caption'), 2000),
           sort_order, is_published: visibility === true || visibility === 'true',
           width: integer(value('width'), null), height: integer(value('height'), null), image_url: ''
         };

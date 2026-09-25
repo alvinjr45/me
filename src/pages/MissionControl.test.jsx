@@ -207,11 +207,12 @@ test('uploads a new image through the authenticated photo endpoint', async () =>
   fireEvent.change(screen.getByLabelText('Upload image'), { target: { files: [file] } });
   await screen.findByText('Image ready. Save the photo to upload it.');
   fireEvent.change(screen.getByLabelText('Photo title'), { target: { value: 'New memory' } });
-  fireEvent.change(screen.getByLabelText('Alt text'), { target: { value: 'A new memory outside' } });
+  expect(screen.getByLabelText('Alt text (optional)')).not.toBeRequired();
   fireEvent.click(screen.getByRole('button', { name: 'Save photo' }));
   await screen.findByText('Photo saved and published to your camera roll.');
   const [, request] = global.fetch.mock.calls.find(([, options]) => options.body instanceof FormData);
   expect(request.body.get('file').name).toBe('new-image.jpg');
+  expect(request.body.get('alt_text')).toBe('');
   expect(request.headers['Content-Type']).toBeUndefined();
   expect(screen.getByRole('button', { name: 'New memory Published / Drake & Josh' })).toBeInTheDocument();
 });

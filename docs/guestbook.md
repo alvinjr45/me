@@ -24,12 +24,20 @@ messages and previews and blocks new replies; it does not delete its contents.
 ## Participation gate and site policies
 
 Opening Messages starts on a dedicated "Before you join" screen. It contains
-the display name, age declaration, readable policies, and terms agreement.
+the display name, age declaration, readable policies, terms agreement, and a
+visible Cloudflare Turnstile check.
 "Continue to messages" opens the conversation browser after those requirements
 are met. There is no option to skip joining. Conversation fetching starts only
 after completing the entry screen. Both declarations are grouped together below
 the policy readers. "Change details" returns to the same full entry screen,
 preserving conversation drafts. Closing and reopening the app shows entry again.
+
+Continue also requires a Turnstile token. The entry token is kept in memory for
+the first message, where the server validates it before publishing. The client
+discards it after four minutes or any submission attempt; a fresh interaction-only
+check then runs in the composer. Drafts survive expiry and failed checks. This
+does not create a verified session or bypass server verification for later posts.
+Local previews without a Turnstile site key cannot continue past entry.
 
 Before any message or new conversation title can be entered, visitors must give
 a nonblank display name and explicitly check two initially unchecked boxes:
@@ -43,8 +51,8 @@ both checkboxes and locks the composer while preserving unsent drafts.
 
 The Terms and Conditions are in `src/data/guestbookTerms.js`; the Privacy Policy
 is in `src/data/privacyPolicy.js`. Both use version `2026-09-25` and are available
-at `/terms` and `/privacy`, inline before joining, and through links in the
-guestbook sidebar and Settings > System. Policy links open a separate tab to
+at `/terms` and `/privacy`, in dropdowns before joining, and through links in
+Settings > System. Policy links open a separate tab to
 preserve guestbook drafts and declarations on phones as well as desktop.
 The policy pages currently use the site's existing public Instagram contact.
 Confirm the contact method and the deployed host's logging, backups, and any

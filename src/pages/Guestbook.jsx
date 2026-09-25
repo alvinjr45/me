@@ -22,6 +22,7 @@ export default function Guestbook() {
   const [hasMore, setHasMore] = useState(false);
   const [participant, setParticipant] = useState(null);
   const [joining, setJoining] = useState(true);
+  const [entryToken, setEntryToken] = useState('');
   const [participationError, setParticipationError] = useState('');
   const [drafts, setDrafts] = useState({});
   const [ownIds, setOwnIds] = useState(new Set());
@@ -30,6 +31,13 @@ export default function Guestbook() {
   const selectedButton = useRef(null);
   const newButton = useRef(null);
   const draftKey = creating ? 'new' : selected?.id;
+
+  useEffect(() => {
+    if (!entryToken) return undefined;
+    // Refresh before Cloudflare's five-minute limit, including after the entry widget unmounts.
+    const timeout = setTimeout(() => setEntryToken(''), 240000);
+    return () => clearTimeout(timeout);
+  }, [entryToken]);
 
   useEffect(() => {
     if (joining) return undefined;
@@ -86,7 +94,7 @@ export default function Guestbook() {
 
   if (joining) return <main className="guestbook-messages guestbook-messages--welcome">
     <header className="guestbook-messages__welcome-header"><span>GUESTBOOK</span><h1>Messages</h1></header>
-    <GuestbookParticipation participant={participant} onContinue={updateParticipant} blockedMessage={participationError} />
+    <GuestbookParticipation participant={participant} onContinue={updateParticipant} blockedMessage={participationError} token={entryToken} onToken={setEntryToken} />
   </main>;
 
   return <main className={`guestbook-messages${chatOpen ? ' guestbook-messages--chat-open' : ''}`}>
@@ -112,6 +120,8 @@ export default function Guestbook() {
         draft={drafts[draftKey] || { title: '', message: '' }}
         onDraft={(draft) => setDrafts((current) => ({ ...current, [draftKey]: draft }))}
         participant={participant}
+        entryToken={entryToken}
+        onEntryToken={setEntryToken}
         onParticipant={updateParticipant}
         onJoin={openParticipation}
         ownIds={ownIds}

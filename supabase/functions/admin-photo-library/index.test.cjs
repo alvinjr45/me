@@ -60,10 +60,22 @@ test('lists library records and supports CORS preflight without writes', async (
 
 test('validates URL, order, dimensions, visibility, title and alt text before saving', async () => {
   const { send, state } = service();
-  for (const fields of [{ image_url: 'javascript:alert(1)' }, { image_url: '//untrusted.test/a.jpg' }, { sort_order: -1 }, { width: 0 }, { is_published: 'maybe' }, { title: '' }, { alt_text: '' }]) {
+  for (const fields of [{ image_url: 'javascript:alert(1)' }, { image_url: '//untrusted.test/a.jpg' }, { sort_order: -1 }, { width: 0 }, { is_published: 'maybe' }, { title: '' }, { alt_text: 'a'.repeat(501) }]) {
     assert.equal((await send({ ...validPhoto, ...fields })).status, 400);
   }
   assert.equal(state.writes.length, 0);
+});
+
+test('accepts blank or omitted alt text for photo edits and uploads', async () => {
+  const { send, state } = service();
+  for (const alt_text of ['', '   ', undefined]) {
+    assert.equal((await send({ ...validPhoto, alt_text })).status, 200);
+    assert.equal(state.writes.at(-1).row.alt_text, '');
+  }
+  const form = uploadForm();
+  form.delete('alt_text');
+  assert.equal((await send(form)).status, 200);
+  assert.equal(state.writes.at(-1).row.alt_text, '');
 });
 
 test('persists hidden status and rejects unknown albums', async () => {

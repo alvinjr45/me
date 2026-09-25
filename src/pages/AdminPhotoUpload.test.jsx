@@ -119,12 +119,12 @@ test('locks the queue during uploads and prevents duplicate submissions', async 
   expect(requestPhotoLibrary).toHaveBeenCalledTimes(2);
 });
 
-test('requires photo descriptions and allows removing or discarding queued files', () => {
+test('requires photo titles and allows removing or discarding queued files', () => {
   const props = openUpload();
   choosePhotos();
-  fireEvent.change(screen.getByLabelText('Alt text for first-photo.jpg'), { target: { value: ' ' } });
+  fireEvent.change(screen.getByLabelText('Title for first-photo.jpg'), { target: { value: ' ' } });
   fireEvent.submit(screen.getByRole('form', { name: 'Upload multiple photos' }));
-  expect(screen.getByRole('status')).toHaveTextContent('Add a title and alt text');
+  expect(screen.getByRole('status')).toHaveTextContent('Add a title');
   expect(requestPhotoLibrary).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Remove first-photo.jpg' }));
   expect(screen.queryByLabelText('Title for first-photo.jpg')).not.toBeInTheDocument();
@@ -133,6 +133,21 @@ test('requires photo descriptions and allows removing or discarding queued files
   expect(props.onClose).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
   expect(props.onClose).toHaveBeenCalledTimes(1);
+});
+
+test('uploads photos with empty or whitespace-only alt text', async () => {
+  openUpload();
+  choosePhotos();
+  const firstAlt = screen.getByLabelText('Alt text for first-photo.jpg');
+  const secondAlt = screen.getByLabelText('Alt text for second_photo.png');
+  expect(firstAlt).not.toBeRequired();
+  expect(secondAlt).not.toBeRequired();
+  fireEvent.change(firstAlt, { target: { value: '' } });
+  fireEvent.change(secondAlt, { target: { value: ' ' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Upload 2 photos' }));
+  await screen.findByText('2 photos uploaded. All selected photos are saved.');
+  expect(requestPhotoLibrary).toHaveBeenCalledTimes(2);
+  for (const [, body] of requestPhotoLibrary.mock.calls) expect(body.get('alt_text')).toBe('');
 });
 
 test('requires an existing album before uploading', () => {

@@ -57,13 +57,16 @@ function joinGuestbook() {
   fireEvent.change(screen.getByLabelText('Display name'), { target: { value: 'A guest' } });
   fireEvent.click(screen.getByRole('checkbox', { name: 'I confirm that I am at least 18 years old.' }));
   fireEvent.click(screen.getByRole('checkbox', { name: 'I have read and agree to the Terms and Conditions.' }));
+  const challenge = screen.queryByRole('button', { name: 'Complete bot check' });
+  if (challenge) fireEvent.click(challenge);
   fireEvent.click(screen.getByRole('button', { name: 'Continue to messages' }));
 }
 
 function fillMessage() {
   joinGuestbook();
   fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Hello there!' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Complete bot check' }));
+  const challenge = screen.queryByRole('button', { name: 'Complete bot check' });
+  if (challenge) fireEvent.click(challenge);
 }
 
 test('published policies unlock participation and remain accessible before joining', async () => {
@@ -73,8 +76,7 @@ test('published policies unlock participation and remain accessible before joini
   expect(getConversations).not.toHaveBeenCalled();
   expect(screen.getByText('Read the Privacy Policy')).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
-  expect(screen.getAllByRole('link', { name: /Privacy Policy/ })[0]).toHaveAttribute('href', '/privacy');
-  expect(screen.getAllByRole('link', { name: /Terms and Conditions/ })[0]).toHaveAttribute('target', '_blank');
+  expect(screen.getByText('Read the Terms and Conditions')).toBeInTheDocument();
   joinGuestbook();
   await screen.findByText('Hello!');
   fillMessage();
@@ -89,7 +91,8 @@ test('requires a bot token, publishes without approval, and resets the token aft
   renderGuestbook();
   await screen.findByText('Hello!');
   joinGuestbook();
-  expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
+  expect(screen.queryByRole('button', { name: 'Complete bot check' })).not.toBeInTheDocument();
   fillMessage();
   fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
   expect(await screen.findByText('Sent. Filtered words were replaced with ***.')).toBeInTheDocument();
@@ -116,15 +119,18 @@ test('expired challenges and missing configuration cannot submit', async () => {
   const { unmount } = renderGuestbook();
   await screen.findByText('Hello!');
   fillMessage();
+  fireEvent.click(screen.getByRole('button', { name: 'Send message' }));
+  await screen.findByText('Sent to the conversation.');
+  fillMessage();
   fireEvent.click(screen.getByRole('button', { name: 'Expire bot check' }));
   expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
   unmount();
   delete process.env.REACT_APP_TURNSTILE_SITE_KEY;
-  renderGuestbook();
-  await screen.findByText('Hello!');
-  joinGuestbook();
-  expect(screen.getByText('Posting is unavailable until spam protection is configured.')).toBeInTheDocument();
-  expect(screen.getByLabelText('Message')).toBeDisabled();
+  guestbookRequest.mockClear();
+  renderGuestbook(false);
+  expect(screen.getByText('Joining is unavailable until spam protection is configured.')).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
+  expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
   expect(guestbookRequest).not.toHaveBeenCalled();
 });
 
@@ -204,7 +210,7 @@ test('requires a nonblank name and both unchecked confirmations before showing a
   expect(screen.queryByRole('button', { name: /without joining/ })).not.toBeInTheDocument();
   expect(getConversations).not.toHaveBeenCalled();
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
-  expect(screen.queryByRole('button', { name: 'Complete bot check' })).not.toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Complete bot check' })).toBeInTheDocument();
   const age = screen.getByRole('checkbox', { name: /at least 18/ });
   const terms = screen.getByRole('checkbox', { name: /have read and agree/ });
   expect(age).not.toBeChecked(); expect(terms).not.toBeChecked();
@@ -220,6 +226,12 @@ test('requires a nonblank name and both unchecked confirmations before showing a
   fireEvent.click(age);
   fireEvent.click(screen.getByText('Read the Terms and Conditions'));
   expect(screen.getByText('Test-only terms fixture.')).toBeVisible();
+  expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Complete bot check' }));
+  expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeEnabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Expire bot check' }));
+  expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
+  fireEvent.click(screen.getByRole('button', { name: 'Complete bot check' }));
   fireEvent.click(screen.getByRole('button', { name: 'Continue to messages' }));
   expect(await screen.findByLabelText('Message')).toBeInTheDocument();
   expect(guestbookRequest).not.toHaveBeenCalled();
@@ -250,7 +262,24 @@ test('changing participation details relocks the composer and preserves the unse
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
   joinGuestbook();
   expect(screen.getByLabelText('Message')).toHaveValue('Hello there!');
-  expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
+});
+
+test('entry token expires while reading and a fresh challenge preserves the draft', async () => {
+  jest.useFakeTimers();
+  let view;
+  try {
+    view = renderGuestbook();
+    await act(async () => { jest.advanceTimersByTime(1); });
+    fireEvent.change(screen.getByLabelText('Message'), { target: { value: 'Still writing' } });
+    expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
+    await act(async () => { jest.advanceTimersByTime(240000); });
+    expect(screen.getByRole('button', { name: 'Send message' })).toBeDisabled();
+    expect(screen.getByLabelText('Message')).toHaveValue('Still writing');
+    fireEvent.click(screen.getByRole('button', { name: 'Complete bot check' }));
+    expect(screen.getByRole('button', { name: 'Send message' })).toBeEnabled();
+    expect(guestbookRequest).not.toHaveBeenCalled();
+  } finally { view?.unmount(); jest.useRealTimers(); }
 });
 
 test('server-side terms changes relock composition and require a reload', async () => {

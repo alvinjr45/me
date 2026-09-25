@@ -33,8 +33,8 @@ export default function AdminPhotoUpload({ secret, library, onChange, onBusy, on
       setMessage('Choose an album before uploading.');
       return;
     }
-    if (remaining.some((item) => !item.title.trim() || !item.alt.trim())) {
-      setMessage('Add a title and alt text for each photo before uploading.');
+    if (remaining.some((item) => !item.title.trim())) {
+      setMessage('Add a title for each photo before uploading.');
       return;
     }
     uploading.current = true;
@@ -92,7 +92,7 @@ export default function AdminPhotoUpload({ secret, library, onChange, onBusy, on
           <label>Upload to album<select required value={albumId} onChange={(event) => setAlbumId(event.target.value)}><option value="" disabled>Choose an album</option>{library.albums.map((album) => <option key={album.id} value={album.id}>{album.title}</option>)}</select></label>
           <label>Choose photos<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif" onChange={chooseFiles} /></label>
         </div>
-        <p className="admin-page__hint">Select several photos at once. Up to 20 MB each, including HEIC. Review titles and describe each image for screen readers.</p>
+        <p className="admin-page__hint">Select several photos at once. Up to 20 MB each, including HEIC. Review titles and optionally add alt text for screen readers.</p>
         <label className="admin-page__toggle"><input type="checkbox" checked={published} onChange={(event) => setPublished(event.target.checked)} />Publish uploaded photos</label>
         <ul className="admin-photos__queue">
           {queue.map((item) => <li key={item.id}>
@@ -100,7 +100,7 @@ export default function AdminPhotoUpload({ secret, library, onChange, onBusy, on
             {item.status !== 'saved' && <>
               <div className="admin-page__row">
                 <label>Title<input required aria-label={`Title for ${item.name}`} maxLength={160} value={item.title} onChange={(event) => updateItem(item.id, { title: event.target.value })} /></label>
-                <label>Alt text<input required aria-label={`Alt text for ${item.name}`} maxLength={500} value={item.alt} onChange={(event) => updateItem(item.id, { alt: event.target.value })} /></label>
+                <label>Alt text (optional)<input aria-label={`Alt text for ${item.name}`} maxLength={500} value={item.alt} onChange={(event) => updateItem(item.id, { alt: event.target.value })} /></label>
               </div>
               {item.error && <p className="admin-photos__upload-error" role="alert">{item.error}</p>}
               <button type="button" aria-label={`Remove ${item.name}`} onClick={() => setQueue((current) => current.filter((entry) => entry.id !== item.id))}>Remove</button>

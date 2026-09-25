@@ -20,12 +20,6 @@
 .mission-control button:disabled { opacity: 0.55; cursor: not-allowed; }
 .mission-control__content { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 24px; }
 .mission-control__content .admin-page--mission-control { min-height: 0; padding: 0; background: transparent; }
-.mission-control .mission-control__overview > h1 { margin: 9px 0 12px; font-size: 34px; line-height: 1.1; letter-spacing: -0.05em; }
-.mission-control__overview > p:not(.mission-control__eyebrow) { color: #a7b8c9; font-size: 13px; line-height: 1.6; }
-.mission-control__eyebrow { margin: 0; color: var(--color-main); font: 9px var(--font-mono); letter-spacing: 0.16em; }
-.mission-control__stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 26px 0; padding: 20px 0; border-block: 1px solid #293948; }
-.mission-control__stats dt { color: #a4b8c9; font-size: 11px; }
-.mission-control__stats dd { margin: 7px 0 0; font-size: 30px; font-weight: 650; letter-spacing: -0.05em; }
 .mission-control__destinations { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
 .mission-control__destinations button { min-width: 0; padding: 22px; border: 1px solid #344351; border-radius: 9px; background: #111e2c; color: #f1f6fa; text-align: left; }
 .mission-control__destinations button:hover { border-color: var(--color-accent); background: #152739; }
@@ -158,12 +152,5 @@
   .mission-control__toolbar { padding: 12px 16px; min-height: 62px; }
   .mission-control__content { padding: 20px 14px; }
   .mission-control__destinations { grid-template-columns: 1fr; }
-  .mission-control__stats { gap: 10px; }
-  .mission-control__stats dt { font-size: 10px; line-height: 1.5; }
-  .mission-control__stats dd { font-size: 27px; }
   .mission-control__content .admin-page--mission-control { padding: 0; }
-}
-
-@media (max-width: 1024px), (max-height: 500px) {
-  .device-window__content:has(> .mission-control) { padding-bottom: 28px; background: #0a111a; }
 }

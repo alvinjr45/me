@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import GuestbookConversation from '../components/GuestbookConversation';
 import GuestbookParticipation, { canParticipate } from '../components/GuestbookParticipation';
-import PolicyLinks from '../components/PolicyLinks';
 import { getConversations } from '../lib/guestbook';
 import './Guestbook.css';
 
@@ -67,13 +66,6 @@ export default function Guestbook() {
     setJoining(true);
   }
 
-  function browseConversations() {
-    setParticipant((current) => current ? { name: current.name } : null);
-    setJoining(false);
-    setChatOpen(false);
-    requestAnimationFrame(() => newButton.current?.focus({ preventScroll: true }));
-  }
-
   async function loadMore() {
     const current = ++request.current;
     setLoading(true);
@@ -93,8 +85,8 @@ export default function Guestbook() {
   }
 
   if (joining) return <main className="guestbook-messages guestbook-messages--welcome">
-    <header className="guestbook-messages__welcome-header"><span>GUESTBOOK</span><h1>Messages</h1><p>A little corner of the internet for public conversations.</p></header>
-    <GuestbookParticipation participant={participant} onContinue={updateParticipant} onBrowse={browseConversations} blockedMessage={participationError} />
+    <header className="guestbook-messages__welcome-header"><span>GUESTBOOK</span><h1>Messages</h1></header>
+    <GuestbookParticipation participant={participant} onContinue={updateParticipant} blockedMessage={participationError} />
   </main>;
 
   return <main className={`guestbook-messages${chatOpen ? ' guestbook-messages--chat-open' : ''}`}>
@@ -111,7 +103,6 @@ export default function Guestbook() {
         </button>)}
         {hasMore && !error && <button className="guestbook-messages__more" disabled={loading} type="button" onClick={loadMore}>More conversations</button>}
       </nav>
-      <footer className="guestbook-messages__sidebar-footer">A little corner of the internet.<br />Read freely. Posting is for ages 18+.<button className="guestbook-messages__join-button" type="button" disabled={busy} onClick={openParticipation}>{canParticipate(participant) ? 'Your details and policies' : 'Join the guestbook'}</button><PolicyLinks /></footer>
     </aside>
     {creating || selected ? (
       <GuestbookConversation

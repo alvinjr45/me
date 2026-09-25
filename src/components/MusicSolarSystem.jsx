@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 const TAU = Math.PI * 2;
 const ECCENTRICITY = 0.035;
@@ -20,7 +20,7 @@ function createOrbits(count) {
   return Array.from({ length: laneCount }, (_, lane) => {
     const remaining = count - start;
     const size = lane === laneCount - 1 ? remaining : Math.min(count <= 8 ? 2 : lane + 3, remaining);
-    const orbit = { start, size, radius: 100 + lane * (220 / Math.max(1, laneCount - 1)) };
+    const orbit = { start, size, radius: 110 + lane * (250 / Math.max(1, laneCount - 1)) };
     start += size;
     return orbit;
   }).filter((orbit) => orbit.size > 0);
@@ -30,14 +30,21 @@ function initialAnomaly(index, orbit) {
   return ((index - orbit.start) / orbit.size * TAU + orbit.start * 0.7 + 0.5) % TAU;
 }
 
-const stars = Array.from({ length: 65 }, (_, index) => ({
-  left: `${(index * 73.37 + 9) % 100}%`,
-  top: `${(index * 41.71 + 3) % 100}%`,
-  '--star-opacity': 0.15 + (index % 5) * 0.1,
-  animationDelay: `${-index * 0.73}s`,
-  animationDuration: `${5 + index % 7}s`,
-  width: index % 7 === 0 ? 2 : 1
-}));
+// Generate once so playlist selections keep the same starfield.
+const stars = Array.from({ length: 120 }, () => {
+  const size = 0.7 + Math.random() ** 2 * 1.8;
+  return {
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    '--star-opacity': 0.3 + Math.random() * 0.5,
+    '--star-size': `${size}px`,
+    '--star-color': Math.random() < 0.12 ? '#ffe4ba' : '#d5e7ff',
+    '--star-glow': size > 2 ? '0 0 5px var(--star-color)' : 'none',
+    '--star-animation': Math.random() < 0.35 ? 'music-star-twinkle' : 'none',
+    animationDelay: `${-Math.random() * 12}s`,
+    animationDuration: `${6 + Math.random() * 6}s`
+  };
+});
 
 function overlap(a, b) {
   return Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left))
@@ -98,12 +105,8 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
   const orbits = createOrbits(playlists.length);
   const stageRef = useRef(null);
   const planetRefs = useRef([]);
-  const pausedRef = useRef(false);
-  const syncAnimationRef = useRef(() => {});
   const selectedRef = useRef(selectedKey);
   selectedRef.current = selectedKey;
-  const [paused, setPaused] = useState(false);
-  const [reducedMotion, setReducedMotion] = useState(false);
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -136,15 +139,12 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
         const x = viewport.width / 2 + point.x * scale;
         const y = viewport.height / 2 + point.y * scale;
         points.push({ x, y });
-        button.style.left = `${x}px`;
-        button.style.top = `${y}px`;
+        button.style.transform = `translate3d(${point.x * scale}px, ${point.y * scale}px, 0) translate(-50%, -50%)`;
         button.style.setProperty('--preview-x', `${Math.max(previewSize / 2 + 8,
           Math.min(viewport.width - previewSize / 2 - 8, x)) - x}px`);
         button.style.setProperty('--preview-y', `${Math.max(previewSize / 2 + 8,
           Math.min(viewport.height - previewSize / 2 - 32, y)) - y}px`);
-        button.style.setProperty('--planet-depth', 1 + point.depth * 0.025);
-        button.style.setProperty('--light-x', `${50 - point.x / radius * 36}%`);
-        button.style.setProperty('--light-y', `${50 - point.y / radius * 36}%`);
+        button.style.setProperty('--light-angle', `${Math.atan2(point.y, point.x)}rad`);
         button.style.zIndex = point.depth > 0 ? 4 : 2;
       });
       labelPositions = positionLabels(points, labelWidths, viewport, labelPositions,
@@ -161,7 +161,7 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
 
     const tick = (time) => {
       frameId = null;
-      if (disposed || !visible || document.hidden || media.matches || pausedRef.current) return;
+      if (disposed || !visible || document.hidden || media.matches) return;
       const delta = previousTime === null ? 0 : Math.min((time - previousTime) / 1000, 0.05);
       previousTime = time;
       // Hold the entire system still while a moving target is being inspected.
@@ -175,9 +175,8 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
       window.cancelAnimationFrame(frameId);
       frameId = null;
       previousTime = null;
-      setReducedMotion(media.matches);
-      stage.dataset.motion = !visible || document.hidden || media.matches || pausedRef.current ? 'paused' : 'running';
-      if (!disposed && visible && !document.hidden && !media.matches && !pausedRef.current) {
+      stage.dataset.motion = !visible || document.hidden || media.matches ? 'paused' : 'running';
+      if (!disposed && visible && !document.hidden && !media.matches) {
         frameId = window.requestAnimationFrame(tick);
       }
     };
@@ -196,7 +195,6 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
     resizeObserver.observe(stage);
     media.addEventListener('change', syncAnimation);
     document.addEventListener('visibilitychange', syncAnimation);
-    syncAnimationRef.current = syncAnimation;
     paint(0);
     syncAnimation();
 
@@ -207,41 +205,19 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
       resizeObserver.disconnect();
       media.removeEventListener('change', syncAnimation);
       document.removeEventListener('visibilitychange', syncAnimation);
-      syncAnimationRef.current = () => {};
     };
   }, [playlists]);
-
-  const toggleMotion = () => {
-    pausedRef.current = !pausedRef.current;
-    setPaused(pausedRef.current);
-    syncAnimationRef.current();
-  };
 
   return (
     <section className="music-system" aria-label="Orbiting playlist library">
       <header className="music-system__header">
         <span>{playlists.length} playlists</span>
-        <button type="button" className="music-system__motion" onClick={toggleMotion}
-          aria-pressed={paused || reducedMotion} disabled={reducedMotion}>
-          {reducedMotion ? 'Reduced motion' : paused ? 'Resume orbits' : 'Pause orbits'}
-        </button>
       </header>
 
-      <div className={`music-system__stage${paused || reducedMotion ? ' music-system__stage--still' : ''}`} ref={stageRef}>
+      <div className="music-system__stage" ref={stageRef}>
         <div className="music-system__stars" aria-hidden="true">
           {stars.map((star, index) => <i key={index} style={star} />)}
         </div>
-        <svg className="music-system__orbits" viewBox="0 0 800 800" aria-hidden="true">
-          <circle className="music-system__dust" cx="400" cy="400" r="350" />
-          {orbits.map(({ radius, start, size }) => {
-            const path = Array.from({ length: 121 }, (_, index) => {
-              const point = orbitalPoint(radius, index / 120 * TAU);
-              return `${index === 0 ? 'M' : 'L'}${400 + point.x},${400 + point.y}`;
-            }).join(' ');
-            const active = playlists.slice(start, start + size).some((item) => item.key === selectedKey);
-            return <path key={start} d={`${path} Z`} className={active ? 'music-system__orbit--active' : undefined} />;
-          })}
-        </svg>
         <div className="music-system__sun" aria-hidden="true" />
 
         {playlists.map((playlist, index) => {
@@ -254,8 +230,7 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
               aria-controls="music-playlist-player" onClick={() => onSelect(playlist.key)}
               title={playlist.title}
               style={{ '--planet-color': playlist.color, '--planet-size': `${Math.round(playlist.size * 0.4)}px`,
-                '--surface-period': `${24 + index * 2}s`, '--surface-delay': `${-index * 3}s`,
-                left: `${50 + point.x / 8}%`, top: `${50 + point.y / 8}%` }}>
+                transform: `translate3d(calc(var(--system-size, 400px) * ${point.x / 800}), calc(var(--system-size, 400px) * ${point.y / 800}), 0) translate(-50%, -50%)` }}>
               <span className="music-planet__leader" aria-hidden="true" />
               <span className="music-planet__sphere">
                 <span className="music-planet__surface" />

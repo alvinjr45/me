@@ -151,6 +151,3 @@
   .calendar-agenda__events { grid-template-columns: 1fr; }
   .calendar-heading { gap: 10px; }
 }
-@media (max-width: 1024px), (max-height: 500px) {
-  .device-window__content:has(> .calendar-app) { padding-bottom: 28px; }
-}

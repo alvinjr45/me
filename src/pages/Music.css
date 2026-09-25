@@ -81,20 +81,6 @@
   font: 0.72rem var(--font-mono);
 }
 
-.music-system__motion {
-  flex-shrink: 0;
-  min-height: 44px;
-  padding: 0 0.8rem;
-  border: 1px solid var(--color-line-strong);
-  border-radius: 6px;
-  background: #0c121b;
-  color: #c3cbd6;
-  font: 0.7rem var(--font-mono);
-}
-
-.music-system__motion:hover { border-color: var(--color-accent); }
-.music-system__motion:disabled { cursor: default; color: #a8b3c3; }
-
 .music-system__stage {
   position: relative;
   isolation: isolate;
@@ -105,56 +91,25 @@
   container-type: inline-size;
 }
 
-.music-system__stars,
-.music-system__orbits {
+.music-system__stars {
   position: absolute;
+  z-index: 0;
   inset: 0;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   pointer-events: none;
 }
 
 .music-system__stars i {
   position: absolute;
-  height: 1px;
+  width: var(--star-size);
+  height: var(--star-size);
   border-radius: 50%;
-  background: #d5e7ff;
-  box-shadow: 0 0 5px #5f91bd;
+  background: var(--star-color);
   opacity: var(--star-opacity);
-  animation: music-star-twinkle 7s ease-in-out infinite alternate;
-}
-
-.music-system__orbits {
-  inset: auto;
-  left: 50%;
-  top: 50%;
-  width: var(--system-size, 100%);
-  height: var(--system-size, 100%);
-  transform: translate(-50%, -50%);
-}
-
-.music-system__dust {
-  fill: none;
-  stroke: #94bad1;
-  stroke-width: 1.5;
-  stroke-opacity: 0.22;
-  stroke-dasharray: 1 17 2 31 1 9;
-  transform-origin: 400px 400px;
-  animation: music-corona-turn 160s linear infinite;
-}
-
-.music-system__orbits path {
-  fill: none;
-  stroke: #405064;
-  stroke-opacity: 0.35;
-  stroke-width: 1;
-  vector-effect: non-scaling-stroke;
-  transition: stroke 0.4s ease, stroke-opacity 0.4s ease;
-}
-
-.music-system__orbits .music-system__orbit--active {
-  stroke: #d18b54;
-  stroke-opacity: 0.48;
+  box-shadow: var(--star-glow);
+  animation: var(--star-animation) 7s ease-in-out infinite alternate;
 }
 
 .music-system__sun {
@@ -164,14 +119,12 @@
   left: 50%;
   display: grid;
   place-items: center;
-  width: clamp(30px, calc(var(--system-size, 400px) * 0.08), 48px);
+  width: clamp(38px, calc(var(--system-size, 400px) * 0.1), 60px);
   aspect-ratio: 1;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  background:
-    repeating-conic-gradient(from 16deg, #ffffff00 0deg 16deg, #ffc15430 17deg 20deg, #ffffff00 21deg 40deg),
-    radial-gradient(circle at 37% 32%, #fffad4, #ffe397 21%, #ffae44 52%, #ec601e 78%, #ad320e);
-  box-shadow: 0 0 15px #ffd478a6, 0 0 45px #ff922563, 0 0 100px #f777202b;
+  background: radial-gradient(circle, #fffef5 0%, #fff9d9 24%, #ffe99b 40%,
+    #ffc45ad9 52%, #ff972b70 62%, #ff801a00 72%);
   animation: music-sun-breathe 8s ease-in-out infinite;
   pointer-events: none;
 }
@@ -179,29 +132,33 @@
 .music-system__sun::before {
   content: '';
   position: absolute;
-  inset: -18%;
-  border-radius: inherit;
-  border: 1px solid #ffae4920;
-  box-shadow: 0 0 0 13px #ffae4905;
+  inset: -95%;
+  background:
+    radial-gradient(ellipse 50% 3% at center, #fffce8d9, #ffe3a16b 28%, #ffb64b00 100%),
+    radial-gradient(ellipse 3% 44% at center, #fffce8b3, #ffe3a14d 28%, #ffb64b00 100%),
+    radial-gradient(circle, #ffdd783d 12%, #ffb54829 30%, #ff8c1e12 46%, #ff801a00 70%);
+  transform: rotate(-18deg);
 }
 
 .music-system__sun::after {
   content: '';
   position: absolute;
-  inset: -35%;
+  inset: -65%;
   border-radius: 50%;
-  background: repeating-conic-gradient(#ffb85400 0deg 24deg, #ffb85424 28deg, #ffb85400 33deg 60deg);
-  mask-image: radial-gradient(circle, transparent 38%, #000 48%, transparent 72%);
-  animation: music-corona-turn 38s linear infinite;
+  background:
+    repeating-conic-gradient(from 12deg, #ffb85400 0deg, #ffe7a380 9deg, #ffb85400 20deg 60deg),
+    repeating-conic-gradient(from 38deg, #ffb85400 0deg, #ffcb603d 12deg, #ffb85400 25deg 90deg);
+  mask-image: radial-gradient(circle, transparent 18%, #0009 30%, #0004 46%, transparent 68%);
+  animation: music-corona-turn 70s linear infinite;
 }
 
-.music-system__stage--still *,
-.music-system__stage--still *::after,
 .music-system__stage[data-motion='paused'] *,
 .music-system__stage[data-motion='paused'] *::after { animation-play-state: paused !important; }
 
 .music-planet {
   position: absolute;
+  left: 50%;
+  top: 50%;
   display: grid;
   place-items: center;
   width: 32px;
@@ -210,7 +167,8 @@
   border: 0;
   border-radius: 50%;
   background: transparent;
-  transform: translate(-50%, -50%);
+  transform: translate3d(0, 0, 0) translate(-50%, -50%);
+  will-change: transform;
 }
 
 .music-planet__sphere {
@@ -223,7 +181,7 @@
   border-radius: 50%;
   background: var(--planet-color);
   box-shadow: 0 5px 14px #0009, 0 0 0 1px #ffffff12;
-  transform: translate(-50%, -50%) scale(var(--planet-depth, 1));
+  transform: translate(-50%, -50%);
   transition: width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
     transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), border-radius 0.3s ease, box-shadow 0.3s ease;
 }
@@ -234,12 +192,10 @@
   overflow: hidden;
   border-radius: inherit;
   background:
-    radial-gradient(circle at var(--light-x, 30%) var(--light-y, 25%), #ffffff94, #ffffff08 30%, #00000030 50%, #000000ef 100%),
-    repeating-linear-gradient(164deg, transparent 0 5%, #1b233326 7% 12%, #ffffff0c 14% 16%, transparent 20% 23%),
+    radial-gradient(circle at 20% 50%, #ffffff94, #ffffff08 30%, #00000030 58%, #000000ef 100%),
+    linear-gradient(164deg, transparent 15%, #1b233326 40%, #ffffff0c 65%, transparent 85%),
     var(--planet-color);
-  background-size: 100% 100%, 180% 180%, auto;
-  animation: music-surface-drift var(--surface-period) linear infinite;
-  animation-delay: var(--surface-delay);
+  transform: rotate(var(--light-angle, 0rad));
   box-shadow: inset 0 0 5px #fff2;
   transition: opacity 0.2s ease;
 }
@@ -436,15 +392,11 @@
 
 @keyframes music-star-twinkle {
   from { opacity: var(--star-opacity); }
-  to { opacity: 0.08; }
+  to { opacity: calc(var(--star-opacity) * 0.45); }
 }
 
 @keyframes music-corona-turn {
   to { transform: rotate(360deg); }
-}
-
-@keyframes music-surface-drift {
-  to { background-position: 0 0, 100% 35%, 0 0; }
 }
 
 @container (max-width: 960px) {
@@ -461,7 +413,6 @@
 
 @container (max-width: 520px) {
   .music-system__stage { min-height: 400px; }
-  .music-system__motion { padding: 0 0.6rem; font-size: 0.65rem; }
 }
 
 @container app-viewport (max-width: 820px) {

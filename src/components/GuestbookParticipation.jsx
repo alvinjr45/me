@@ -15,7 +15,7 @@ export function canParticipate(participant) {
     && participant.termsVersion === guestbookTerms.version;
 }
 
-export default function GuestbookParticipation({ participant, onContinue, onBrowse, blockedMessage = '' }) {
+export default function GuestbookParticipation({ participant, onContinue, blockedMessage = '' }) {
   const heading = useRef(null);
   const [name, setName] = useState(participant?.name || '');
   const [ageConfirmed, setAgeConfirmed] = useState(false);
@@ -33,18 +33,20 @@ export default function GuestbookParticipation({ participant, onContinue, onBrow
 
   return <form className="guestbook-messages__participation" aria-labelledby="guestbook-join-title" onSubmit={continueToMessages}>
     <h2 id="guestbook-join-title" ref={heading} tabIndex={-1}>Before you join</h2>
-    <p>Introduce yourself and confirm the requirements below to write a message. You can still read the conversations without joining.</p>
+    <p>Enter a display name and confirm both requirements to open the conversations.</p>
     <label className="guestbook-messages__join-name" htmlFor="guestbook-display-name">Display name</label>
     <input id="guestbook-display-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={40} required autoComplete="nickname" aria-describedby="guestbook-name-notice" placeholder="How should we call you?" />
     <p id="guestbook-name-notice" className="guestbook-messages__join-hint">Your display name and messages will be public.</p>
-    <label className="guestbook-messages__agreement"><input type="checkbox" required checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} /><span>I confirm that I am at least 18 years old.</span></label>
     {published ? <details className="guestbook-messages__terms"><summary>Read the Terms and Conditions</summary><p>{guestbookTerms.content}</p><small>Version: {guestbookTerms.version}</small></details> : <p className="guestbook-messages__terms-pending" role="status">Terms and Conditions are being prepared. Message entry will open once they are published.</p>}
     <details className="guestbook-messages__terms"><summary>Read the Privacy Policy</summary><p>{privacyPolicy.content}</p><small>Version: {privacyPolicy.version}</small></details>
-    <p className="guestbook-messages__join-hint">Open the full policies and contact information in a separate tab:<PolicyLinks /></p>
-    <label className="guestbook-messages__agreement"><input type="checkbox" required disabled={!published} checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} /><span>I have read and agree to the Terms and Conditions.</span></label>
+    <div className="guestbook-messages__policy-links"><PolicyLinks /></div>
+    <fieldset className="guestbook-messages__agreements">
+      <legend className="sr-only">Requirements to join</legend>
+      <label className="guestbook-messages__agreement"><input type="checkbox" required checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} /><span>I confirm that I am at least 18 years old.</span></label>
+      <label className="guestbook-messages__agreement"><input type="checkbox" required disabled={!published} checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} /><span>I have read and agree to the Terms and Conditions.</span></label>
+    </fieldset>
     {blockedMessage && <p role="alert">{blockedMessage}</p>}
     <button type="submit" disabled={!ready}>Continue to messages</button>
-    <button type="button" className="guestbook-messages__browse-button" onClick={onBrowse}>Read conversations without joining</button>
-    <p className="guestbook-messages__join-hint">The age confirmation is a self-declaration. We do not collect your date of birth or identity documents.</p>
+    <p className="guestbook-messages__join-hint">Age is self-declared. No date of birth or ID is collected.</p>
   </form>;
 }

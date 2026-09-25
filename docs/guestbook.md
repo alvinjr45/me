@@ -26,16 +26,17 @@ messages and previews and blocks new replies; it does not delete its contents.
 Opening Messages starts on a dedicated "Before you join" screen. It contains
 the display name, age declaration, readable policies, and terms agreement.
 "Continue to messages" opens the conversation browser after those requirements
-are met. "Read conversations without joining" allows browsing without any
-declarations or bot challenge. Conversation fetching starts only after leaving
-the entry screen. Read-only visitors can return through "Join the guestbook"
-or "Join conversation". "Change details" returns to the same full entry screen,
+are met. There is no option to skip joining. Conversation fetching starts only
+after completing the entry screen. Both declarations are grouped together below
+the policy readers. "Change details" returns to the same full entry screen,
 preserving conversation drafts. Closing and reopening the app shows entry again.
 
 Before any message or new conversation title can be entered, visitors must give
 a nonblank display name and explicitly check two initially unchecked boxes:
 they are at least 18, and they have read and agree to the Terms and Conditions.
-Reading the public boards requires no declaration. The name and declarations
+Messages requires these declarations before showing the public boards. This
+entry screen is not authentication or a restriction on public database reads.
+The name and declarations
 last only while this Guestbook app instance is open; they are not saved to
 browser storage. Switching conversations retains them. "Change details" resets
 both checkboxes and locks the composer while preserving unsent drafts.

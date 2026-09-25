@@ -5,7 +5,7 @@ export const guestbookTerms = {
 AJT3 is AJ Thompson's personal website. These Terms and Conditions cover use of the site and its public guestbook. By using the site, you agree to these terms. If you do not agree, stop using the site. The Privacy Policy explains how information is handled.
 
 2. Joining the guestbook
-You must be at least 18 years old to post or start a conversation. Before posting, provide a display name, confirm your age, and accept the current terms. You may use a nickname. Names and ages are self-declared, not verified. Do not impersonate another person or claim to be a moderator. Reading public conversations does not require joining.
+You must be at least 18 years old to post or start a conversation. Before entering conversations in Messages, provide a display name, confirm your age, and accept the current terms. You may use a nickname. Names and ages are self-declared, not verified. Do not impersonate another person or claim to be a moderator. Guestbook posts remain public.
 
 3. Everything you post is public
 Your display name, conversation title, message, and posting time can be viewed by anyone. Visitors may copy or share them, and search engines may index them. Do not post passwords, contact details, financial or health information, or anyone else's private information. This guestbook is not a private messaging service.

@@ -82,7 +82,7 @@ test('keeps the dashboard locked until the server accepts the password, and sign
   expect(global.fetch).toHaveBeenCalledTimes(1);
 
   await signIn();
-  await screen.findByRole('heading', { name: 'Welcome back.' });
+  await screen.findByRole('heading', { name: 'Recent posts' });
   fireEvent.click(screen.getByRole('button', { name: '02 Blog posts' }));
   expect(await screen.findByRole('heading', { name: 'Posts' })).toBeInTheDocument();
   expect(screen.getByRole('button', { name: 'First post Published' })).toBeInTheDocument();
@@ -156,7 +156,7 @@ test.each([
   openApp();
   await signIn();
   expect(await screen.findByRole('alert')).toHaveTextContent(message);
-  expect(screen.queryByRole('heading', { name: 'Welcome back.' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: 'Recent posts' })).not.toBeInTheDocument();
 });
 
 test('aborts an unfinished sign-in when its window is closed', async () => {

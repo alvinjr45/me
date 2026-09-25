@@ -44,9 +44,9 @@ afterEach(() => {
   window.confirm = savedConfirm;
 });
 
-function renderGuestbook(browse = true) {
+function renderGuestbook(join = true) {
   const view = render(<Guestbook />);
-  if (browse) fireEvent.click(screen.getByRole('button', { name: 'Read conversations without joining' }));
+  if (join) joinGuestbook();
   return view;
 }
 
@@ -200,6 +200,9 @@ test('an unavailable conversation clears its feed and disables replies', async (
 
 test('requires a nonblank name and both unchecked confirmations before showing a composer', async () => {
   renderGuestbook(false);
+  expect(within(screen.getByRole('group', { name: 'Requirements to join' })).getAllByRole('checkbox')).toHaveLength(2);
+  expect(screen.queryByRole('button', { name: /without joining/ })).not.toBeInTheDocument();
+  expect(getConversations).not.toHaveBeenCalled();
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
   expect(screen.queryByRole('button', { name: 'Complete bot check' })).not.toBeInTheDocument();
   const age = screen.getByRole('checkbox', { name: /at least 18/ });
@@ -222,18 +225,17 @@ test('requires a nonblank name and both unchecked confirmations before showing a
   expect(guestbookRequest).not.toHaveBeenCalled();
 });
 
-test('unpublished terms keep new conversations and replies read-only', async () => {
+test('unpublished terms prevent entering conversations', () => {
   guestbookTerms.version = null; guestbookTerms.content = '';
   renderGuestbook(false);
   expect(screen.getByText(/Terms and Conditions are being prepared/)).toBeInTheDocument();
   expect(screen.getByRole('checkbox', { name: /have read and agree/ })).toBeDisabled();
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Read conversations without joining' }));
-  await screen.findByText('Hello!');
-  fireEvent.click(screen.getByRole('button', { name: 'New conversation' }));
+  expect(screen.queryByRole('button', { name: /without joining/ })).not.toBeInTheDocument();
+  expect(screen.queryByRole('navigation', { name: 'Conversations' })).not.toBeInTheDocument();
+  expect(getConversations).not.toHaveBeenCalled();
   expect(screen.queryByLabelText('Conversation title')).not.toBeInTheDocument();
   expect(screen.queryByLabelText('Message')).not.toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Join conversation' }));
   expect(screen.getByRole('button', { name: 'Continue to messages' })).toBeDisabled();
 });
 

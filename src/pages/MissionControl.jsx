@@ -94,8 +94,6 @@ function MissionControl() {
         <div className="mission-control__content">
           {activeSection.path === '/admin' && !isEditor && (
             <main className="mission-control__overview">
-              <p className="mission-control__eyebrow">THE BIG PICTURE</p><h1>Welcome back.</h1><p>Publish a thought. Add a memory. Make this place yours.</p>
-              <dl className="mission-control__stats"><div><dt>Published posts</dt><dd>{posts.filter((post) => post.is_published).length}</dd></div><div><dt>Drafts</dt><dd>{posts.filter((post) => !post.is_published).length}</dd></div><div><dt>Published photos</dt><dd>{photoStatus === 'ready' ? library.photos.filter((photo) => photo.is_published).length : '--'}</dd></div></dl>
               <div className="mission-control__destinations">
                 <button type="button" onClick={() => navigate('/admin/calendar')}><span>WHAT'S NEXT</span><h2>Calendar</h2><p>Add events and make room for what matters.</p><strong>Manage events &rarr;</strong></button>
                 <button type="button" onClick={() => navigate('/admin/posts')}><span>PUBLISHING</span><h2>Blog posts</h2><p>Write, edit, and choose what goes live.</p><strong>Manage posts &rarr;</strong></button>

@@ -858,7 +858,21 @@ function DeviceShell({ children, home }) {
               <time>{time}</time>
               <span className="device-screen__island" aria-hidden="true" />
               <span className="device-screen__phone-signals" aria-hidden="true">
-                <svg viewBox="0 0 50 16" fill="currentColor"><path d="M1 12h3v3H1zm5-3h3v6H6zm5-4h3v10h-3zm5-4h3v14h-3zM27 12l7-8 7 8zM43 3h5v10h-5z" /></svg>
+                <svg viewBox="0 0 68 16" fill="currentColor" focusable="false">
+                  <rect x="0" y="10" width="3" height="4" rx="0.8" />
+                  <rect x="5" y="7.5" width="3" height="6.5" rx="0.8" />
+                  <rect x="10" y="4.5" width="3" height="9.5" rx="0.8" />
+                  <rect x="15" y="1.5" width="3" height="12.5" rx="0.8" />
+                  <g fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
+                    <path d="M23 5a11.2 11.2 0 0 1 16 0" />
+                    <path d="M26 8a7 7 0 0 1 10 0" />
+                    <path d="M29 11a2.8 2.8 0 0 1 4 0" />
+                  </g>
+                  <circle cx="31" cy="13.5" r="1.2" />
+                  <rect x="45" y="2" width="20" height="12" rx="3" fill="none" stroke="currentColor" strokeOpacity="0.5" />
+                  <rect x="47" y="4" width="14" height="8" rx="1.4" />
+                  <path d="M66.5 6v4a2.2 2.2 0 0 0 0-4Z" opacity="0.65" />
+                </svg>
               </span>
             </div>
 

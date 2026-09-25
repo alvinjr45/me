@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Calendar, { timedLayout } from './Calendar';
 import { addDays, dateFromKey, dateKey, eventsOnDay, getCalendarEvents, monthDays } from '../data/calendar';
@@ -25,6 +25,24 @@ test('shows event details, filters calendars and links to event management', asy
   expect(screen.queryByRole('button', { name: 'Project launch All day' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByLabelText('Work'));
   expect(screen.getAllByRole('button', { name: 'Project launch All day' }).length).toBeGreaterThan(0);
+});
+
+test('links web addresses in notes while preserving punctuation and keeping markup as text', async () => {
+  getCalendarEvents.mockResolvedValue([{ ...event, notes: 'Join (https://example.com/meet?room=1&guest=2).\nRead https://example.com/wiki/Event_(live), or www.example.com.\nhttp://example.com/info\n<script>alert(1)</script> javascript:alert(1) https://.' }]);
+  openCalendar();
+  fireEvent.click((await screen.findAllByRole('button', { name: 'Project launch All day' }))[0]);
+  const details = screen.getByRole('region', { name: 'Event details' });
+  const links = within(details).getAllByRole('link');
+  expect(links.map((link) => link.getAttribute('href'))).toEqual([
+    'https://example.com/meet?room=1&guest=2', 'https://example.com/wiki/Event_(live)', 'https://www.example.com', 'http://example.com/info'
+  ]);
+  links.forEach((link) => {
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(link).toHaveAccessibleName(/opens in a new tab/);
+  });
+  expect(within(details).getByText(/Join/).textContent).toContain(').\nRead');
+  expect(details).toHaveTextContent('<script>alert(1)</script> javascript:alert(1) https://.');
 });
 
 test('supports all four views and navigates safely across month boundaries', async () => {

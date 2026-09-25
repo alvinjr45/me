@@ -96,7 +96,8 @@ function AdminCalendar({ secret, onBusy }) {
             <label>Ends<input type={draft.all_day ? 'date' : 'datetime-local'} required min={draft.starts} value={draft.ends} onChange={(event) => update('ends', event.target.value)} /></label>
             <p className="admin-page__hint">{draft.all_day ? 'The end date is included.' : `Times use your local time zone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}.`}</p>
             <label>Location<input maxLength={500} value={draft.location} onChange={(event) => update('location', event.target.value)} /></label>
-            <label>Notes<textarea rows={4} maxLength={5000} value={draft.notes} onChange={(event) => update('notes', event.target.value)} /></label>
+            <label>Notes<textarea rows={4} maxLength={5000} aria-describedby="calendar-notes-hint" value={draft.notes} onChange={(event) => update('notes', event.target.value)} /></label>
+            <p className="admin-page__hint" id="calendar-notes-hint">Links starting with https://, http://, or www. are clickable in event details.</p>
             <label className="admin-page__toggle"><input type="checkbox" checked={draft.is_published} onChange={(event) => update('is_published', event.target.checked)} />Publish in Calendar</label>
             <p className="admin-page__hint">Published events, including their location and notes, are visible to everyone. Uncheck to hide an event.</p>
             <button type="submit">{saving ? 'Saving event...' : 'Save event'}</button>

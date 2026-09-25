@@ -642,7 +642,7 @@ function DeviceShell({ children, home }) {
   const phoneLocked = isPhone && systemState === 'locked';
 
   const openBuild = (event) => {
-    if (!isPhone || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
     event.preventDefault();
     setBuildRedirect(desktopApps.find((app) => app.key === 'tech').path);
   };
@@ -1041,7 +1041,7 @@ function DeviceShell({ children, home }) {
               <span className="device-screen__dock-divider" aria-hidden="true" />
               </>}
               {(isPhone ? phoneDockApps : desktopApps).map((app) => (
-                <Link key={app.key} to={app.path} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`device-screen__dock-app${app.utility ? ' device-screen__dock-app--utility' : ''}${windows.some((item) => item.key === app.key) || activeApp?.key === app.key ? ' device-screen__dock-app--active' : ''}`} aria-label={`Open ${app.label}`} title={app.label}>
+                <Link key={app.key} to={app.path} onClick={app.key === 'tech' ? openBuild : undefined} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`device-screen__dock-app${app.utility ? ' device-screen__dock-app--utility' : ''}${windows.some((item) => item.key === app.key) || activeApp?.key === app.key ? ' device-screen__dock-app--active' : ''}`} aria-label={`Open ${app.label}`} title={app.label}>
                   <AppIcon name={app.key} />
                   <span className="device-screen__dock-label">{app.label}</span>
                 </Link>

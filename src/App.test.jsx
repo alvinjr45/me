@@ -61,7 +61,11 @@ function expectHomeUrl(historyLength) {
   expect(window.history.length).toBe(historyLength);
 }
 
-test('Build shows a full phone redirect screen before leaving the site', () => {
+test.each([
+  [true, 'Build'],
+  [false, 'Build'],
+  [false, 'Open Build']
+])('Build shows a full emulator redirect screen before leaving the site (phone: %s, link: %s)', (isPhone, linkName) => {
   jest.useFakeTimers();
   const savedLocation = Object.getOwnPropertyDescriptor(window, 'location');
   const assign = jest.fn();
@@ -70,14 +74,14 @@ test('Build shows a full phone redirect screen before leaving the site', () => {
     value: { href: window.location.href, origin: window.location.origin, pathname: '/', search: '', hash: '', assign }
   });
   window.matchMedia.mockImplementation((query) => ({
-    matches: query.includes('max-width'),
+    matches: isPhone && query.includes('max-width'),
     addEventListener: jest.fn(), removeEventListener: jest.fn()
   }));
   let unmount;
   try {
     ({ unmount } = render(<App />));
-    fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
-    fireEvent.click(screen.getByRole('link', { name: 'Build' }));
+    if (isPhone) fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
+    fireEvent.click(screen.getByRole('link', { name: linkName }));
     const redirect = screen.getByRole('region', { name: 'Redirecting to ajt3.website...' });
     expect(redirect).toHaveClass('device-system-screen--redirect');
     expect(within(redirect).getByRole('heading')).toHaveFocus();

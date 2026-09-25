@@ -28,6 +28,7 @@
 .calendar-heading__navigation button { min-width: 30px; padding: 4px 9px; }
 .calendar-heading__navigation button:first-child, .calendar-heading__navigation button:last-child { font-size: 21px; line-height: 1; }
 .calendar-canvas { flex: 1; min-height: 180px; overflow: auto; }
+.calendar-canvas:has(> .calendar-month)::after { content: ''; display: block; height: var(--calendar-scroll-space, 0px); }
 .calendar-month { height: 100%; min-height: 594px; display: flex; flex-direction: column; }
 .calendar-month__weekdays { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); flex: none; padding-block: 8px; border-bottom: 1px solid #35404c; color: #adb8c8; font-size: 11px; text-align: right; }
 .calendar-month__weekdays span { padding-right: 10px; }
@@ -73,6 +74,9 @@
 .calendar-agenda header button { flex: none; width: 30px; font-size: 19px; }
 .calendar-agenda p { margin: 8px 0; color: #b8c7d8; font-size: 12px; line-height: 1.5; overflow-wrap: anywhere; }
 .calendar-agenda__notes { white-space: pre-wrap; }
+.calendar-agenda__notes a { color: #66baff; text-decoration: underline; text-underline-offset: 2px; overflow-wrap: anywhere; }
+.calendar-agenda__notes a:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.device-screen[data-appearance='light'] .calendar-agenda__notes a { color: #176fbb; }
 .calendar-agenda__events { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 8px; margin-top: 10px; }
 .calendar-notice { margin: 0; padding: 8px 20px; color: #b8c7d8; font-size: 12px; line-height: 1.5; }
 .calendar-notice button { margin-left: 6px; }

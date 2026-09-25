@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addDays, calendarGroups, dateFromKey, dateKey, eventDate, eventRange, eventsOnDay, eventTime, getCalendarEvents, monthDays } from '../data/calendar';
 import './Calendar.css';
@@ -16,6 +16,25 @@ function MiniMonth({ date, selected, onSelect }) {
 
 function EventButton({ event, onSelect, style, className = '' }) {
   return <button type="button" className={`calendar-event ${className}`} style={{ '--event-color': groupFor(event).color, ...style }} onClick={() => onSelect(event)} title={`${event.title} / ${eventRange(event)}`}><strong>{event.title}</strong><span>{eventTime(event)}</span></button>;
+}
+
+function EventNotes({ notes }) {
+  const parts = notes.split(/(\b(?:https?:\/\/|www\.)[^\s<>"']+)/gi);
+  return <p className="calendar-agenda__notes">{parts.map((part, index) => {
+    if (index % 2 === 0) return part;
+    let label = part.replace(/[.,!?;:]+$/, '');
+    for (const [open, close] of [['(', ')'], ['[', ']'], ['{', '}']]) {
+      while (label.endsWith(close) && label.split(close).length > label.split(open).length) {
+        label = label.slice(0, -1).replace(/[.,!?;:]+$/, '');
+      }
+    }
+    const href = /^www\./i.test(label) ? `https://${label}` : label;
+    try {
+      const url = new URL(href);
+      if (!['http:', 'https:'].includes(url.protocol)) return part;
+    } catch { return part; }
+    return <React.Fragment key={index}><a href={href} target="_blank" rel="noopener noreferrer">{label}<span className="sr-only"> (opens in a new tab)</span></a>{part.slice(label.length)}</React.Fragment>;
+  })}</p>;
 }
 
 // Place overlapping events in separate lanes, including their minimum visible height.
@@ -70,6 +89,31 @@ function Calendar() {
   const [reload, setReload] = useState(0);
   const details = useRef(null);
   const todayButton = useRef(null);
+  const canvas = useRef(null);
+
+  useLayoutEffect(() => {
+    const container = canvas.current;
+    if (view !== 'month' || !container) return;
+    function alignSelectedWeek() {
+      container.style.removeProperty('--calendar-scroll-space');
+      if (!window.matchMedia?.('(min-width: 1025px) and (min-height: 501px)').matches) return;
+      const month = container.querySelector('.calendar-month');
+      const cell = month?.querySelector('.is-selected');
+      if (!cell) return;
+      const cellTop = cell.getBoundingClientRect().top;
+      // Leave enough room below the final week to align it at the top too.
+      const space = Math.max(0, container.clientHeight - (month.getBoundingClientRect().bottom - cellTop));
+      container.style.setProperty('--calendar-scroll-space', `${space}px`);
+      container.scrollTop += cellTop - container.getBoundingClientRect().top;
+    }
+    alignSelectedWeek();
+    const observer = window.ResizeObserver ? new ResizeObserver(alignSelectedWeek) : null;
+    observer?.observe(container);
+    return () => {
+      observer?.disconnect();
+      container.style.removeProperty('--calendar-scroll-space');
+    };
+  }, [view, selected]);
 
   useEffect(() => {
     let current = true;
@@ -126,7 +170,7 @@ function Calendar() {
           <div className="calendar-heading"><h1>{heading}</h1><div className="calendar-heading__navigation"><button type="button" onClick={() => move(-1)} aria-label={`Previous ${view}`}>&lsaquo;</button><button type="button" ref={todayButton} onClick={() => chooseDay(dateFromKey(dateKey(new Date())))}>Today</button><button type="button" onClick={() => move(1)} aria-label={`Next ${view}`}>&rsaquo;</button></div></div>
           {loading && <p className="calendar-notice" role="status">Loading events...</p>}
           {error && <div className="calendar-notice" role="alert">{error} <button type="button" onClick={() => { setLoading(true); setReload((value) => value + 1); }}>Retry calendar</button></div>}
-          <div className="calendar-canvas">
+          <div className="calendar-canvas" ref={canvas}>
             {view === 'month' ? <div className="calendar-month"><div className="calendar-month__weekdays">{weekdays.map((day) => <span key={day}>{day}</span>)}</div><div className="calendar-month__days">{monthDays(selected).map((day) => {
                 const entries = eventsOnDay(filtered, day);
                 return <div key={dateKey(day)} className={`calendar-month__cell${day.getMonth() !== selected.getMonth() ? ' is-outside' : ''}${dateKey(day) === dateKey(selected) ? ' is-selected' : ''}`}>
@@ -145,7 +189,7 @@ function Calendar() {
                   : <TimeView days={days} events={filtered} onSelect={selectEvent} onDay={openDay} />}
           </div>
           <section className="calendar-agenda" aria-label={active ? 'Event details' : 'Selected day events'} ref={details} tabIndex={-1}>
-            {active ? <><header><h2 style={{ color: `var(--calendar-detail-color, ${groupFor(active).color})` }}>{active.title}</h2><button type="button" onClick={() => { setActiveId(null); todayButton.current?.focus(); }} aria-label="Close event details">&times;</button></header><p>{eventRange(active)}</p><p className="calendar-agenda__group">{groupFor(active).title}</p>{active.location && <p><strong>Location:</strong> {active.location}</p>}{active.notes && <p className="calendar-agenda__notes">{active.notes}</p>}</>
+            {active ? <><header><h2 style={{ color: `var(--calendar-detail-color, ${groupFor(active).color})` }}>{active.title}</h2><button type="button" onClick={() => { setActiveId(null); todayButton.current?.focus(); }} aria-label="Close event details">&times;</button></header><p>{eventRange(active)}</p><p className="calendar-agenda__group">{groupFor(active).title}</p>{active.location && <p><strong>Location:</strong> {active.location}</p>}{active.notes && <EventNotes notes={active.notes} />}</>
               : <><header><h2>{fullDate(selected)}</h2><span>{agenda.length} {agenda.length === 1 ? 'event' : 'events'}</span></header>{!loading && !error && !agenda.length && <p>No events. A little room in the day.</p>}<div className="calendar-agenda__events">{agenda.map((event) => <EventButton key={event.id} event={event} onSelect={selectEvent} />)}</div></>}
           </section>
         </div>

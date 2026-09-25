@@ -7,7 +7,6 @@
 .guestbook h2 { margin: 0; font-size: 1.05rem; }
 .guestbook button { min-height: 44px; padding: 8px 14px; border: 1px solid #546477; border-radius: 8px; background: #233246; color: #fff; cursor: pointer; }
 .guestbook button:disabled { opacity: 0.55; cursor: not-allowed; }
-.guestbook :is(button, input, textarea):focus-visible { outline: 3px solid #70c3ff; outline-offset: 3px; }
 .guestbook__form { padding: 20px; border: 1px solid #354356; border-radius: 14px; background: #111d2c; }
 .guestbook__form > p { font-size: 0.85rem; }
 .guestbook__form fieldset { display: grid; gap: 8px; min-width: 0; margin: 16px 0; padding: 0; border: 0; }
@@ -34,7 +33,6 @@
 .guestbook-messages * { box-sizing: border-box; }
 .guestbook-messages button { color: inherit; font: inherit; cursor: pointer; }
 .guestbook-messages button:disabled { opacity: 0.5; cursor: not-allowed; }
-.guestbook-messages :is(button, input, textarea):focus-visible { outline: 2px solid #ff9b52; outline-offset: 3px; }
 .guestbook-messages button:focus-visible { position: relative; z-index: 1; }
 .guestbook-messages__sidebar { display: flex; flex-direction: column; min-height: 0; min-width: 0; border-right: 1px solid #3a3b40; background: #222328; }
 .guestbook-messages__sidebar-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px 8px; }
@@ -109,7 +107,6 @@
 .guestbook-messages__agreement input { flex: none; width: 18px; height: 18px; margin: 1px 0 0; accent-color: #339cff; }
 .guestbook-messages__terms { margin: 4px 0; padding: 0 10px; border: 1px solid #51535f; border-radius: 8px; }
 .guestbook-messages__terms summary { min-height: 44px; padding: 12px 0; color: #9cd0ff; cursor: pointer; font-size: 0.78rem; }
-.guestbook-messages__terms summary:focus-visible { outline: 2px solid #ff9b52; outline-offset: 3px; }
 .guestbook-messages__terms p { white-space: pre-wrap; overflow-wrap: anywhere; }
 .guestbook-messages__terms small { color: #b5b7c4; font-size: 0.65rem; }
 .guestbook-messages__participation .guestbook-messages__terms-pending { padding: 10px 12px; border-left: 3px solid #ff9b52; background: #2e2b29; }

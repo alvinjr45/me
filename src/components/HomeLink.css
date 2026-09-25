@@ -22,11 +22,12 @@
 .home-link:hover,
 .home-link:focus-visible {
   transform: translateY(-2px);
-  border-color: rgba(251, 127, 51, 0.85);
   background:
     linear-gradient(180deg, rgba(251, 127, 51, 0.16), rgba(51, 175, 251, 0.08)),
     rgba(2, 6, 18, 0.72);
 }
+
+.home-link:hover { border-color: rgba(251, 127, 51, 0.85); }
 
 .home-link--compact {
   min-height: 40px;

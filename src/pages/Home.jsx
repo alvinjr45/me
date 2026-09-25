@@ -5,7 +5,7 @@ import { DeviceSettingsContext } from '../components/deviceSettings';
 import './Home.css';
 
 function Home() {
-  const { isPhone = false } = useContext(DeviceSettingsContext) || {};
+  const { isPhone = false, openBuild } = useContext(DeviceSettingsContext) || {};
   const appsRef = useRef(null);
   const [pageSize, setPageSize] = useState(desktopApps.length);
   const [activePage, setActivePage] = useState(0);
@@ -72,7 +72,7 @@ function Home() {
         {pages.map((apps, index) => (
           <div className="desktop-home__page" key={index} role={isPhone ? 'group' : undefined} aria-label={isPhone ? `App page ${index + 1} of ${pages.length}` : undefined}>
             {apps.map((app) => (
-              <Link key={app.key} to={app.path} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`desktop-home__app desktop-home__app--${app.key}`}>
+              <Link key={app.key} to={app.path} onClick={app.key === 'tech' ? openBuild : undefined} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`desktop-home__app desktop-home__app--${app.key}`}>
                 <AppIcon name={app.key} />
                 <span className="desktop-home__app-label">{app.label}</span>
               </Link>

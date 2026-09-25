@@ -131,7 +131,10 @@ export default function MusicPlayerSlider() {
                 '&::before': {
                   boxShadow: '0 2px 12px 0 rgba(0,0,0,0.4)',
                 },
-                '&:hover, &.Mui-focusVisible': {
+                '&.Mui-focusVisible': {
+                  boxShadow: 'none',
+                },
+                '&:hover': {
                   boxShadow: `0px 0px 0px 8px ${isDark ? 'rgb(255 255 255 / 16%)' : 'rgb(0 0 0 / 16%)'}`,
                 },
                 '&.Mui-active': {

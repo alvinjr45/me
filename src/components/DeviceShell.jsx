@@ -294,13 +294,18 @@ function PhoneLockScreen({ time, date, onUnlock, onSwitchUser }) {
       animationRef.current?.cancel();
       previewAnimationRef.current?.cancel();
       device.style.removeProperty('--unlock-progress');
+      device.style.removeProperty('--unlock-reveal');
       device.classList.remove('device-screen--unlock-dragging');
     };
   }, []);
 
+  const revealProgress = (progress) => clamp((progress - 0.18) / 0.82, 0, 1);
+
   const paintSwipe = (offset, height) => {
+    const progress = Math.min(offset / height, 1);
     screenRef.current.style.setProperty('--unlock-offset', `${offset}px`);
-    screenRef.current.parentElement.style.setProperty('--unlock-progress', Math.min(offset / height, 1));
+    screenRef.current.parentElement.style.setProperty('--unlock-progress', progress);
+    screenRef.current.parentElement.style.setProperty('--unlock-reveal', revealProgress(progress));
   };
 
   const resetSwipe = () => {
@@ -319,6 +324,7 @@ function PhoneLockScreen({ time, date, onUnlock, onSwitchUser }) {
     const sheet = lock.querySelector('.device-system-screen__lock-sheet');
     const preview = lock.parentElement.querySelector('.device-screen__session');
     const progress = Math.min(offset / height, 1);
+    const reveal = revealProgress(progress);
     gestureRef.current = null;
     cancelAnimationFrame(frameRef.current);
     frameRef.current = null;
@@ -333,7 +339,7 @@ function PhoneLockScreen({ time, date, onUnlock, onSwitchUser }) {
       { opacity: 0, transform: `translate3d(0, -${height}px, 0)` }
     ], timing);
     previewAnimationRef.current = preview.animate([
-      { opacity: progress, transform: `translate3d(0, ${(1 - progress) * 24}px, 0) scale(${0.96 + progress * 0.04})` },
+      { opacity: reveal, transform: `translate3d(0, ${(1 - reveal) * 24}px, 0) scale(${0.96 + reveal * 0.04})` },
       { opacity: 1, transform: 'translate3d(0, 0, 0) scale(1)' }
     ], timing);
     animationRef.current.onfinish = onUnlock;
@@ -607,6 +613,7 @@ function DeviceShell({ children, home }) {
   const screenRef = useRef(null);
   const dragRef = useRef(null);
   const systemTimerRef = useRef(null);
+  const redirectRef = useRef(null);
   const nextZRef = useRef(10);
   const [now, setNow] = useState(() => new Date());
   const [isPhone, setIsPhone] = useState(() => window.matchMedia(phoneMediaQuery).matches);
@@ -622,6 +629,7 @@ function DeviceShell({ children, home }) {
   const [clock24, setClock24] = useState(() => getSavedBoolean('ajt3-clock24', false));
   const [motion, setMotion] = useState(() => getSavedBoolean('ajt3-motion', true));
   const [systemState, setSystemState] = useState(() => isPhone ? 'locked' : 'running');
+  const [buildRedirect, setBuildRedirect] = useState(null);
   const isHome = pathname === '/';
   const activeApp = desktopApps.find((app) => pathname === app.path || pathname.startsWith(`${app.path}/`)) || (!isHome ? { key: 'page', label: 'Page', path: pathname } : null);
   const activeKey = activeApp?.key;
@@ -629,6 +637,26 @@ function DeviceShell({ children, home }) {
   const accountName = isAdmin ? 'AJ Thompson' : 'Guest';
   const guestDenied = systemState === 'running' && activeKey === 'admin' && !isAdmin;
   const phoneLocked = isPhone && systemState === 'locked';
+
+  const openBuild = (event) => {
+    if (!isPhone || event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    setBuildRedirect(desktopApps.find((app) => app.key === 'tech').path);
+  };
+
+  useEffect(() => {
+    if (!buildRedirect) return;
+    redirectRef.current?.focus();
+    const timer = window.setTimeout(() => window.location.assign(buildRedirect), 2000);
+    const restore = (event) => {
+      if (event.persisted) setBuildRedirect(null);
+    };
+    window.addEventListener('pageshow', restore);
+    return () => {
+      window.clearTimeout(timer);
+      window.removeEventListener('pageshow', restore);
+    };
+  }, [buildRedirect]);
 
   useEffect(() => {
     if (isAdmin) setSystemState('running');
@@ -871,6 +899,7 @@ function DeviceShell({ children, home }) {
   return (
     <DeviceSettingsContext.Provider value={{
       isPhone,
+      openBuild,
       wallpaper,
       setWallpaper,
       background,
@@ -923,8 +952,8 @@ function DeviceShell({ children, home }) {
             </div>
             {(systemState === 'running' || phoneLocked) && <div
               className={`device-screen__session${phoneLocked ? ' device-screen__session--locked' : ''}`}
-              aria-hidden={phoneLocked ? true : undefined}
-              inert={phoneLocked ? '' : undefined}
+              aria-hidden={phoneLocked || buildRedirect ? true : undefined}
+              inert={phoneLocked || buildRedirect ? '' : undefined}
             >
             <header className="device-screen__menu">
               <Link to="/" className="device-screen__brand" aria-label="AJ Thompson desktop home" onClick={showDesktop}>A/3</Link>
@@ -941,20 +970,20 @@ function DeviceShell({ children, home }) {
               <time>{time}</time>
               <span className="device-screen__island" aria-hidden="true" />
               <span className="device-screen__phone-signals" aria-hidden="true">
-                <svg viewBox="0 0 68 16" fill="currentColor" focusable="false">
+                <svg viewBox="0 0 76 16" fill="currentColor" focusable="false">
                   <rect x="0" y="10" width="3" height="4" rx="0.8" />
                   <rect x="5" y="7.5" width="3" height="6.5" rx="0.8" />
                   <rect x="10" y="4.5" width="3" height="9.5" rx="0.8" />
                   <rect x="15" y="1.5" width="3" height="12.5" rx="0.8" />
                   <g fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round">
-                    <path d="M23 5a11.2 11.2 0 0 1 16 0" />
-                    <path d="M26 8a7 7 0 0 1 10 0" />
-                    <path d="M29 11a2.8 2.8 0 0 1 4 0" />
+                    <path d="M27 5a11.2 11.2 0 0 1 16 0" />
+                    <path d="M30 8a7 7 0 0 1 10 0" />
+                    <path d="M33 11a2.8 2.8 0 0 1 4 0" />
                   </g>
-                  <circle cx="31" cy="13.5" r="1.2" />
-                  <rect x="45" y="2" width="20" height="12" rx="3" fill="none" stroke="currentColor" strokeOpacity="0.5" />
-                  <rect x="47" y="4" width="14" height="8" rx="1.4" />
-                  <path d="M66.5 6v4a2.2 2.2 0 0 0 0-4Z" opacity="0.65" />
+                  <circle cx="35" cy="13.5" r="1.2" />
+                  <rect x="53" y="2" width="20" height="12" rx="3" fill="none" stroke="currentColor" strokeOpacity="0.5" />
+                  <rect x="55" y="4" width="14" height="8" rx="1.4" />
+                  <path d="M74.5 6v4a2.2 2.2 0 0 0 0-4Z" opacity="0.65" />
                 </svg>
               </span>
             </div>
@@ -1034,6 +1063,16 @@ function DeviceShell({ children, home }) {
               onGuestLogin={(preserveRoute = false) => { adminAccess.logout(); if (!preserveRoute) navigate('/'); setSystemState('running'); }}
               onPowerOn={powerOn}
             />
+            {buildRedirect && (
+              <section className="device-system-screen device-system-screen--redirect" aria-labelledby="build-redirect-title">
+                <AppIcon name="tech" />
+                <h1 id="build-redirect-title" ref={redirectRef} tabIndex={-1}>
+                  Redirecting to <span>{new URL(buildRedirect).hostname}...</span>
+                </h1>
+                <p>You're leaving AJ's Personal Site.</p>
+                <a href={buildRedirect}>Continue now</a>
+              </section>
+            )}
           </div>
           <div className="device-scene__chin"><span>AJT3</span></div>
         </div>

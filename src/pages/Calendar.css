@@ -2,7 +2,6 @@
 .calendar-app { height: 100%; min-height: 0; display: flex; flex-direction: column; color: #e9edf3; background: #111821; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; container-type: inline-size; color-scheme: dark; scrollbar-color: #506579 #111821; }
 .calendar-app button { min-height: 30px; border: 1px solid #3b4654; border-radius: 5px; background: #27313e; color: #e9edf3; font: inherit; font-size: 12px; cursor: pointer; }
 .calendar-app button:hover { background: #364558; }
-.calendar-app :is(button, a, input):focus-visible { outline: 2px solid #66baff; outline-offset: 2px; }
 .calendar-toolbar { display: flex; align-items: center; flex-wrap: wrap; flex: none; gap: 8px; padding: 10px 14px; border-bottom: 1px solid #35404c; background: #1d2631; }
 .calendar-toolbar__views { display: flex; padding: 2px; margin-inline: auto; border-radius: 6px; background: #101821; }
 .calendar-toolbar__views button { min-width: 54px; padding: 3px 10px; border-color: transparent; background: transparent; }
@@ -90,7 +89,6 @@
 }
 .device-screen[data-appearance='light'] .calendar-app button { border-color: #c5ced8; background: #f4f6f8; color: #202a36; }
 .device-screen[data-appearance='light'] .calendar-app button:hover { background: #e3eaf2; }
-.device-screen[data-appearance='light'] .calendar-app :is(button, a, input):focus-visible { outline-color: #176fbb; }
 .device-screen[data-appearance='light'] .calendar-toolbar { background: #f0f2f5; border-color: #ccd4dd; }
 .device-screen[data-appearance='light'] .calendar-toolbar__views { background: #dfe4eb; }
 .device-screen[data-appearance='light'] .calendar-toolbar__views button { border-color: transparent; background: transparent; }
@@ -152,7 +150,6 @@
   .device-screen[data-appearance='light'] .calendar-app .calendar-month__preview,
   .device-screen[data-appearance='light'] .calendar-app .calendar-month__preview[aria-current='date'] { display: flex; flex-direction: column; align-items: stretch; gap: 2px; width: 100%; min-width: 0; padding: 2px 2px 4px; border: 0; border-radius: 0; background: transparent; color: inherit; text-align: left; }
   .calendar-app .calendar-month__preview:hover { box-shadow: inset 0 0 0 1px #6689a9; }
-  .calendar-app .calendar-month__preview:focus-visible { outline-offset: -2px; }
   .calendar-month__preview-date { display: grid; place-items: center; align-self: center; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; line-height: 1; }
   .calendar-month__cell.is-outside .calendar-month__preview-date { color: var(--calendar-preview-muted, #8190a3); }
   .calendar-month__preview[aria-current='date'] .calendar-month__preview-date { background: #ff9d54; color: #171c23; }

@@ -111,7 +111,8 @@ Deno.serve(async (request: Request) => {
     const limit = await db.rpc('ajt3_guestbook_submit_v2', { p_actor: actor, p_kind: 'attempt' });
     if (limit.error || !limit.data) throw new Error('Rate limiter unavailable');
     if (limit.data.error === 'paused') return respond({ error: 'New messages are paused. Please check back later.' }, 503);
-    if (!limit.data.ok) return respond({ error: 'Too many attempts. Please try again later.' }, 429);
+    if (limit.data.error === 'limited') return respond({ error: 'Too many attempts. Please try again later.' }, 429);
+    if (!limit.data.ok) throw new Error('Rate limiter unavailable');
     if (body.website) return respond({ error: 'Unable to accept this message.' }, 400);
     if (typeof body.token !== 'string' || !body.token || body.token.length > 2048) return respond({ error: 'Complete the bot check before posting.' }, 400);
     let name;
@@ -149,7 +150,8 @@ Deno.serve(async (request: Request) => {
     if (result.data.error === 'paused') return respond({ error: 'New messages are paused. Please check back later.' }, 503);
     if (result.data.error === 'duplicate') return respond({ error: 'That message has already been posted recently.' }, 409);
     if (result.data.error === 'conversation_unavailable') return respond({ error: 'This conversation is no longer available.' }, 404);
-    if (result.data.error) return respond({ error: 'Posting limit reached. Please try again later.' }, 429);
+    if (result.data.error === 'limited') return respond({ error: 'Posting limit reached. Please try again later.' }, 429);
+    if (result.data.error) throw new Error('Publication unavailable');
     if (!result.data.entry?.id) throw new Error('Publication unavailable');
     return respond({ entry: result.data.entry, scrubbed: safeName !== name || safeMessage !== message || safeTitle !== title }, 201);
   } catch {

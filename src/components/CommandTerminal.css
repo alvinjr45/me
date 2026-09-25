@@ -88,20 +88,25 @@
   min-height: 1.7em;
 }
 
-.command-terminal__form input {
+.command-terminal__input {
+  position: relative;
+  display: flex;
   flex: 1;
   min-width: 0;
-  border: 0;
-  outline: 0;
-  padding: 0;
-  background: transparent;
-  color: #dfe8f1;
-  caret-color: var(--color-accent);
-  font: inherit;
+  overflow: hidden;
 }
 
-.command-terminal__form input:focus-visible {
-  box-shadow: 0 1px 0 #61707d;
+.command-terminal__form input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 0;
+  outline: 0;
+  padding: 0 1ch 0 0;
+  background: transparent;
+  color: #dfe8f1;
+  caret-color: transparent;
+  font: inherit;
 }
 
 .command-terminal__form input::placeholder {
@@ -109,16 +114,32 @@
   opacity: 1;
 }
 
-.command-terminal__form > span,
-.command-terminal__cursor {
+.command-terminal__form > span {
   flex-shrink: 0;
 }
 
+.command-terminal__cursor-measure {
+  position: absolute;
+  visibility: hidden;
+  white-space: pre;
+  pointer-events: none;
+}
+
 .command-terminal__cursor {
-  width: 8px;
+  display: none;
+  position: absolute;
+  top: calc(50% - 0.525em);
+  left: clamp(0px, var(--cursor-offset, 0px), calc(100% - 1ch));
+  width: 1ch;
   height: 1.05em;
   background: var(--color-accent);
+  opacity: 0.65;
+  pointer-events: none;
   animation: terminal-blink 1s steps(1) infinite;
+}
+
+.command-terminal__input:focus-within .command-terminal__cursor {
+  display: block;
 }
 
 .command-terminal--home {
@@ -145,12 +166,7 @@
 
 @container app-viewport (max-width: 560px) {
   .command-terminal__form {
-    flex-wrap: wrap;
     column-gap: 0.4rem;
-  }
-
-  .command-terminal__form > span:first-of-type {
-    flex-basis: 100%;
   }
 
   .command-terminal {

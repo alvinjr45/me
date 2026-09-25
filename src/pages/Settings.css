@@ -18,7 +18,6 @@
 .settings-page__search svg { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; }
 .settings-page__search input { min-width: 0; width: 100%; min-height: 32px; padding: 0; border: 0; background: transparent; color: var(--color-text); }
 .settings-page__search input:focus-visible { outline: none; }
-.settings-page__search:has(input:focus-visible) { box-shadow: inset 0 0 0 1px var(--color-muted-strong); }
 .settings-page__search input::placeholder { color: var(--color-muted-strong); opacity: 1; }
 .settings-page__account { display: flex; align-items: center; gap: 10px; padding: 20px 4px; }
 .settings-page__avatar { display: grid; place-items: center; flex: none; width: 42px; height: 42px; border-radius: 50%; background: linear-gradient(145deg, #88929e, #505964); color: white; font-size: 1.35rem; }

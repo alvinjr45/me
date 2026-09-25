@@ -178,6 +178,16 @@ test('rejects honeypots, missing tokens, invalid names/messages, malformed and o
   assert.equal(state.challenges.length, 0);
 });
 
+test('database version and validation errors are not reported as posting limits', async () => {
+  for (const error of ['upgrade_required', 'invalid', 'unexpected']) {
+    for (const phase of ['attempt', 'post']) {
+      const response = await service({ [phase]: { error } }).send(valid);
+      assert.equal(response.status, 503);
+      assert.doesNotMatch((await response.json()).error, /limit|Too many/);
+    }
+  }
+});
+
 test('uses the final forwarded address, ignoring spoofed prefixes', async () => {
   const { send, state } = service();
   await send(valid);

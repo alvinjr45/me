@@ -124,11 +124,6 @@ body.blog-post-page--modal-open {
   display: block;
 }
 
-.blog-post-page__image-button:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: -2px;
-}
-
 .blog-post-page__image {
   width: 100%;
   height: 100%;

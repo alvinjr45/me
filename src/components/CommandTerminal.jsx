@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useId, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { DeviceSettingsContext } from './deviceSettings';
 import { getBlogPosts } from '../data/blogPosts';
@@ -22,11 +22,35 @@ function CommandTerminal({ autoFocus = false, onNavigate, showIntro = true, vari
   const [command, setCommand] = useState('');
   const [history, setHistory] = useState(() => showIntro ? introLines : []);
   const inputRef = useRef(null);
+  const cursorRef = useRef(null);
+  const cursorMeasureRef = useRef(null);
   const outputRef = useRef(null);
   const commandsRef = useRef([]);
   const recallRef = useRef(null);
   const draftRef = useRef('');
   const requestRef = useRef(0);
+
+  const syncCursor = useCallback(() => {
+    const input = inputRef.current;
+    const cursor = cursorRef.current;
+    const measure = cursorMeasureRef.current;
+    if (!input || !cursor || !measure) return;
+    measure.textContent = input.value.slice(0, input.selectionStart ?? input.value.length);
+    cursor.style.setProperty('--cursor-offset', `${measure.getBoundingClientRect().width - input.scrollLeft}px`);
+    cursor.style.visibility = input.selectionStart === input.selectionEnd ? '' : 'hidden';
+  }, []);
+
+  useLayoutEffect(() => { syncCursor(); }, [command, syncCursor]);
+
+  useEffect(() => {
+    const observer = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(syncCursor);
+    observer?.observe(inputRef.current);
+    document.fonts?.addEventListener('loadingdone', syncCursor);
+    return () => {
+      observer?.disconnect();
+      document.fonts?.removeEventListener('loadingdone', syncCursor);
+    };
+  }, [syncCursor]);
 
   useEffect(() => () => { requestRef.current += 1; }, []);
 
@@ -326,19 +350,26 @@ function CommandTerminal({ autoFocus = false, onNavigate, showIntro = true, vari
         <form className="command-terminal__form" aria-label="Site command" onSubmit={handleSubmit}>
           <label htmlFor={inputId} className="sr-only">Enter a site command</label>
           <span aria-hidden="true">visitor@ajt3:~$</span>
-          <input
-            id={inputId}
-            ref={inputRef}
-            value={command}
-            onChange={(event) => { setCommand(event.target.value); recallRef.current = null; }}
-            onKeyDown={handleKeyDown}
-            placeholder="--help for help"
-            autoComplete="off"
-            autoCapitalize="none"
-            spellCheck="false"
-            aria-describedby={hintId}
-          />
-          <span className="command-terminal__cursor" aria-hidden="true"></span>
+          <div className="command-terminal__input">
+            <input
+              id={inputId}
+              ref={inputRef}
+              value={command}
+              onChange={(event) => { setCommand(event.target.value); recallRef.current = null; }}
+              onKeyDown={handleKeyDown}
+              onKeyUp={syncCursor}
+              onSelect={syncCursor}
+              onScroll={syncCursor}
+              onFocus={syncCursor}
+              placeholder="--help for help"
+              autoComplete="off"
+              autoCapitalize="none"
+              spellCheck="false"
+              aria-describedby={hintId}
+            />
+            <span ref={cursorMeasureRef} className="command-terminal__cursor-measure" aria-hidden="true" />
+            <span ref={cursorRef} className="command-terminal__cursor" aria-hidden="true" />
+          </div>
         </form>
         <span id={hintId} className="sr-only">Type --help for commands and examples. Use Up and Down for command history, Tab to complete, and Shift+Tab to move focus back.</span>
       </div>

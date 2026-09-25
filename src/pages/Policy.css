@@ -8,6 +8,5 @@
 .policy-page a { color: #8acfff; text-underline-offset: 4px; }
 .policy-page nav a { display: inline-flex; align-items: center; min-height: 44px; }
 .policy-page nav a[aria-current='page'] { color: #ff9b52; font-weight: 700; }
-.policy-page a:focus-visible { outline: 2px solid #ff9b52; outline-offset: 4px; }
 .policy-page ul { padding-left: 22px; line-height: 2; }
 @media (max-width: 480px) { .policy-page { padding: 22px 16px; } .policy-page nav { flex-direction: column; align-items: flex-start; gap: 4px; } }

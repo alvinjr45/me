@@ -112,6 +112,13 @@ budget as a reply. The chat-like layout does not relax the existing spam limits.
 
 ## Setup (user-owned)
 
+The guestbook Edge Function was updated through the Supabase dashboard on
+September 25, 2026 to use `ajt3_guestbook_submit_v2` and enforce the current
+participation requirements. The older deployed function called the retired RPC,
+whose `upgrade_required` response was incorrectly displayed as a posting limit.
+Only an explicit `limited` result now produces a rate-limit response. A Vercel
+frontend deployment does not deploy this Supabase function.
+
 On September 25, 2026, browser setup created the managed "AJT3 Guestbook"
 Turnstile widget for `ajt3.me`, saved its private `TURNSTILE_SECRET_KEY` in the
 AJT3 Supabase project, and saved `REACT_APP_TURNSTILE_SITE_KEY` in the Vercel

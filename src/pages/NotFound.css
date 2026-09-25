@@ -99,9 +99,10 @@
 .not-found-page__link:hover,
 .not-found-page__link:focus-visible {
   transform: translateY(-2px);
-  border-color: rgba(251, 127, 51, 0.95);
   background: rgba(251, 127, 51, 0.22);
 }
+
+.not-found-page__link:hover { border-color: rgba(251, 127, 51, 0.95); }
 
 @media (max-width: 640px) {
   .not-found-page {

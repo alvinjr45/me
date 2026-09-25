@@ -61,6 +61,45 @@ function expectHomeUrl(historyLength) {
   expect(window.history.length).toBe(historyLength);
 }
 
+test('Build shows a full phone redirect screen before leaving the site', () => {
+  jest.useFakeTimers();
+  const savedLocation = Object.getOwnPropertyDescriptor(window, 'location');
+  const assign = jest.fn();
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { href: window.location.href, origin: window.location.origin, pathname: '/', search: '', hash: '', assign }
+  });
+  window.matchMedia.mockImplementation((query) => ({
+    matches: query.includes('max-width'),
+    addEventListener: jest.fn(), removeEventListener: jest.fn()
+  }));
+  let unmount;
+  try {
+    ({ unmount } = render(<App />));
+    fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
+    fireEvent.click(screen.getByRole('link', { name: 'Build' }));
+    const redirect = screen.getByRole('region', { name: 'Redirecting to ajt3.website...' });
+    expect(redirect).toHaveClass('device-system-screen--redirect');
+    expect(within(redirect).getByRole('heading')).toHaveFocus();
+    expect(within(redirect).getByText("You're leaving AJ's Personal Site.")).toBeInTheDocument();
+    expect(within(redirect).getByRole('link', { name: 'Continue now' })).toHaveAttribute('href', 'https://ajt3.website');
+    expect(screen.queryByRole('navigation', { name: 'Open a site app' })).not.toBeInTheDocument();
+    act(() => jest.advanceTimersByTime(1999));
+    expect(assign).not.toHaveBeenCalled();
+    act(() => jest.advanceTimersByTime(1));
+    expect(assign).toHaveBeenCalledWith('https://ajt3.website');
+    const restoredPage = new Event('pageshow');
+    Object.defineProperty(restoredPage, 'persisted', { value: true });
+    fireEvent(window, restoredPage);
+    expect(screen.queryByRole('region', { name: 'Redirecting to ajt3.website...' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Build' })).toBeInTheDocument();
+  } finally {
+    unmount?.();
+    Object.defineProperty(window, 'location', savedLocation);
+    jest.useRealTimers();
+  }
+});
+
 describe('iOS scene entry', () => {
   let enterFrame;
   let mocks;

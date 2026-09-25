@@ -1030,6 +1030,27 @@
     .device-scene { --device-phone-viewport-height: 100dvh; }
   }
 
+  .device-scene.device-scene--keyboard {
+    --device-monitor-height: var(--keyboard-monitor-height);
+    position: fixed;
+    top: var(--keyboard-scene-top);
+    left: var(--keyboard-scene-left);
+    width: var(--keyboard-scene-width);
+    height: var(--keyboard-scene-height);
+    min-height: var(--keyboard-scene-height);
+  }
+
+  .device-scene--keyboard .device-system-screen--locked {
+    bottom: auto;
+    height: var(--keyboard-login-height);
+    grid-template-rows: auto;
+    align-content: start;
+    padding-top: 53px;
+    overscroll-behavior: contain;
+  }
+
+  .device-scene--keyboard .device-system-screen__clock { display: none; }
+
   .device-scene__ambient { display: none; }
 
   .device-scene__monitor {

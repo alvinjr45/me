@@ -14,6 +14,7 @@ import MissionControl from '../pages/MissionControl';
 import SceneBackground from './SceneBackground';
 import PhoneHomeIndicator from './PhoneHomeIndicator';
 import useAdminAccess from '../lib/useAdminAccess';
+import usePhoneLoginViewport from '../lib/usePhoneLoginViewport';
 import useAdminProfile from '../lib/useAdminProfile';
 import {
   DeviceSettingsContext,
@@ -429,6 +430,8 @@ function PhoneLockScreen({ time, date, onUnlock, onSwitchUser }) {
 function SystemScreen({ state, isPhone, time, date, access, profileImage, onGuestLogin, onPowerOn }) {
   const [selectedAccount, setSelectedAccount] = useState('guest');
   const [showProfiles, setShowProfiles] = useState(false);
+  const loginPanelRef = useRef(null);
+  usePhoneLoginViewport(loginPanelRef, isPhone && state === 'locked' && showProfiles);
 
   useEffect(() => {
     if (state !== 'locked') setShowProfiles(false);
@@ -464,7 +467,7 @@ function SystemScreen({ state, isPhone, time, date, access, profileImage, onGues
   }
 
   return (
-    <section className="device-system-screen device-system-screen--locked" aria-label="Logged out">
+    <section className="device-system-screen device-system-screen--locked" aria-label="Logged out" ref={loginPanelRef}>
       <div className="device-system-screen__clock">
         <time>{time}</time>
         <span>{date}</span>

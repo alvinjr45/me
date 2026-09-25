@@ -428,7 +428,7 @@
 }
 
 .music-mobile__library[hidden] { display: none; }
-.music-mobile__header { margin-bottom: 1.5rem; }
+.music-mobile__header { margin-bottom: 1.5rem; text-align: center; }
 .music-mobile__eyebrow {
   margin: 0 0 0.65rem;
   color: var(--color-accent);

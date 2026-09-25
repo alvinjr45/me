@@ -1,0 +1,30 @@
+.guestbook { box-sizing: border-box; min-height: 100%; max-width: 920px; margin: 0 auto; padding: clamp(18px, 4%, 36px); background: #0b1119; color: #edf2f8; }
+.guestbook__header { margin-bottom: 24px; }
+.guestbook__header > span { color: #fb7f33; font: 0.7rem var(--font-mono); letter-spacing: 0.14em; }
+.guestbook__header h1 { margin: 8px 0; font-size: clamp(1.8rem, 4vw, 2.5rem); }
+.guestbook p { line-height: 1.6; overflow-wrap: anywhere; }
+.guestbook__header p, .guestbook__form > p { color: #b6c4d4; }
+.guestbook h2 { margin: 0; font-size: 1.05rem; }
+.guestbook button { min-height: 44px; padding: 8px 14px; border: 1px solid #546477; border-radius: 8px; background: #233246; color: #fff; cursor: pointer; }
+.guestbook button:disabled { opacity: 0.55; cursor: not-allowed; }
+.guestbook :is(button, input, textarea):focus-visible { outline: 3px solid #70c3ff; outline-offset: 3px; }
+.guestbook__form { padding: 20px; border: 1px solid #354356; border-radius: 14px; background: #111d2c; }
+.guestbook__form > p { font-size: 0.85rem; }
+.guestbook__form fieldset { display: grid; gap: 8px; min-width: 0; margin: 16px 0; padding: 0; border: 0; }
+.guestbook__form label { display: flex; justify-content: space-between; gap: 8px; font-size: 0.85rem; }
+.guestbook__form label span { color: #aebdd0; }
+.guestbook__form :is(input, textarea) { box-sizing: border-box; width: 100%; min-width: 0; padding: 12px; border: 1px solid #546477; border-radius: 8px; background: #0a1421; color: #f3f5f9; font: inherit; }
+.guestbook__form textarea { resize: vertical; min-height: 100px; }
+.guestbook__form .guestbook__trap { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.guestbook__challenge { margin: 12px 0; min-width: 0; }
+.guestbook .guestbook__submit { background: #fb7f33; color: #17100b; border-color: #fb7f33; font-weight: 700; }
+.guestbook__form .guestbook__privacy { font-size: 0.72rem; }
+.guestbook [role="alert"] { color: #ffb5a4; }
+.guestbook__board { margin-top: 30px; }
+.guestbook__board > header, .guestbook__entry > header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.guestbook__entry { padding: 20px 0; border-bottom: 1px solid #354356; overflow-wrap: anywhere; }
+.guestbook__entry strong { color: #8acfff; }
+.guestbook__entry time, .guestbook__entry small { color: #a8b8cc; font-size: 0.75rem; }
+.guestbook__entry p { margin: 10px 0; white-space: pre-wrap; }
+.guestbook__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+@media (max-width: 480px) { .guestbook { padding: 16px 12px; } .guestbook__form { padding: 14px 10px; } .guestbook__submit { width: 100%; } }

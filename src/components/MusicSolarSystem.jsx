@@ -122,6 +122,8 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
     const paint = (delta) => {
       if (!viewport.width || !viewport.height) return;
       const scale = Math.min(viewport.width, viewport.height) / 800;
+      const previewSize = Math.min(144, Math.max(104, Math.min(viewport.width, viewport.height) * 0.3));
+      stage.style.setProperty('--preview-size', `${previewSize}px`);
       const points = [];
       playlists.forEach((_, index) => {
         const button = planetRefs.current[index];
@@ -136,6 +138,10 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
         points.push({ x, y });
         button.style.left = `${x}px`;
         button.style.top = `${y}px`;
+        button.style.setProperty('--preview-x', `${Math.max(previewSize / 2 + 8,
+          Math.min(viewport.width - previewSize / 2 - 8, x)) - x}px`);
+        button.style.setProperty('--preview-y', `${Math.max(previewSize / 2 + 8,
+          Math.min(viewport.height - previewSize / 2 - 32, y)) - y}px`);
         button.style.setProperty('--planet-depth', 1 + point.depth * 0.025);
         button.style.setProperty('--light-x', `${50 - point.x / radius * 36}%`);
         button.style.setProperty('--light-y', `${50 - point.y / radius * 36}%`);
@@ -236,7 +242,7 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
             return <path key={start} d={`${path} Z`} className={active ? 'music-system__orbit--active' : undefined} />;
           })}
         </svg>
-        <div className="music-system__sun" aria-hidden="true"><span>A/3</span></div>
+        <div className="music-system__sun" aria-hidden="true" />
 
         {playlists.map((playlist, index) => {
           const orbit = orbits.find((item) => index < item.start + item.size);

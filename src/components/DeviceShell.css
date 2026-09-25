@@ -419,10 +419,14 @@
 
 .device-app-icon svg { display: block; width: 100%; height: 100%; }
 .device-app-icon--tech { background: linear-gradient(#39bffa, #0874d9); }
+.device-app-icon--store { background: linear-gradient(#30b9ff, #0964ee); }
 .device-app-icon--music { background: linear-gradient(#ff6176, #ee254b); }
 .device-app-icon--dogs { background: linear-gradient(#ffbd62, #ee8332); }
 .device-app-icon--blog { background: linear-gradient(#ffe477, #ffd33e 33%, #fffef9 33%, #f4f1e9); }
 .device-app-icon--photos { background: linear-gradient(#fff, #fafafa); }
+.device-app-icon--calendar { background: #f8f8f5; }
+.device-app-icon--instagram { background: radial-gradient(circle at 25% 100%, #ffd776, #f77737 25%, #e1306c 50%, #833ab4 80%, #405de6); }
+.device-app-icon--guestbook { background: linear-gradient(#56b9f2, #236bad); }
 .device-app-icon--terminal { background: linear-gradient(#d1d5dc, #8d95a1); }
 .device-app-icon--settings { background: linear-gradient(#e3e6eb, #a6aeba); }
 .device-app-icon--admin { background: linear-gradient(#414957, #222833); }
@@ -887,11 +891,13 @@
   .device-window__content h1 { font-size: clamp(2rem, 10cqw, 3.8rem); }
 }
 
-@media (max-width: 760px), (max-height: 500px) {
+@media (max-width: 1024px), (max-height: 500px) {
   .device-scene {
     --device-monitor-width: min(400px, calc(100vw - 40px));
-    --device-monitor-height: 72svh;
+    --device-phone-min-height: max(640px, calc(var(--device-monitor-width) * 1.8));
+    --device-monitor-height: max(var(--device-phone-min-height), 72svh);
     --device-offset-y: 6svh;
+    min-height: calc(var(--device-monitor-height) + var(--device-offset-y) * 2 + 48px);
   }
   .device-scene__ambient { display: none; }
 
@@ -972,7 +978,6 @@
   .device-screen__dock-app--active::after { display: none; }
   .device-screen__dock-app .device-app-icon { width: clamp(32px, 11cqw, 44px); height: clamp(32px, 11cqw, 44px); border-radius: 12px; }
   .device-screen__dock-app { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .device-screen__dock .device-screen__dock-app--utility { display: none; }
   .device-screen__dock-label { display: block; color: #fff; font-size: 0.69rem; line-height: 1; text-shadow: 0 1px 5px #000; }
 
   .device-window {
@@ -1039,7 +1044,7 @@
 @media (max-height: 500px) and (orientation: landscape) {
   .device-scene {
     --device-monitor-width: min(430px, 56vw);
-    --device-monitor-height: calc(100svh - 56px);
+    --device-monitor-height: max(var(--device-phone-min-height), calc(100svh - 56px));
     --device-offset-x: 18vw;
     --device-offset-y: 0px;
   }

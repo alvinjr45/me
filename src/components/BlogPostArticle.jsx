@@ -2,9 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './BlogPostArticle.css';
 
-function BlogPostArticle({ post, embedded = false, onBack }) {
+function BlogPostArticle({ post, embedded = false, onBack, backLabel = 'Blogs' }) {
   const [lightboxImage, setLightboxImage] = useState(null);
-  const isNote = !post.tags?.includes('dogs');
+  const isNote = embedded || !post.tags?.includes('dogs');
   const Container = embedded ? 'section' : 'main';
 
   useEffect(() => {
@@ -35,11 +35,11 @@ function BlogPostArticle({ post, embedded = false, onBack }) {
     <Container className={`blog-post-page${embedded ? ' blog-post-page--embedded' : ' app-view'}${isNote ? ' blog-post-page--note' : ''}`} aria-label="Article reader">
       <nav className="app-toolbar" aria-label="Article navigation">
         {embedded ? <>
-          <button type="button" className="blog-post-page__back" onClick={onBack}><span aria-hidden="true">&lsaquo;</span> Notes</button>
-          <span className="blog-post-page__notebook">{post.eyebrow || 'Blog notes'}</span>
-          <Link to={`/blog/${post.slug}`} className="blog-post-page__open" aria-label={`Open ${post.title} entry`}>Open entry <span aria-hidden="true">&nearr;</span></Link>
+          <button type="button" className="blog-post-page__back" onClick={onBack}><span aria-hidden="true">&lsaquo;</span> {backLabel}</button>
+          <span className="blog-post-page__notebook">{post.eyebrow || 'Blogs'}</span>
+          <Link to={`/blog/${post.slug}`} className="blog-post-page__open" aria-label={`Open ${post.title} blog`}>Open blog <span aria-hidden="true">&nearr;</span></Link>
         </> : <><Link to={post.tags?.includes('dogs') ? '/dogs' : '/blog'} className="app-control">
-          <span aria-hidden="true">&larr;</span> {post.tags?.includes('dogs') ? 'Dogs' : 'All entries'}
+          <span aria-hidden="true">&larr;</span> {post.tags?.includes('dogs') ? 'Dogs' : 'All blogs'}
         </Link>
         <span>{post.date}</span></>}
       </nav>

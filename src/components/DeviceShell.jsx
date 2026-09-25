@@ -5,8 +5,11 @@ import Music from '../pages/Music';
 import Dogs from '../pages/Dogs';
 import Blog from '../pages/Blog';
 import Photos from '../pages/Photos';
+import Calendar from '../pages/Calendar';
+import Guestbook from '../pages/Guestbook';
 import Terminal from '../pages/Terminal';
 import Settings from '../pages/Settings';
+import AppStore from '../pages/AppStore';
 import MissionControl from '../pages/MissionControl';
 import SceneBackground from './SceneBackground';
 import useAdminAccess from '../lib/useAdminAccess';
@@ -27,13 +30,18 @@ export const desktopApps = [
   { key: 'dogs', label: 'Dogs', path: '/dogs', description: 'Drake & Josh' },
   { key: 'blog', label: 'Blog', path: '/blog', description: 'Notes from the build' },
   { key: 'photos', label: 'Photos', path: '/photos', description: 'A little of my world' },
+  { key: 'instagram', label: 'Instagram', path: 'https://www.instagram.com/_ajt3_/', description: 'Follow me on Instagram', external: true },
+  { key: 'calendar', label: 'Calendar', path: '/calendar', description: 'Make time for what matters', utility: true },
+  { key: 'store', label: 'App Store', path: '/app-store', description: 'Find your next favorite', utility: true },
+  { key: 'guestbook', label: 'Guestbook', path: '/guestbook', description: 'Leave a little note' },
   { key: 'admin', label: 'Mission Control', path: '/admin', description: 'Behind the scenes', utility: true },
   { key: 'terminal', label: 'Terminal', path: '/terminal', description: 'Command center', utility: true },
   { key: 'settings', label: 'Settings', path: '/settings', description: 'Make it yours', utility: true }
 ];
 
-const appPages = { tech: Tech, music: Music, dogs: Dogs, blog: Blog, photos: Photos, admin: MissionControl, terminal: Terminal, settings: Settings };
-const phoneMediaQuery = '(max-width: 760px), (max-height: 500px)';
+const appPages = { tech: Tech, music: Music, dogs: Dogs, blog: Blog, photos: Photos, calendar: Calendar, guestbook: Guestbook, store: AppStore, admin: MissionControl, terminal: Terminal, settings: Settings };
+const phoneMediaQuery = '(max-width: 1024px), (max-height: 500px)';
+const phoneDockApps = desktopApps.slice(0, 4);
 
 const clamp = (value, min, max) => Math.min(Math.max(value, min), Math.max(min, max));
 const resizeCorners = [
@@ -103,6 +111,22 @@ function getSavedNumber(key, fallback, min, max) {
 
 export function AppIcon({ name }) {
   const paths = {
+    calendar: <>
+      <rect width="64" height="64" rx="13" fill="#f8f8f5" />
+      <path d="M0 13C0 6 6 0 13 0h38c7 0 13 6 13 13v8H0Z" fill="#ee654b" />
+      <text x="32" y="15" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="600">{new Date().toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</text>
+      <text x="32" y="54" textAnchor="middle" fill="#242b33" fontSize="35" fontWeight="300">{new Date().getDate()}</text>
+    </>,
+    store: <path d="m24 13 23 39M39 13 17 51M12 40h28M46 40h7" stroke="#fff" strokeWidth="5" />,
+    instagram: <>
+      <rect x="14" y="14" width="36" height="36" rx="11" stroke="#fff" strokeWidth="3.5" />
+      <circle cx="32" cy="32" r="9" stroke="#fff" strokeWidth="3.5" />
+      <circle cx="43" cy="21" r="2.5" fill="#fff" />
+    </>,
+    guestbook: <>
+      <path d="M12 12h40v31H30L19 53V43h-7Z" fill="#eff8ff" />
+      <path d="M21 22h23M21 30h17" stroke="#2776b0" strokeWidth="3" strokeLinecap="round" />
+    </>,
     admin: <>
       <path d="M27 46h10l2 7H25Z" fill="#aeb7c3" />
       <rect x="20" y="52" width="24" height="3" rx="1.5" fill="#e3e8ed" />
@@ -620,6 +644,7 @@ function DeviceShell({ children, home }) {
 
   return (
     <DeviceSettingsContext.Provider value={{
+      isPhone,
       wallpaper,
       setWallpaper,
       background,
@@ -730,10 +755,12 @@ function DeviceShell({ children, home }) {
             })}
 
             <nav className="device-screen__dock" aria-label="App dock">
+              {!isPhone && <>
               <Link className={`device-screen__dock-home${isHome ? ' device-screen__dock-home--active' : ''}`} to="/" aria-label="Show desktop" onClick={showDesktop}>A/3</Link>
               <span className="device-screen__dock-divider" aria-hidden="true" />
-              {desktopApps.map((app) => (
-                <Link key={app.key} to={app.path} className={`device-screen__dock-app${app.utility ? ' device-screen__dock-app--utility' : ''}${windows.some((item) => item.key === app.key) || activeApp?.key === app.key ? ' device-screen__dock-app--active' : ''}`} aria-label={`Open ${app.label}`} title={app.label}>
+              </>}
+              {(isPhone ? phoneDockApps : desktopApps).map((app) => (
+                <Link key={app.key} to={app.path} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`device-screen__dock-app${app.utility ? ' device-screen__dock-app--utility' : ''}${windows.some((item) => item.key === app.key) || activeApp?.key === app.key ? ' device-screen__dock-app--active' : ''}`} aria-label={`Open ${app.label}`} title={app.label}>
                   <AppIcon name={app.key} />
                   <span className="device-screen__dock-label">{app.label}</span>
                 </Link>

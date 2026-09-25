@@ -90,6 +90,6 @@
   .mission-control__content .admin-page--mission-control { padding: 0; }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px), (max-height: 500px) {
   .device-window__content:has(> .mission-control) { padding-bottom: 28px; background: #0a111a; }
 }

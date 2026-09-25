@@ -3,6 +3,8 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import Admin from './Admin';
 import NewPost from './NewPost';
 import AdminPhotos from './AdminPhotos';
+import AdminCalendar from './AdminCalendar';
+import AdminGuestbook from './AdminGuestbook';
 import { DeviceSettingsContext } from '../components/deviceSettings';
 import { requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 import './MissionControl.css';
@@ -11,7 +13,9 @@ const sections = [
   { path: '/admin', title: 'Overview', mark: '01' },
   { path: '/admin/posts', title: 'Blog posts', mark: '02' },
   { path: '/admin/photos', title: 'Photos', mark: '03' },
-  { path: '/admin/dogs', title: 'Dog incident', mark: '04' }
+  { path: '/admin/dogs', title: 'Dog incident', mark: '04' },
+  { path: '/admin/guestbook', title: 'Guestbook', mark: '05' },
+  { path: '/admin/calendar', title: 'Calendar', mark: '06' }
 ];
 
 function MissionControl() {
@@ -27,6 +31,7 @@ function MissionControl() {
   const [photoStatus, setPhotoStatus] = useState('loading');
   const [photoError, setPhotoError] = useState('');
   const [photoReload, setPhotoReload] = useState(0);
+  const [calendarOpened, setCalendarOpened] = useState(false);
 
   useEffect(() => {
     if (isAdminRoute) setLastRoute({ pathname, search });
@@ -39,6 +44,11 @@ function MissionControl() {
   const activePath = isEditor ? '/admin/posts' : route.pathname;
   const activeSection = sections.find((item) => item.path === activePath) || sections[0];
   const posts = access.session?.posts || [];
+
+  useEffect(() => {
+    if (!secret) setCalendarOpened(false);
+    else if (activePath === '/admin/calendar') setCalendarOpened(true);
+  }, [secret, activePath]);
 
   useEffect(() => {
     if (!secret) setEditorSlug(undefined);
@@ -87,14 +97,18 @@ function MissionControl() {
               <p className="mission-control__eyebrow">THE BIG PICTURE</p><h1>Welcome back.</h1><p>Publish a thought. Add a memory. Make this place yours.</p>
               <dl className="mission-control__stats"><div><dt>Published posts</dt><dd>{posts.filter((post) => post.is_published).length}</dd></div><div><dt>Drafts</dt><dd>{posts.filter((post) => !post.is_published).length}</dd></div><div><dt>Published photos</dt><dd>{photoStatus === 'ready' ? library.photos.filter((photo) => photo.is_published).length : '--'}</dd></div></dl>
               <div className="mission-control__destinations">
+                <button type="button" onClick={() => navigate('/admin/calendar')}><span>WHAT'S NEXT</span><h2>Calendar</h2><p>Add events and make room for what matters.</p><strong>Manage events &rarr;</strong></button>
                 <button type="button" onClick={() => navigate('/admin/posts')}><span>PUBLISHING</span><h2>Blog posts</h2><p>Write, edit, and choose what goes live.</p><strong>Manage posts &rarr;</strong></button>
                 <button type="button" onClick={() => navigate('/admin/photos')}><span>YOUR CAMERA ROLL</span><h2>Photos</h2><p>Upload moments and curate your albums.</p><strong>Manage photos &rarr;</strong></button>
+                <button type="button" onClick={() => navigate('/admin/guestbook')}><span>COMMUNITY</span><h2>Guestbook</h2><p>Manage messages and keep the board welcoming.</p><strong>Manage guestbook &rarr;</strong></button>
               </div>
               <section className="mission-control__recent"><header><h2>Recent posts</h2><button type="button" onClick={() => navigate('/admin/new')}>New post</button></header>{posts.slice(0, 4).map((post) => <button className="mission-control__recent-post" type="button" key={post.slug} onClick={() => navigate(`/admin/new?slug=${encodeURIComponent(post.slug)}`)}><strong>{post.title}</strong><span>{post.is_published ? 'Published' : 'Draft'}</span></button>)}{!posts.length && <p>Your first post starts here.</p>}</section>
               {photoStatus === 'error' && <p className="mission-control__notice">Photos needs attention. Open Photos for details; publishing is still available.</p>}
             </main>
           )}
           <div hidden={isEditor || !['/admin/posts', '/admin/dogs'].includes(activeSection.path)}><Admin access={access} section={activeSection.path === '/admin/dogs' ? 'dogs' : 'posts'} onBusy={setBusy} /></div>
+          {activeSection.path === '/admin/guestbook' && <AdminGuestbook secret={secret} onBusy={setBusy} />}
+          {calendarOpened && <div hidden={activeSection.path !== '/admin/calendar'}><AdminCalendar secret={secret} onBusy={setBusy} /></div>}
           {(isEditor || editorSlug !== undefined) && <div hidden={!isEditor}><NewPost key={currentEditorSlug || 'new'} slug={currentEditorSlug} access={access} onBusy={setBusy} /></div>}
           <div hidden={activeSection.path !== '/admin/photos'}>
             {photoStatus === 'loading' && <p className="mission-control__notice" role="status">Loading your photo library...</p>}

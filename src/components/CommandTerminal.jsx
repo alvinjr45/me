@@ -10,6 +10,7 @@ const routes = {
   dogs: '/dogs',
   blog: '/blog',
   photos: '/photos',
+  calendar: '/calendar',
   terminal: '/terminal',
   settings: '/settings',
   admin: '/admin'
@@ -51,7 +52,7 @@ function CommandTerminal({ autoFocus = false, onNavigate, showIntro = true, vari
     const route = routes[normalized];
 
     if (!route) {
-      addLine(`No route named "${destination}". Try: tech, music, dogs, blog, photos, terminal, admin, or settings.`, 'error');
+      addLine(`No route named "${destination}". Try: tech, music, dogs, blog, photos, calendar, terminal, admin, or settings.`, 'error');
       return;
     }
 
@@ -77,12 +78,12 @@ function CommandTerminal({ autoFocus = false, onNavigate, showIntro = true, vari
         addLine('Commands: ls, open <page>, cd <page>, whoami, pwd, date, clear, logout, restart, shutdown');
         break;
       case 'ls':
-        addLine('tech/   music/   dogs/   blog/   photos/   admin/   terminal/   settings/');
+        addLine('tech/   music/   dogs/   blog/   photos/   calendar/   admin/   terminal/   settings/');
         break;
       case 'open':
       case 'cd':
         if (!args[0]) {
-          addLine(`Usage: ${verb} <tech|music|dogs|blog|photos|admin|terminal|settings>`, 'error');
+          addLine(`Usage: ${verb} <tech|music|dogs|blog|photos|calendar|admin|terminal|settings>`, 'error');
         } else {
           openRoute(args[0]);
         }

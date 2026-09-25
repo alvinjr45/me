@@ -6,3 +6,9 @@ verify_jwt = false
 
 [functions.admin-photo-library]
 verify_jwt = false
+
+[functions.guestbook]
+verify_jwt = false
+
+[functions.admin-calendar]
+verify_jwt = false

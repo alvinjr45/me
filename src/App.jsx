@@ -9,8 +9,11 @@ import MissionControl from './pages/MissionControl';
 import Dogs from './pages/Dogs';
 import Music from './pages/Music';
 import Photos from './pages/Photos';
+import Calendar from './pages/Calendar';
+import Guestbook from './pages/Guestbook';
 import Terminal from './pages/Terminal';
 import Settings from './pages/Settings';
+import AppStore from './pages/AppStore';
 import NotFound from './pages/NotFound';
 import DeviceShell from './components/DeviceShell';
 import './App.css';
@@ -30,8 +33,11 @@ function AppShell() {
       <Route path="/dogs" element={<Dogs />} />
       <Route path="/music" element={<Music />} />
       <Route path="/photos" element={<Photos />} />
+      <Route path="/calendar" element={<Calendar />} />
+      <Route path="/guestbook" element={<Guestbook />} />
       <Route path="/terminal" element={<Terminal />} />
       <Route path="/settings" element={<Settings />} />
+      <Route path="/app-store" element={<AppStore />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

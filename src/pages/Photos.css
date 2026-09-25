@@ -128,6 +128,6 @@
   .photos-app__tile-title { transition: none; }
 }
 
-@media (max-width: 760px) {
+@media (max-width: 1024px), (max-height: 500px) {
   .device-window--photos .device-window__content { padding-bottom: 28px; background: #101113; }
 }

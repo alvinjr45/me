@@ -7,7 +7,7 @@ import {
   wallpaperChoices,
   wallpaperSpeedChoices
 } from '../components/deviceSettings';
-import { SceneLandscape } from '../components/SceneBackground';
+import { SceneWindow } from '../components/SceneBackground';
 import './Settings.css';
 
 const settingsCategories = [
@@ -157,7 +157,7 @@ function Settings() {
               onClick={() => setBackground(choice.key)}
             >
               <span className={`settings-page__background-preview scene-theme scene-theme--${choice.key}`} aria-hidden="true">
-                <SceneLandscape background={choice.key} />
+                <SceneWindow background={choice.key} />
                 {background === choice.key && <span className="settings-page__background-selected">Selected</span>}
               </span>
               <strong>{choice.label}</strong>

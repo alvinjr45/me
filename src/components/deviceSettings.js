@@ -33,12 +33,12 @@ export const wallpaperSpeedChoices = [
 ];
 
 export const backgroundChoices = [
-  { key: 'alpine', label: 'Alpine Lake', description: 'Mountain air and warm wood' },
-  { key: 'coast', label: 'Coastal Retreat', description: 'Ocean waves and a lighthouse' },
-  { key: 'desert', label: 'Desert Sunset', description: 'Red mesas and golden light' },
-  { key: 'forest', label: 'Forest Cabin', description: 'Evergreens in the morning mist' },
-  { key: 'city', label: 'City After Dark', description: 'A skyline full of evening lights' },
-  { key: 'winter', label: 'Snowbound', description: 'Snowy peaks under a quiet moon' },
-  { key: 'aurora', label: 'Northern Lights', description: 'Polar skies above a dark fjord' },
-  { key: 'garden', label: 'Spring Garden', description: 'Cherry blossoms beside a pond' }
+  { key: 'alpine', label: 'Alpine Lake', description: 'A modern panoramic window' },
+  { key: 'coast', label: 'Coastal Retreat', description: 'A rounded brass coastal lookout' },
+  { key: 'desert', label: 'Desert Sunset', description: 'An open adobe arch' },
+  { key: 'forest', label: 'Forest Cabin', description: 'Warm timber cabin panes' },
+  { key: 'city', label: 'City After Dark', description: 'Floor-to-ceiling loft glass' },
+  { key: 'winter', label: 'Snowbound', description: 'Frosted chalet windows' },
+  { key: 'aurora', label: 'Northern Lights', description: 'A curved observatory canopy' },
+  { key: 'garden', label: 'Spring Garden', description: 'Open shoji garden doors' }
 ];

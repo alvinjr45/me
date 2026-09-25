@@ -7,6 +7,15 @@
   --scene-desk-light: #79563a;
   --scene-desk-dark: #36251c;
   --scene-desk-edge: #b28b65;
+  --scene-frame: #17252b;
+  --scene-frame-rim: #596261;
+  --scene-frame-width: 10px;
+  --scene-window-radius: 3px;
+  --scene-bar-width: 5px;
+  --scene-window-bars:
+    linear-gradient(90deg, transparent calc(33% - var(--scene-bar-width)), var(--scene-frame) calc(33% - var(--scene-bar-width)) calc(33% + var(--scene-bar-width)), transparent calc(33% + var(--scene-bar-width))),
+    linear-gradient(90deg, transparent calc(72% - var(--scene-bar-width)), var(--scene-frame) calc(72% - var(--scene-bar-width)) calc(72% + var(--scene-bar-width)), transparent calc(72% + var(--scene-bar-width))),
+    linear-gradient(180deg, transparent calc(38% - var(--scene-bar-width)), var(--scene-frame) calc(38% - var(--scene-bar-width)) calc(38% + var(--scene-bar-width)), transparent calc(38% + var(--scene-bar-width)));
 }
 
 .scene-theme--coast {
@@ -18,6 +27,17 @@
   --scene-desk-light: #aa9672;
   --scene-desk-dark: #5b5040;
   --scene-desk-edge: #caba98;
+  --scene-frame: #a68d5e;
+  --scene-frame-rim: #ddc99b;
+  --scene-frame-width: 14px;
+  --scene-window-radius: 18% / 30%;
+  --scene-window-left: 5%;
+  --scene-window-width: 90%;
+  --scene-window-top: 26px;
+  --scene-window-clearance: 100px;
+  --scene-window-bars: linear-gradient(115deg, #fff4d530, transparent 35% 70%, #fff4d518);
+  --scene-window-sill: none;
+  --scene-wall-texture: repeating-linear-gradient(0deg, transparent 0 65px, #101e2655 66px 69px);
 }
 
 .scene-theme--desert {
@@ -29,6 +49,17 @@
   --scene-desk-light: #895c44;
   --scene-desk-dark: #442b26;
   --scene-desk-edge: #c08a67;
+  --scene-frame: #ba8b70;
+  --scene-frame-rim: #d0a58b;
+  --scene-frame-width: 18px;
+  --scene-window-radius: 48% 48% 2px 2px / 42% 42% 2px 2px;
+  --scene-window-left: 5%;
+  --scene-window-width: 90%;
+  --scene-window-top: 24px;
+  --scene-window-clearance: 90px;
+  --scene-window-bars: none;
+  --scene-glass-shading: inset 0 10px 18px #49251e44;
+  --scene-wall-texture: radial-gradient(ellipse at 20% 30%, #d5a17c22, transparent 60%);
 }
 
 .scene-theme--forest {
@@ -40,6 +71,18 @@
   --scene-desk-light: #63523b;
   --scene-desk-dark: #302a20;
   --scene-desk-edge: #96825a;
+  --scene-frame: #59432e;
+  --scene-frame-rim: #9e7d52;
+  --scene-frame-width: 16px;
+  --scene-window-left: 5%;
+  --scene-window-width: 90%;
+  --scene-window-top: 30px;
+  --scene-window-clearance: 100px;
+  --scene-window-bars:
+    linear-gradient(90deg, transparent calc(33% - var(--scene-bar-width)), var(--scene-frame) calc(33% - var(--scene-bar-width)) calc(33% + var(--scene-bar-width)), transparent calc(33% + var(--scene-bar-width))),
+    linear-gradient(90deg, transparent calc(67% - var(--scene-bar-width)), var(--scene-frame) calc(67% - var(--scene-bar-width)) calc(67% + var(--scene-bar-width)), transparent calc(67% + var(--scene-bar-width))),
+    linear-gradient(0deg, transparent calc(50% - var(--scene-bar-width)), var(--scene-frame) calc(50% - var(--scene-bar-width)) calc(50% + var(--scene-bar-width)), transparent calc(50% + var(--scene-bar-width)));
+  --scene-wall-texture: repeating-linear-gradient(90deg, #ba8a5512 0 70px, #100e0d50 71px 76px);
 }
 
 .scene-theme--city {
@@ -51,6 +94,16 @@
   --scene-desk-light: #414956;
   --scene-desk-dark: #1b222d;
   --scene-desk-edge: #69758b;
+  --scene-frame: #111924;
+  --scene-frame-rim: #5b6676;
+  --scene-frame-width: 2px;
+  --scene-window-radius: 0;
+  --scene-window-top: 0px;
+  --scene-window-left: 0%;
+  --scene-window-width: 100%;
+  --scene-window-clearance: 0px;
+  --scene-window-sill: none;
+  --scene-window-bars: repeating-linear-gradient(90deg, transparent 0 calc(25% - var(--scene-bar-width)), #111924 calc(25% - var(--scene-bar-width)) 25%);
 }
 
 .scene-theme--winter {
@@ -62,6 +115,19 @@
   --scene-desk-light: #7f7770;
   --scene-desk-dark: #403d3d;
   --scene-desk-edge: #a5a5a0;
+  --scene-frame: #a4b1b7;
+  --scene-frame-rim: #d0dade;
+  --scene-frame-width: 14px;
+  --scene-window-radius: 38px 38px 3px 3px;
+  --scene-window-left: 5%;
+  --scene-window-width: 90%;
+  --scene-window-top: 26px;
+  --scene-window-clearance: 96px;
+  --scene-window-bars:
+    linear-gradient(90deg, transparent calc(50% - var(--scene-bar-width)), var(--scene-frame) calc(50% - var(--scene-bar-width)) calc(50% + var(--scene-bar-width)), transparent calc(50% + var(--scene-bar-width))),
+    linear-gradient(0deg, #e1f2f366, transparent 23% 85%, #e1f2f34d),
+    linear-gradient(90deg, #d2e6ed66, transparent 15% 85%, #d2e6ed66);
+  --scene-glass-shading: inset 0 0 24px #e0f1f166;
 }
 
 .scene-theme--aurora {
@@ -73,6 +139,17 @@
   --scene-desk-light: #405b59;
   --scene-desk-dark: #1c2a2d;
   --scene-desk-edge: #6d9390;
+  --scene-frame: #223844;
+  --scene-frame-rim: #779295;
+  --scene-frame-width: 12px;
+  --scene-window-radius: 45% 45% 8px 8px / 55% 55% 8px 8px;
+  --scene-window-left: 3%;
+  --scene-window-width: 94%;
+  --scene-window-clearance: 60px;
+  --scene-window-sill: none;
+  --scene-window-bars:
+    linear-gradient(60deg, transparent calc(35% - var(--scene-bar-width)), var(--scene-frame) calc(35% - var(--scene-bar-width)) calc(35% + var(--scene-bar-width)), transparent calc(35% + var(--scene-bar-width))),
+    linear-gradient(-60deg, transparent calc(35% - var(--scene-bar-width)), var(--scene-frame) calc(35% - var(--scene-bar-width)) calc(35% + var(--scene-bar-width)), transparent calc(35% + var(--scene-bar-width)));
 }
 
 .scene-theme--garden {
@@ -84,6 +161,15 @@
   --scene-desk-light: #92705b;
   --scene-desk-dark: #4c3830;
   --scene-desk-edge: #bd9a7b;
+  --scene-frame: #4f4031;
+  --scene-frame-rim: #9b8060;
+  --scene-frame-width: 12px;
+  --scene-window-radius: 0;
+  --scene-window-top: 22px;
+  --scene-window-clearance: 60px;
+  --scene-window-bars: none;
+  --scene-glass-shading: none;
+  --scene-wall-texture: repeating-linear-gradient(90deg, transparent 0 110px, #1a292650 110px 114px);
 }
 
 .scene-background {
@@ -95,20 +181,29 @@
   user-select: none;
   background:
     radial-gradient(ellipse at 85% 10%, var(--scene-wall-light) 0, transparent 55%),
-    repeating-linear-gradient(90deg, transparent 0 119px, #ffffff03 120px, transparent 121px),
+    var(--scene-wall-texture, repeating-linear-gradient(90deg, transparent 0 119px, #ffffff03 120px, transparent 121px)),
     linear-gradient(100deg, var(--scene-wall-dark), var(--scene-wall-light));
 }
 
 .scene-background__window {
+  display: block;
   position: absolute;
-  top: 14px;
-  left: 2.5%;
-  width: 95%;
-  height: calc(var(--desk-top) - 74px);
-  border: 10px solid var(--scene-wall-dark);
-  border-radius: 3px;
+  top: var(--scene-window-top, 14px);
+  left: var(--scene-window-left, 2.5%);
+  width: var(--scene-window-width, 95%);
+  height: calc(var(--desk-top) - var(--scene-window-clearance, 74px));
+  border: var(--scene-frame-width) solid var(--scene-frame);
+  border-radius: var(--scene-window-radius);
   background: #688a98;
-  box-shadow: 0 0 0 2px #596261, 0 0 0 9px #20292d, 12px 18px 28px #080e1466;
+  box-shadow: 0 0 0 2px var(--scene-frame-rim), 0 0 0 9px var(--scene-wall-dark), 12px 18px 28px #080e1466;
+}
+
+.scene-background__window-view {
+  display: block;
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  overflow: hidden;
 }
 
 .scene-background__landscape {
@@ -120,23 +215,35 @@
 .scene-background__window-bars {
   position: absolute;
   inset: 0;
-  background:
-    linear-gradient(90deg, transparent calc(33% - 5px), #25363c calc(33% - 5px), #111f26 calc(33% + 5px), #72807c calc(33% + 6px), transparent calc(33% + 7px)),
-    linear-gradient(90deg, transparent calc(72% - 5px), #25363c calc(72% - 5px), #111f26 calc(72% + 5px), #72807c calc(72% + 6px), transparent calc(72% + 7px)),
-    linear-gradient(180deg, transparent calc(38% - 4px), #26383e calc(38% - 4px), #13252d calc(38% + 4px), transparent calc(38% + 5px)),
-    linear-gradient(115deg, #d3e6e41a, transparent 24% 76%, #f9d4ab14);
-  box-shadow: inset 0 0 20px #07131b66;
+  background: var(--scene-window-bars);
+  box-shadow: var(--scene-glass-shading, inset 0 0 20px #07131b66);
 }
+
+.scene-theme--garden .scene-background__window-bars::before,
+.scene-theme--garden .scene-background__window-bars::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  width: 16%;
+  border-inline: var(--scene-bar-width) solid var(--scene-frame);
+  background:
+    repeating-linear-gradient(0deg, transparent 0 calc(20% - 3px), var(--scene-frame) calc(20% - 3px) 20%),
+    repeating-linear-gradient(90deg, transparent 0 calc(33.33% - 2px), var(--scene-frame) calc(33.33% - 2px) 33.33%),
+    #d6d3bc;
+}
+.scene-theme--garden .scene-background__window-bars::before { left: 0; }
+.scene-theme--garden .scene-background__window-bars::after { right: 0; }
 
 .scene-background__window::after {
   content: '';
+  display: var(--scene-window-sill, block);
   position: absolute;
   left: -22px;
   right: -22px;
   bottom: -23px;
   height: 14px;
-  border-top: 3px solid #737570;
-  background: linear-gradient(#45504f, #283334);
+  border-top: 3px solid var(--scene-frame-rim);
+  background: var(--scene-frame);
   box-shadow: 0 9px 12px #050b1059;
 }
 
@@ -226,13 +333,76 @@
   border-radius: 0 15px 15px 0;
 }
 
-@media (max-width: 1100px), (max-height: 650px) {
-  .scene-background__plant,
-  .scene-background__mug { display: none; }
+.scene-theme--city .scene-background__desk {
+  background: radial-gradient(ellipse at 85% 0, #e4b77433, transparent 28%), linear-gradient(var(--scene-desk-light), var(--scene-desk-dark));
+}
+.scene-theme--garden .scene-background__desk { border-top-width: 5px; }
+.scene-theme--winter .scene-background__plant,
+.scene-theme--aurora .scene-background__plant,
+.scene-theme--city .scene-background__mug { display: none; }
+
+.scene-background__lantern {
+  position: absolute;
+  left: 6%;
+  top: -66px;
+  width: 48px;
+  height: 84px;
+  border: 5px solid #303b40;
+  border-block-width: 10px;
+  border-radius: 8px;
+  background: radial-gradient(ellipse at 50% 70%, #ffe4ae, #df9950 45%, #765034);
+  box-shadow: 0 9px 12px #10171966;
+}
+.scene-background__lantern::before {
+  content: '';
+  position: absolute;
+  left: 6px;
+  right: 6px;
+  top: -31px;
+  height: 23px;
+  border: 4px solid #303b40;
+  border-radius: 50% 50% 0 0;
+}
+.scene-background__lantern span { position: absolute; inset: 0 45%; background: #303b40; }
+
+.scene-background__desk-lamp {
+  position: absolute;
+  right: 6%;
+  top: -100px;
+  width: 80px;
+  height: 122px;
+  border-bottom: 9px solid #202a33;
+  border-radius: 0 0 40% 40%;
+}
+.scene-background__desk-lamp::before {
+  content: '';
+  position: absolute;
+  left: 38px;
+  top: 6px;
+  height: 108px;
+  border-left: 6px solid #394752;
+  transform: rotate(12deg);
+}
+.scene-background__desk-lamp span {
+  position: absolute;
+  left: -6px;
+  width: 82px;
+  height: 33px;
+  border-radius: 40px 40px 4px 4px;
+  border-bottom: 4px solid #f1c989;
+  background: linear-gradient(90deg, #202a33, #4b5963);
 }
 
-@media (max-width: 760px), (max-height: 500px) {
+@media (max-width: 1100px), (max-height: 650px) {
+  .scene-background__plant,
+  .scene-background__mug,
+  .scene-background__lantern,
+  .scene-background__desk-lamp { display: none; }
+}
+
+@media (max-width: 1024px), (max-height: 500px) {
   .scene-background {
+    --scene-bar-width: 3px;
     --desk-top: calc(50% + var(--device-monitor-height) / 2 + var(--device-offset-y) - 20px);
   }
 
@@ -242,13 +412,7 @@
     width: 90%;
     height: clamp(120px, 24svh, 220px);
     border-width: 6px;
-    box-shadow: 0 0 0 2px #596261, 0 0 0 5px #20292d, 6px 12px 18px #080e1466;
-  }
-
-  .scene-background__window-bars {
-    background:
-      linear-gradient(90deg, transparent calc(50% - 3px), var(--scene-wall-dark) calc(50% - 3px) calc(50% + 3px), transparent calc(50% + 3px)),
-      linear-gradient(115deg, #d3e6e41a, transparent 55%);
+    box-shadow: 0 0 0 2px var(--scene-frame-rim), 0 0 0 5px var(--scene-wall-dark), 6px 12px 18px #080e1466;
   }
 
   .scene-background__window::after {

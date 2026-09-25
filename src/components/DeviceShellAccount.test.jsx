@@ -1,12 +1,13 @@
 import React from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import DeviceShell from './DeviceShell';
+import DeviceShell, { desktopApps } from './DeviceShell';
+import Home from '../pages/Home';
 import MissionControl from '../pages/MissionControl';
 import Settings from '../pages/Settings';
 
 jest.mock('heic2any', () => jest.fn());
-jest.mock('./SceneBackground', () => ({ __esModule: true, default: () => null, SceneLandscape: () => null }));
+jest.mock('./SceneBackground', () => ({ __esModule: true, default: () => null, SceneWindow: () => null }));
 jest.mock('../pages/Tech', () => () => null);
 jest.mock('../pages/Music', () => () => null);
 jest.mock('../pages/Dogs', () => () => null);
@@ -93,6 +94,44 @@ test.each([false, true])('blocks a direct admin editor link on phone=%s', (phone
   expect(screen.getByRole('alertdialog')).toBeInTheDocument();
   expect(screen.queryByLabelText('Title')).not.toBeInTheDocument();
   expect(global.fetch).not.toHaveBeenCalled();
+});
+
+test('phone keeps four dock shortcuts and paginates every app to fit the available space', () => {
+  window.matchMedia.mockImplementation((query) => ({ matches: query.includes('max-width'), addEventListener: jest.fn(), removeEventListener: jest.fn() }));
+  let availableHeight = 224;
+  const height = jest.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(() => availableHeight);
+  const width = jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(280);
+  try {
+    render(
+      <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <DeviceShell><Home /></DeviceShell>
+      </MemoryRouter>
+    );
+    const dock = screen.getByRole('navigation', { name: 'App dock' });
+    expect(within(dock).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['/tech', '/music', '/dogs', '/blog']);
+    const apps = screen.getByRole('navigation', { name: 'Open a site app' });
+    expect(within(apps).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(desktopApps.map((app) => app.path));
+    expect(within(apps).getAllByRole('group')).toHaveLength(Math.ceil(desktopApps.length / 8));
+    expect(within(within(apps).getAllByRole('group')[0]).getAllByRole('link')).toHaveLength(8);
+
+    apps.scrollTo = jest.fn();
+    fireEvent.click(screen.getByRole('button', { name: 'Show app page 2' }));
+    expect(apps.scrollTo).toHaveBeenLastCalledWith({ left: 280 });
+    fireEvent.scroll(apps, { target: { scrollLeft: 280 } });
+    expect(screen.getByRole('button', { name: 'Show app page 2' })).toHaveAttribute('aria-current', 'page');
+    fireEvent.keyDown(apps, { key: 'ArrowLeft' });
+    expect(apps.scrollTo).toHaveBeenLastCalledWith({ left: 0 });
+    expect(within(apps).getAllByRole('link')[0]).toHaveFocus();
+
+    availableHeight = 600;
+    fireEvent(window, new Event('resize'));
+    expect(within(apps).getAllByRole('group')).toHaveLength(1);
+    expect(screen.queryByRole('navigation', { name: 'Home screen pages' })).not.toBeInTheDocument();
+    expect(apps.scrollLeft).toBe(0);
+  } finally {
+    height.mockRestore();
+    width.mockRestore();
+  }
 });
 
 test('requires verified AJ Thompson login, opens Mission Control, and clears access on logout', async () => {

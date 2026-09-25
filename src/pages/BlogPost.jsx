@@ -27,7 +27,7 @@ function BlogPost() {
           return;
         }
 
-        setError(nextError.message || 'Unable to load this blog entry.');
+        setError(nextError.message || 'Unable to load this blog.');
         setStatus('error');
       });
 
@@ -39,8 +39,8 @@ function BlogPost() {
   if (status === 'loading') {
     return (
       <main className="blog-post-page app-view" aria-label="Article reader">
-        <nav className="app-toolbar" aria-label="Article navigation"><Link className="app-control" to="/blog">All entries</Link></nav>
-        <p className="app-empty" role="status">Loading entry...</p>
+        <nav className="app-toolbar" aria-label="Article navigation"><Link className="app-control" to="/blog">All blogs</Link></nav>
+        <p className="app-empty" role="status">Loading blog...</p>
       </main>
     );
   }
@@ -48,8 +48,8 @@ function BlogPost() {
   if (status === 'error' || !post) {
     return (
       <main className="blog-post-page app-view" aria-label="Article reader">
-        <nav className="app-toolbar" aria-label="Article navigation"><Link className="app-control" to="/blog">All entries</Link></nav>
-        <p className="app-empty" role="alert">{status === 'error' ? error : 'Entry not found.'}</p>
+        <nav className="app-toolbar" aria-label="Article navigation"><Link className="app-control" to="/blog">All blogs</Link></nav>
+        <p className="app-empty" role="alert">{status === 'error' ? error : 'Blog not found.'}</p>
       </main>
     );
   }

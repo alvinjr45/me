@@ -161,19 +161,29 @@ export function SceneLandscape({ background = 'alpine' }) {
   );
 }
 
+export function SceneWindow({ background = 'alpine' }) {
+  return (
+    <span className="scene-background__window">
+      <span className="scene-background__window-view">
+        <SceneLandscape background={background} />
+        <span className="scene-background__window-bars" />
+      </span>
+    </span>
+  );
+}
+
 function SceneBackground({ background = 'alpine' }) {
   return (
     <div className={`scene-background scene-theme scene-theme--${background}`} aria-hidden="true">
-      <div className="scene-background__window">
-        <SceneLandscape background={background} />
-        <span className="scene-background__window-bars" />
-      </div>
+      <SceneWindow background={background} />
       <div className="scene-background__desk">
         <div className="scene-background__plant">
           <span /><span /><span /><span />
           <i />
         </div>
         <div className="scene-background__mug" />
+        {['winter', 'aurora'].includes(background) && <div className="scene-background__lantern"><span /></div>}
+        {background === 'city' && <div className="scene-background__desk-lamp"><span /></div>}
       </div>
     </div>
   );

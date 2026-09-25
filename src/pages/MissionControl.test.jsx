@@ -237,3 +237,29 @@ test('keeps blog management usable when photo setup is unavailable', async () =>
   fireEvent.click(screen.getByRole('button', { name: '02 Blog posts' }));
   expect(screen.getByRole('button', { name: 'First post Published' })).toBeInTheDocument();
 });
+
+test('creates calendar events and keeps unsaved details when switching sections', async () => {
+  const implementation = global.fetch.getMockImplementation();
+  global.fetch.mockImplementation((url, options) => {
+    if (!url.endsWith('admin-calendar')) return implementation(url, options);
+    const body = JSON.parse(options.body);
+    return Promise.resolve(body.action === 'list' ? response(200, { events: [] }) : response(200, { event: { ...body, id: 'saved-calendar-event' } }));
+  });
+  openApp('/admin/calendar');
+  expect(screen.queryByRole('heading', { name: 'Calendar events' })).not.toBeInTheDocument();
+  await signIn();
+  await screen.findByText('Your calendar starts with one event.');
+  fireEvent.click(screen.getByRole('button', { name: 'Add event' }));
+  fireEvent.change(screen.getByLabelText('Event title'), { target: { value: 'Studio session' } });
+  fireEvent.click(screen.getByRole('button', { name: '02 Blog posts' }));
+  fireEvent.click(screen.getByRole('button', { name: '06 Calendar' }));
+  expect(screen.getByLabelText('Event title')).toHaveValue('Studio session');
+  fireEvent.click(screen.getByLabelText('Publish in Calendar'));
+  fireEvent.click(screen.getByRole('button', { name: 'Save event' }));
+  await screen.findByText('Event saved and published to Calendar.');
+  const [, request] = global.fetch.mock.calls.find(([url, options]) => url.endsWith('admin-calendar') && JSON.parse(options.body).action === 'save');
+  expect(request.headers['x-admin-secret']).toBe('test-password');
+  expect(JSON.parse(request.body)).toMatchObject({ title: 'Studio session', is_published: true });
+  fireEvent.click(screen.getByRole('button', { name: 'Sign out' }));
+  expect(screen.queryByRole('heading', { name: 'Calendar events' })).not.toBeInTheDocument();
+});

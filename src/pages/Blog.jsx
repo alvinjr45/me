@@ -26,7 +26,7 @@ function Blog() {
           return;
         }
 
-        setPosts(nextPosts.filter((post) => !post.tags.includes('dogs')));
+        setPosts(nextPosts);
         setError('');
         setStatus('ready');
       })
@@ -73,14 +73,14 @@ function Blog() {
   };
 
   return (
-    <main className={`blog-page app-view${readerOpen && selectedPost ? ' blog-page--reading' : ''}`} aria-label="Blog notes">
+    <main className={`blog-page app-view${readerOpen && selectedPost ? ' blog-page--reading' : ''}`} aria-label="Blogs">
       <div className="blog-page__workspace">
-        <aside className="blog-page__folders" aria-label="Note folders">
-          <div className="blog-page__brand"><NoteIcon /> <strong>Notes</strong></div>
+        <aside className="blog-page__folders" aria-label="Blog folders">
+          <div className="blog-page__brand"><NoteIcon /> <strong>Blogs</strong></div>
           <p className="blog-page__account">On AJT3</p>
           <button type="button" className={`blog-page__folder${!activeFolder ? ' is-selected' : ''}`}
             aria-pressed={!activeFolder} onClick={() => selectFolder('')}>
-            <NoteIcon /><span>All notes</span><small>{posts.length}</small>
+            <NoteIcon /><span>All blogs</span><small>{posts.length}</small>
           </button>
           {folders.map((tag) => (
             <button type="button" key={tag} className={`blog-page__folder${activeFolder === tag ? ' is-selected' : ''}`}
@@ -88,29 +88,29 @@ function Blog() {
               <NoteIcon folder /><span>{tag}</span><small>{posts.filter((post) => post.tags.includes(tag)).length}</small>
             </button>
           ))}
-          <p className="blog-page__signature">{'// notes from the build'}</p>
+          <p className="blog-page__signature">{'// blogs from the build'}</p>
         </aside>
 
-        <section className="blog-page__list" aria-label="Notes list" aria-busy={status === 'loading'}>
+        <section className="blog-page__list" aria-label="Blogs list" aria-busy={status === 'loading'}>
           <header className="blog-page__list-header">
-            <div className="blog-page__list-title"><h2>{activeFolder || 'All notes'}</h2><NoteIcon /></div>
+            <div className="blog-page__list-title"><h2>{activeFolder || 'All blogs'}</h2><NoteIcon /></div>
             <label className="blog-page__search">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></svg>
-              <span className="sr-only">Search notes</span>
-              <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setReaderOpen(false); }} placeholder="Search notes" />
+              <span className="sr-only">Search blogs</span>
+              <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setReaderOpen(false); }} placeholder="Search blogs" />
             </label>
             <label className="blog-page__folder-picker">
-              <span className="sr-only">Note folder</span>
+              <span className="sr-only">Blog folder</span>
               <select value={activeFolder} onChange={(event) => selectFolder(event.target.value)}>
-                <option value="">All notes</option>
+                <option value="">All blogs</option>
                 {folders.map((tag) => <option key={tag} value={tag}>{tag}</option>)}
               </select>
             </label>
           </header>
           <div className="blog-page__entries">
             {status === 'error' ? <p className="app-empty" role="alert">{error}</p> : null}
-            {status === 'loading' ? <p className="app-empty">Loading notes...</p> : null}
-            {status === 'ready' && matchingPosts.length === 0 ? <p className="app-empty">{query ? 'No matching notes.' : 'No notes yet.'}</p> : null}
+            {status === 'loading' ? <p className="app-empty">Loading blogs...</p> : null}
+            {status === 'ready' && matchingPosts.length === 0 ? <p className="app-empty">{query ? 'No matching blogs.' : 'No blogs yet.'}</p> : null}
             {matchingPosts.map((post) => (
               <button type="button" key={post.slug}
                 ref={(node) => { noteButtons.current[post.slug] = node; }}
@@ -124,7 +124,7 @@ function Blog() {
             ))}
           </div>
           <footer className="blog-page__count" role="status">
-            {status === 'loading' ? 'Loading...' : status === 'error' ? 'Unavailable' : `${matchingPosts.length} ${matchingPosts.length === 1 ? 'note' : 'notes'}`}
+            {status === 'loading' ? 'Loading...' : status === 'error' ? 'Unavailable' : `${matchingPosts.length} ${matchingPosts.length === 1 ? 'blog' : 'blogs'}`}
           </footer>
         </section>
 
@@ -132,7 +132,7 @@ function Blog() {
           {selectedPost ? <BlogPostArticle key={selectedPost.slug} post={selectedPost} embedded onBack={() => {
             returnFocus.current = true;
             setReaderOpen(false);
-          }} /> : <div className="blog-page__blank"><NoteIcon /><p>{status === 'loading' ? 'Opening your notes...' : 'Select a note to read'}</p></div>}
+          }} /> : <div className="blog-page__blank"><NoteIcon /><p>{status === 'loading' ? 'Opening your blogs...' : 'Select a blog to read'}</p></div>}
         </div>
       </div>
     </main>

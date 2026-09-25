@@ -1,0 +1,20 @@
+.admin-calendar__toolbar { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 24px; }
+.admin-calendar__toolbar h1 { margin: 0; }
+.admin-calendar__toolbar p, .admin-calendar__placeholder p { color: #a4b8ca; font-size: 13px; line-height: 1.6; }
+.admin-calendar__layout { display: grid; grid-template-columns: minmax(160px, 0.8fr) minmax(0, 1.2fr); gap: 24px; align-items: start; }
+.admin-calendar__collection { display: grid; gap: 16px; min-width: 0; }
+.admin-calendar__items { display: grid; gap: 8px; max-height: 550px; overflow-y: auto; }
+.admin-calendar__items button { display: block; width: 100%; padding: 12px; background: #101f2e; border-color: #2d4053; text-align: left; text-transform: none; letter-spacing: normal; }
+.admin-calendar__items button[aria-pressed='true'] { border-color: var(--color-accent); background: #19354b; }
+.admin-calendar__items strong, .admin-calendar__items small { display: block; overflow-wrap: anywhere; }
+.admin-calendar__items small { margin-top: 6px; color: #abc0d3; font-size: 11px; font-weight: 400; }
+.admin-calendar__editor { min-width: 0; }
+.admin-calendar__editor fieldset { min-width: 0; border: 1px solid #314457; border-radius: 8px; background: #111e2b; }
+.admin-calendar__editor input, .admin-calendar__editor select { min-width: 0; max-width: 100%; color-scheme: dark; }
+.admin-calendar__placeholder { padding: 20px 0; }
+.admin-calendar__placeholder h2 { font-size: 20px; }
+@container (max-width: 800px) {
+  .admin-calendar__layout { grid-template-columns: 1fr; }
+  .admin-calendar__items { max-height: 240px; }
+  .admin-calendar__toolbar { align-items: flex-start; flex-direction: column; }
+}

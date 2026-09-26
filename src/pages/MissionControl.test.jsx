@@ -37,6 +37,7 @@ beforeEach(() => {
   process.env.REACT_APP_SUPABASE_URL = 'https://example.test';
   URL.createObjectURL = jest.fn(() => 'blob:test-photo');
   URL.revokeObjectURL = jest.fn();
+  let postRows = [{ ...post }];
   let photoRows = [{ ...photo }];
   let albumRows = [{ ...album }];
   global.fetch = jest.fn(async (url, options) => {
@@ -61,9 +62,14 @@ beforeEach(() => {
       return response(200, { photos: photoRows, albums: albumRows });
     }
     const body = JSON.parse(options.body);
-    return body.adminSecret === 'test-password'
-      ? response(200, { posts: [post] })
-      : response(401, { error: 'Unauthorized' });
+    if (body.adminSecret !== 'test-password') return response(401, { error: 'Unauthorized' });
+    if (body.action === 'delete') {
+      const deletedPost = postRows.find((item) => item.slug === body.slug);
+      if (!deletedPost) return response(404, { error: 'Post not found' });
+      postRows = postRows.filter((item) => item.slug !== body.slug);
+      return response(200, { post: deletedPost });
+    }
+    return response(200, { posts: postRows });
   });
 });
 
@@ -306,6 +312,31 @@ test('keeps blog management usable when photo setup is unavailable', async () =>
   expect(await screen.findByRole('alert')).toHaveTextContent('Apply the photo-library migration.');
   fireEvent.click(screen.getByRole('button', { name: '02 Blog posts' }));
   expect(screen.getByRole('button', { name: 'First post Published' })).toBeInTheDocument();
+});
+
+test('confirms and deletes a blog post from Mission Control', async () => {
+  const confirmDelete = jest.spyOn(window, 'confirm').mockReturnValue(false);
+  try {
+    openApp('/admin/posts');
+    await signIn();
+    const deleteButton = await screen.findByRole('button', { name: 'Delete First post' });
+
+    fireEvent.click(deleteButton);
+    expect(confirmDelete).toHaveBeenCalledWith('Permanently delete "First post"? This cannot be undone.');
+    expect(screen.getByRole('button', { name: 'First post Published' })).toBeInTheDocument();
+
+    confirmDelete.mockReturnValue(true);
+    fireEvent.click(deleteButton);
+    expect(await screen.findByText('Deleted "First post".')).toHaveAttribute('role', 'status');
+    expect(screen.queryByRole('button', { name: 'First post Published' })).not.toBeInTheDocument();
+    const [, request] = global.fetch.mock.calls.find(([url, options]) => {
+      if (!url.endsWith('admin-blog-post')) return false;
+      return JSON.parse(options.body).action === 'delete';
+    });
+    expect(JSON.parse(request.body)).toMatchObject({ action: 'delete', adminSecret: 'test-password', slug: 'first-post' });
+  } finally {
+    confirmDelete.mockRestore();
+  }
 });
 
 test('creates calendar events and keeps unsaved details when switching sections', async () => {

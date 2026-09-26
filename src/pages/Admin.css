@@ -159,6 +159,12 @@
   gap: 0.65rem;
 }
 
+.admin-page__post-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.65rem;
+}
+
 .admin-page__post-button {
   display: flex;
   align-items: center;
@@ -183,6 +189,18 @@
 .admin-page__post-button small {
   color: rgba(249, 249, 249, 0.62);
   font-size: 0.72rem;
+}
+
+.admin-page .admin-page__post-delete {
+  align-self: stretch;
+  border-color: rgba(255, 107, 107, 0.5);
+  background: rgba(255, 107, 107, 0.1);
+  color: #ffb0b0;
+}
+
+.admin-page .admin-page__post-delete:hover {
+  border-color: rgba(255, 107, 107, 0.8);
+  background: rgba(255, 107, 107, 0.18);
 }
 
 .admin-page__url-preview {
@@ -345,6 +363,7 @@
   .admin-page--mission-control .admin-page__panel,
   .admin-page--mission-control .admin-page__actions { padding: 1rem; }
   .admin-page--mission-control .admin-page__post-button { flex-direction: column; align-items: flex-start; padding-block: 0.75rem; }
+  .admin-page--mission-control .admin-page__post-delete { padding-inline: 0.75rem; }
   .admin-page--mission-control .admin-page__form--gate { margin-block: 0; }
   .admin-page__overview > div { padding: 1rem 0.65rem; }
 }

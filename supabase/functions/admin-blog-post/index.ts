@@ -258,6 +258,33 @@ Deno.serve(async (request) => {
       });
     }
 
+    if (action === 'delete') {
+      const slug = String(jsonBody?.slug || formData?.get('slug') || '').trim();
+
+      if (!slug) {
+        return jsonResponse(request, { error: 'Post slug is required' }, 400);
+      }
+
+      const { data, error } = await supabase
+        .from('ajt3_blog_posts')
+        .delete()
+        .eq('slug', slug)
+        .select('slug,title')
+        .maybeSingle();
+
+      if (error) {
+        console.error('[admin-blog-post] delete failed', formatError(error));
+        return jsonResponse(request, { error: 'Post delete failed', details: formatError(error) }, 500);
+      }
+
+      if (!data) {
+        return jsonResponse(request, { error: 'Post not found' }, 404);
+      }
+
+      console.info('[admin-blog-post] deleted post', { slug: data.slug });
+      return jsonResponse(request, { post: data });
+    }
+
     if (action !== 'save') {
       return jsonResponse(request, { error: `Unknown action: ${action}` }, 400);
     }

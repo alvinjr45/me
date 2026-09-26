@@ -37,12 +37,13 @@ the database-backed photo library.
 - listing posts
 - selecting a post to edit
 - creating a new post
+- confirming and deleting a post
 - building the request payload for save operations
 - uploading cover images and additional media
 
 The browser sends:
 
-- JSON for list requests
+- JSON for list and delete requests
 - `FormData` for save requests
 
 ## Edge Function
@@ -52,6 +53,7 @@ The browser sends:
 - CORS
 - secret validation
 - list requests
+- delete requests
 - incident list and save requests
 - save requests
 - file upload to Supabase Storage

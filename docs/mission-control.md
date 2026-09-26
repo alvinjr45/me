@@ -7,7 +7,7 @@ backend operations still require `ADMIN_POST_SECRET` independently of the UI.
 ## Sections
 
 - `/admin`: publishing totals, photo totals, recent posts, and management links.
-- `/admin/posts`: search and filter published posts and drafts; open the editor.
+- `/admin/posts`: search and filter published posts and drafts; open the editor or permanently delete a post after confirmation.
 - `/admin/new?slug=...`: edit an existing post. Without a slug, create a new post.
 - `/admin/photos`: add or replace images, edit titles and captions,
   assign albums, adjust display order, and publish or hide photos. Create and

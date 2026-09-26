@@ -27,5 +27,6 @@
 }
 
 .device-scene--phone .terminal-page .command-terminal__body {
-  font-size: 16px;
+  font-size: 0.72rem;
+  line-height: 1.55;
 }

@@ -10,6 +10,8 @@ function Admin({ access, section = 'posts', onBusy }) {
   const [query, setQuery] = useState('');
   const [filter, setFilter] = useState('all');
   const [postMessage, setPostMessage] = useState('');
+  const [postStatus, setPostStatus] = useState('idle');
+  const [deletingSlug, setDeletingSlug] = useState('');
   const posts = access.session?.posts || [];
   const adminSecret = access.session?.secret || '';
   const [incident, setIncident] = useState(() => createDogIncidentDraft(today));
@@ -183,6 +185,27 @@ function Admin({ access, section = 'posts', onBusy }) {
     }
   }
 
+  async function handleDeletePost(post) {
+    if (!window.confirm(`Permanently delete "${post.title}"? This cannot be undone.`)) return;
+
+    try {
+      onBusy(true);
+      setDeletingSlug(post.slug);
+      setPostStatus('deleting');
+      setPostMessage(`Deleting "${post.title}"...`);
+      await access.deletePost(post.slug);
+      setPostStatus('saved');
+      setPostMessage(`Deleted "${post.title}".`);
+      window.dispatchEvent(new Event('ajt3-posts-updated'));
+    } catch (error) {
+      setPostStatus('error');
+      setPostMessage(error.message || 'Unable to delete the post. Please retry.');
+    } finally {
+      setDeletingSlug('');
+      onBusy(false);
+    }
+  }
+
   const matchingPosts = posts.filter((post) =>
     `${post.title} ${post.excerpt || ''}`.toLowerCase().includes(query.toLowerCase()) &&
     (filter === 'all' || (filter === 'published' ? post.is_published : !post.is_published))
@@ -202,26 +225,37 @@ function Admin({ access, section = 'posts', onBusy }) {
             <div className="admin-page__panel-title">
               <h2>Posts</h2>
               <div className="admin-page__button-group">
-                <button type="button" onClick={async () => { try { await access.refreshPosts(); setPostMessage('Posts refreshed.'); } catch (error) { setPostMessage(error.message); } }}>Refresh</button>
-                <button className="admin-page__primary" type="button" onClick={() => navigate('/admin/new')}>
+                <button type="button" disabled={Boolean(deletingSlug)} onClick={async () => { try { await access.refreshPosts(); setPostStatus('saved'); setPostMessage('Posts refreshed.'); } catch (error) { setPostStatus('error'); setPostMessage(error.message); } }}>Refresh</button>
+                <button className="admin-page__primary" type="button" disabled={Boolean(deletingSlug)} onClick={() => navigate('/admin/new')}>
                   New post
                 </button>
               </div>
             </div>
             <div className="admin-page__row"><label>Search posts<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Title or excerpt" /></label><label>Status<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All posts</option><option value="published">Published</option><option value="drafts">Drafts</option></select></label></div>
-            {postMessage && <p role="status">{postMessage}</p>}
+            {postMessage && <p role={postStatus === 'error' ? 'alert' : 'status'}>{postMessage}</p>}
             {matchingPosts.length ? (
               <div className="admin-page__post-list">
                 {matchingPosts.map((post) => (
-                  <button
-                    key={post.slug}
-                    type="button"
-                    className="admin-page__post-button"
-                    onClick={() => navigate(`/admin/new?slug=${encodeURIComponent(post.slug)}`)}
-                  >
-                    <span>{post.title}</span>
-                    <small>{post.is_published ? 'Published' : 'Draft'}</small>
-                  </button>
+                  <div className="admin-page__post-row" key={post.slug}>
+                    <button
+                      type="button"
+                      className="admin-page__post-button"
+                      disabled={Boolean(deletingSlug)}
+                      onClick={() => navigate(`/admin/new?slug=${encodeURIComponent(post.slug)}`)}
+                    >
+                      <span>{post.title}</span>
+                      <small>{post.is_published ? 'Published' : 'Draft'}</small>
+                    </button>
+                    <button
+                      type="button"
+                      className="admin-page__post-delete"
+                      disabled={Boolean(deletingSlug)}
+                      aria-label={`Delete ${post.title}`}
+                      onClick={() => handleDeletePost(post)}
+                    >
+                      {deletingSlug === post.slug ? 'Deleting...' : 'Delete'}
+                    </button>
+                  </div>
                 ))}
               </div>
             ) : <p className="admin-page__hint">{posts.length ? 'No posts match these filters.' : 'No posts yet. Start with your first dispatch.'}</p>}

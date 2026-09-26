@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getSupabaseFunctionHeaders, readResponsePayload } from './adminPostEditor';
+import { formatBackendError, getSupabaseFunctionHeaders, readResponsePayload } from './adminPostEditor';
 
 const SESSION_KEY = 'ajt3_admin_secret';
 
@@ -89,5 +89,26 @@ export default function useAdminAccess() {
     setSession((current) => current?.secret === secret ? { ...current, posts: payload.data.posts } : current);
   }
 
-  return { session, password, setPassword, isChecking, error, login, logout, refreshPosts, isConfigured: Boolean(serviceUrl) };
+  async function deletePost(slug) {
+    if (!session) throw new Error('Sign in again before deleting a post.');
+    const secret = session.secret;
+    const response = await fetch(`${serviceUrl}/functions/v1/admin-blog-post`, {
+      method: 'POST',
+      headers: getSupabaseFunctionHeaders({ json: true }),
+      body: JSON.stringify({ action: 'delete', adminSecret: secret, slug })
+    });
+    const payload = await readResponsePayload(response);
+    const result = payload.data || {};
+
+    if (!response.ok || result.post?.slug !== slug) {
+      throw new Error(formatBackendError(result, result.error || 'Unable to delete the post. Please retry.'));
+    }
+
+    setSession((current) => current?.secret === secret
+      ? { ...current, posts: current.posts.filter((post) => post.slug !== slug) }
+      : current);
+    return result.post;
+  }
+
+  return { session, password, setPassword, isChecking, error, login, logout, refreshPosts, deletePost, isConfigured: Boolean(serviceUrl) };
 }

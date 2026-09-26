@@ -26,7 +26,7 @@ The blog system resolves content in this order:
 
 1. If Supabase is configured in the browser, public blog pages read published posts from `ajt3_blog_posts`.
 2. If Supabase is not configured, the app falls back to the local post data in `src/data/blogPosts.js`.
-3. The admin page writes back through the `admin-blog-post` Supabase Edge Function, which checks a shared secret before listing or saving posts.
+3. The admin page writes back through the `admin-blog-post` Supabase Edge Function, which checks a shared secret before listing, saving, or deleting posts.
 
 This means the public site can render with local content during development, while production can use Supabase as the source of truth.
 
@@ -54,6 +54,7 @@ The admin edge function lives at `supabase/functions/admin-blog-post/index.ts`. 
 
 - `list` requests for the admin panel
 - `save` requests for creating or updating posts
+- `delete` requests for permanently removing posts
 - optional cover image uploads
 - optional media uploads for images and videos
 
@@ -81,4 +82,3 @@ Important security note:
 ## Verification
 
 I did not run the app build or a browser server. The documentation and metadata updates were made by reading the source files directly.
-

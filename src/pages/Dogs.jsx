@@ -26,6 +26,7 @@ function DogIcon({ name }) {
 function Dogs() {
   const [dogPosts, setDogPosts] = useState([]);
   const [incident, setIncident] = useState(null);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [postsStatus, setPostsStatus] = useState('loading');
   const [incidentStatus, setIncidentStatus] = useState('loading');
   const [reload, setReload] = useState(0);
@@ -45,7 +46,7 @@ function Dogs() {
       setPostsStatus('loading');
       setIncidentStatus('loading');
 
-      getBlogPostsByTag('dogs').then((posts) => {
+      const postsRequest = getBlogPostsByTag('dogs').then((posts) => {
         if (!isMounted || current !== request) return;
         setDogPosts(posts);
         setPostsStatus('ready');
@@ -54,12 +55,16 @@ function Dogs() {
         if (isMounted && current === request) setPostsStatus('error');
       });
 
-      getLatestDogIncident().then((nextIncident) => {
+      const incidentRequest = getLatestDogIncident().then((nextIncident) => {
         if (!isMounted || current !== request) return;
         setIncident(nextIncident);
         setIncidentStatus('ready');
       }).catch(() => {
         if (isMounted && current === request) setIncidentStatus('error');
+      });
+
+      Promise.all([postsRequest, incidentRequest]).then(() => {
+        if (isMounted && current === request) setInitialLoad(false);
       });
     };
     const onStorage = (event) => {
@@ -92,6 +97,20 @@ function Dogs() {
   const incidentCount = incident ? formatIncidentCount(incident.incidentCount) : '';
   const selectedPost = dogPosts.find((post) => post.slug === selectedSlug);
   const matchingPosts = dogPosts.filter((post) => `${post.title} ${post.excerpt}`.toLowerCase().includes(query.trim().toLowerCase()));
+
+  if (initialLoad) {
+    return (
+      <main className="dogs-app app-view" aria-label="Dogs" aria-busy="true">
+        <header className="dogs-app__toolbar">
+          <div className="dogs-app__brand"><DogIcon name="paw" /><strong>Dog HQ</strong></div>
+        </header>
+        <div className="dogs-app__initial-loading" role="status">
+          <DogIcon name="paw" />
+          <p>Loading Dog HQ...</p>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="dogs-app app-view" aria-label="Dogs">

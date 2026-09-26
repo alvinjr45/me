@@ -159,6 +159,14 @@ function Photos() {
     }
   };
 
+  if (libraryStatus === 'loading') {
+    return (
+      <main className="photos-app" aria-busy="true">
+        <p className="app-initial-loading" role="status">Loading Photos...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="photos-app">
       {selectedPhoto ? (

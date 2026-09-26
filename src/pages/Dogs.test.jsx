@@ -1,5 +1,5 @@
 import React from 'react';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import Dogs from './Dogs';
 import { getBlogPostsByTag } from '../data/blogPosts';
@@ -24,6 +24,25 @@ beforeEach(() => {
 function renderDogs() {
   return render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Dogs /></MemoryRouter>);
 }
+
+test('loads the page data before rendering the dashboard', async () => {
+  let resolvePosts;
+  let resolveIncident;
+  getBlogPostsByTag.mockImplementation(() => new Promise((resolve) => { resolvePosts = resolve; }));
+  getLatestDogIncident.mockImplementation(() => new Promise((resolve) => { resolveIncident = resolve; }));
+
+  renderDogs();
+  expect(screen.getByRole('status')).toHaveTextContent('Loading Dog HQ...');
+  expect(screen.queryByRole('heading', { name: 'Great dogs. Plenty of chaos.' })).not.toBeInTheDocument();
+
+  await act(async () => {
+    resolvePosts(posts);
+    resolveIncident(null);
+  });
+
+  expect(await screen.findByRole('heading', { name: 'Great dogs. Plenty of chaos.' })).toBeInTheDocument();
+  expect(screen.queryByText('Loading Dog HQ...')).not.toBeInTheDocument();
+});
 
 test('searches field notes and returns from the embedded reader with focus and search preserved', async () => {
   renderDogs();

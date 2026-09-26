@@ -84,6 +84,19 @@
 
 .app-empty { margin: 0; padding: 1.5rem; color: var(--color-muted-strong); line-height: 1.6; }
 
+.app-initial-loading {
+  display: grid;
+  flex: 1;
+  grid-column: 1 / -1;
+  min-height: 0;
+  margin: 0;
+  padding: 1.5rem;
+  place-content: center;
+  color: var(--color-muted-strong);
+  font: 0.78rem/1.6 var(--font-mono);
+  text-align: center;
+}
+
 .device-scene--phone .device-screen--app :is(.music-page, .settings-page, .terminal-page, .dogs-app, .blog-page, .calendar-app, .store-page, .mission-control, .guestbook-messages:not(.guestbook-messages--welcome)) {
     --app-safe-top: 0px;
     --app-safe-bottom: 0px;

@@ -20,6 +20,7 @@ export default function Guestbook() {
   const [chatOpen, setChatOpen] = useState(false);
   const [search, setSearch] = useState('');
   const [loading, setLoading] = useState(true);
+  const [initialLoad, setInitialLoad] = useState(true);
   const [error, setError] = useState('');
   const [reload, setReload] = useState(0);
   const [hasMore, setHasMore] = useState(false);
@@ -58,7 +59,12 @@ export default function Guestbook() {
         setConversations(rows); setHasMore(rows.length === 50); setError('');
         setSelected((previous) => previous || rows[0] || null);
       } catch (failure) { if (mounted && current === request.current) { setConversations([]); setError(failure.message); } }
-      finally { if (mounted && current === request.current) setLoading(false); }
+      finally {
+        if (mounted && current === request.current) {
+          setLoading(false);
+          setInitialLoad(false);
+        }
+      }
     }
     setLoading(true);
     const timeout = setTimeout(refresh, search ? 250 : 0);
@@ -102,6 +108,10 @@ export default function Guestbook() {
   if (requiresEntry) return <main className="guestbook-messages guestbook-messages--welcome">
     <header className="guestbook-messages__welcome-header"><span>GUESTBOOK</span><h1>Messages</h1></header>
     <GuestbookParticipation participant={participant} onContinue={(next, verifiedSession) => { setSession(verifiedSession); updateParticipant(next); }} blockedMessage={participationError} session={session} />
+  </main>;
+
+  if (initialLoad) return <main className="guestbook-messages" aria-busy="true">
+    <p className="app-initial-loading" role="status">Loading Guestbook...</p>
   </main>;
 
   return <main className={`guestbook-messages${chatOpen ? ' guestbook-messages--chat-open' : ''}`}>

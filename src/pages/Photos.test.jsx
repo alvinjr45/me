@@ -27,6 +27,22 @@ beforeEach(() => {
   notifyPhotoLibraryChanged.mockReset();
 });
 
+test('loads photo data before rendering the library', async () => {
+  let resolveLibrary;
+  getPhotoLibrary.mockImplementation(() => new Promise((resolve) => { resolveLibrary = resolve; }));
+
+  render(<Photos />);
+  expect(screen.getByRole('status')).toHaveTextContent('Loading Photos...');
+  expect(screen.queryByRole('heading', { name: 'Library' })).not.toBeInTheDocument();
+
+  await act(async () => {
+    resolveLibrary({ photos: [photo], albums: [album] });
+  });
+
+  expect(await screen.findByRole('heading', { name: 'Library' })).toBeInTheDocument();
+  expect(screen.queryByText('Loading Photos...')).not.toBeInTheDocument();
+});
+
 test('loads managed photos, captions and albums without giving guests a favorite control', async () => {
   render(<Photos />);
   fireEvent.click(await screen.findByRole('button', { name: 'Open New memory' }));

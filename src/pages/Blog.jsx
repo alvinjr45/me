@@ -74,6 +74,14 @@ function Blog() {
     setReaderOpen(false);
   };
 
+  if (status === 'loading') {
+    return (
+      <main className="blog-page app-view" aria-label="Blogs" aria-busy="true">
+        <p className="app-initial-loading" role="status">Loading Blogs...</p>
+      </main>
+    );
+  }
+
   return (
     <main className={`blog-page app-view${readerOpen && selectedPost ? ' blog-page--reading' : ''}${sidebarCollapsed ? ' blog-page--sidebar-collapsed' : ''}`} aria-label="Blogs">
       <div className="blog-page__workspace">

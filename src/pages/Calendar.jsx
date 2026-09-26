@@ -93,7 +93,7 @@ function Calendar() {
 
   useLayoutEffect(() => {
     const container = canvas.current;
-    if (view !== 'month' || !container) return;
+    if (loading || view !== 'month' || !container) return;
     function alignSelectedWeek() {
       container.style.removeProperty('--calendar-scroll-space');
       if (!window.matchMedia?.('(min-width: 1025px) and (min-height: 501px)').matches) return;
@@ -113,7 +113,7 @@ function Calendar() {
       observer?.disconnect();
       container.style.removeProperty('--calendar-scroll-space');
     };
-  }, [view, selected]);
+  }, [loading, view, selected]);
 
   useEffect(() => {
     let current = true;
@@ -154,6 +154,14 @@ function Calendar() {
   const agenda = eventsOnDay(filtered, selected);
   const heading = view === 'year' ? String(selected.getFullYear()) : view === 'day' ? selected.toLocaleDateString([], { month: 'long', day: 'numeric', year: 'numeric' }) : selected.toLocaleDateString([], { month: 'long', year: 'numeric' });
 
+  if (loading) {
+    return (
+      <main className="calendar-app" aria-busy="true">
+        <p className="app-initial-loading" role="status">Loading Calendar...</p>
+      </main>
+    );
+  }
+
   return (
     <main className="calendar-app">
       <header className="calendar-toolbar">
@@ -168,7 +176,6 @@ function Calendar() {
         </aside>
         <div className="calendar-workspace">
           <div className="calendar-heading"><h1>{heading}</h1><div className="calendar-heading__navigation"><button type="button" onClick={() => move(-1)} aria-label={`Previous ${view}`}>&lsaquo;</button><button type="button" ref={todayButton} onClick={() => chooseDay(dateFromKey(dateKey(new Date())))}>Today</button><button type="button" onClick={() => move(1)} aria-label={`Next ${view}`}>&rsaquo;</button></div></div>
-          {loading && <p className="calendar-notice" role="status">Loading events...</p>}
           {error && <div className="calendar-notice" role="alert">{error} <button type="button" onClick={() => { setLoading(true); setReload((value) => value + 1); }}>Retry calendar</button></div>}
           <div className="calendar-canvas" ref={canvas}>
             {view === 'month' ? <div className="calendar-month"><div className="calendar-month__weekdays">{weekdays.map((day) => <span key={day}>{day}</span>)}</div><div className="calendar-month__days">{monthDays(selected).map((day) => {

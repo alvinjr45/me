@@ -12,6 +12,30 @@ const event = { id: 'first', title: 'Project launch', calendar: 'work', all_day:
 function openCalendar() { return render(<MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Calendar /></MemoryRouter>); }
 beforeEach(() => { getCalendarEvents.mockReset(); getCalendarEvents.mockResolvedValue([event]); });
 
+test('starts the mobile calendar with today in view', async () => {
+  const rectangle = (top, bottom) => ({ top, bottom, left: 0, right: 320, width: 320, height: bottom - top, x: 0, y: top, toJSON: () => ({}) });
+  const clientHeight = jest.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(function getClientHeight() {
+    return this.classList.contains('calendar-canvas') ? 300 : 0;
+  });
+  const bounds = jest.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function getBounds() {
+    if (this.classList.contains('calendar-canvas')) return rectangle(100, 400);
+    if (this.classList.contains('calendar-month')) return rectangle(100, 550);
+    if (this.classList.contains('is-selected')) return rectangle(400, 496);
+    return rectangle(0, 0);
+  });
+
+  try {
+    render(<div className="device-scene--phone"><MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}><Calendar /></MemoryRouter></div>);
+    await screen.findAllByRole('button', { name: 'Project launch All day' });
+    const canvas = document.querySelector('.calendar-canvas');
+    expect(canvas.scrollTop).toBe(300);
+    expect(canvas.style.getPropertyValue('--calendar-scroll-space')).toBe('150px');
+  } finally {
+    bounds.mockRestore();
+    clientHeight.mockRestore();
+  }
+});
+
 test('shows event details, filters calendars and links to event management', async () => {
   openCalendar();
   fireEvent.click((await screen.findAllByRole('button', { name: 'Project launch All day' }))[0]);

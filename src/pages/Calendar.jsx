@@ -97,7 +97,9 @@ function Calendar() {
     if (loading || view !== 'month' || !container) return;
     function alignSelectedWeek() {
       container.style.removeProperty('--calendar-scroll-space');
-      if (!window.matchMedia?.('(min-width: 1025px) and (min-height: 501px)').matches) return;
+      const isPhone = Boolean(container.closest('.device-scene--phone'));
+      const isLargeViewport = window.matchMedia?.('(min-width: 1025px) and (min-height: 501px)').matches;
+      if (!isPhone && !isLargeViewport) return;
       const month = container.querySelector('.calendar-month');
       const cell = month?.querySelector('.is-selected');
       if (!cell) return;

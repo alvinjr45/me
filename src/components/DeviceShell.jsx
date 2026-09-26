@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Tech from '../pages/Tech';
 import Music from '../pages/Music';
@@ -12,6 +12,7 @@ import Settings from '../pages/Settings';
 import AppStore from '../pages/AppStore';
 import MissionControl from '../pages/MissionControl';
 import SceneBackground from './SceneBackground';
+import PhoneBackGesture from './PhoneBackGesture';
 import PhoneHomeIndicator from './PhoneHomeIndicator';
 import useAdminAccess from '../lib/useAdminAccess';
 import usePhoneLoginViewport from '../lib/usePhoneLoginViewport';
@@ -634,6 +635,8 @@ function DeviceShell({ children, home }) {
   const { pathname } = location;
   const screenRef = useRef(null);
   const dragRef = useRef(null);
+  const phoneHistoryRef = useRef({ appKey: null, entries: [], pending: null });
+  const phoneBackHandlerRef = useRef(null);
   const systemTimerRef = useRef(null);
   const redirectRef = useRef(null);
   const nextZRef = useRef(10);
@@ -658,10 +661,26 @@ function DeviceShell({ children, home }) {
   const isHome = pathname === '/';
   const activeApp = desktopApps.find((app) => pathname === app.path || pathname.startsWith(`${app.path}/`)) || (!isHome ? { key: 'page', label: 'Page', path: pathname } : null);
   const activeKey = activeApp?.key;
+  const activeAppLabel = activeApp?.label;
+  const activeAppPath = activeApp?.path;
   const isAdmin = Boolean(adminAccess.session);
   const accountName = isAdmin ? 'AJ Thompson' : 'Guest';
   const guestDenied = systemState === 'running' && activeKey === 'admin' && !isAdmin;
   const phoneLocked = isPhone && systemState === 'locked';
+  const currentRoute = `${pathname}${location.search}${location.hash}`;
+  const [phoneBackState, setPhoneBackState] = useState({ canGoBack: false, label: '' });
+  const [localPhoneBack, setLocalPhoneBack] = useState(null);
+
+  const registerPhoneBack = useCallback((handler, label = 'Back') => {
+    const token = Symbol('phone-back');
+    phoneBackHandlerRef.current = { handler, token };
+    setLocalPhoneBack({ label, token });
+    return () => {
+      if (phoneBackHandlerRef.current?.token !== token) return;
+      phoneBackHandlerRef.current = null;
+      setLocalPhoneBack(null);
+    };
+  }, []);
 
   const openBuild = (event) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -698,6 +717,32 @@ function DeviceShell({ children, home }) {
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
+
+  useEffect(() => {
+    const history = phoneHistoryRef.current;
+    if (!isPhone || !activeKey || isHome || phoneLocked || guestDenied) {
+      if (!isPhone || isHome) phoneHistoryRef.current = { appKey: null, entries: [], pending: null };
+      setPhoneBackState({ canGoBack: false, label: '' });
+      return;
+    }
+
+    if (history.appKey !== activeKey) {
+      history.appKey = activeKey;
+      history.entries = [currentRoute];
+      history.pending = null;
+    } else if (history.pending === currentRoute) {
+      history.pending = null;
+    } else if (currentRoute === activeAppPath) {
+      history.entries = [currentRoute];
+    } else if (history.entries[history.entries.length - 1] !== currentRoute) {
+      history.entries.push(currentRoute);
+    }
+
+    setPhoneBackState({
+      canGoBack: history.entries.length > 1 || currentRoute !== activeAppPath,
+      label: activeAppLabel
+    });
+  }, [activeAppLabel, activeAppPath, activeKey, currentRoute, guestDenied, isHome, isPhone, phoneLocked]);
 
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: light)');
@@ -879,6 +924,27 @@ function DeviceShell({ children, home }) {
     setWindows((current) => current.map((item) => ({ ...item, minimized: true })));
   };
 
+  const goBackInPhoneApp = () => {
+    if (phoneBackHandlerRef.current) {
+      phoneBackHandlerRef.current.handler();
+      return;
+    }
+    const history = phoneHistoryRef.current;
+    if (!activeApp || history.appKey !== activeKey) return;
+
+    let target;
+    if (history.entries.length > 1) {
+      history.entries.pop();
+      target = history.entries[history.entries.length - 1];
+    } else if (currentRoute !== activeApp.path) {
+      target = activeApp.path;
+      history.entries = [target];
+    }
+    if (!target) return;
+    history.pending = target;
+    navigate(target, { replace: true });
+  };
+
   const clearDesktopSession = () => {
     adminAccess.logout();
     window.clearTimeout(systemTimerRef.current);
@@ -948,7 +1014,8 @@ function DeviceShell({ children, home }) {
       adminProfile,
       accountImage: isAdmin ? adminProfile.imageUrl : '',
       adminAccess: { ...adminAccess, logout: () => runSystemAction('logout') },
-      runSystemAction
+      runSystemAction,
+      registerPhoneBack
     }}>
     <div data-testid="device-scene" className={`device-scene device-scene--${isPhone ? 'phone' : 'desktop'}`}>
       <SceneBackground background={background} />
@@ -1078,6 +1145,13 @@ function DeviceShell({ children, home }) {
               motion={motion}
               onHome={() => { showDesktop(); navigate('/'); }}
             /> : <Link className="device-screen__home-indicator" to="/" aria-label="Return to phone home screen" onClick={showDesktop} />}
+            {isPhone && (localPhoneBack || phoneBackState.canGoBack) && !phoneLocked && !guestDenied && <PhoneBackGesture
+              key={currentRoute}
+              screenRef={screenRef}
+              motion={motion}
+              previousLabel={localPhoneBack?.label || phoneBackState.label}
+              onBack={goBackInPhoneApp}
+            />}
             </div>}
             {guestDenied && <GuestAccessDialog onDismiss={() => navigate('/', { replace: true })} onLogout={() => runSystemAction('logout')} />}
             <SystemScreen

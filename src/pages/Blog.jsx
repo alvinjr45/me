@@ -1,5 +1,6 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import BlogPostArticle from '../components/BlogPostArticle';
+import { usePhoneBack } from '../components/deviceSettings';
 import { getBlogPosts } from '../data/blogPosts';
 import './Blog.css';
 
@@ -73,6 +74,11 @@ function Blog() {
     setSelectedSlug(null);
     setReaderOpen(false);
   };
+
+  usePhoneBack(() => {
+    returnFocus.current = true;
+    setReaderOpen(false);
+  }, readerOpen, 'Blogs');
 
   if (status === 'loading') {
     return (

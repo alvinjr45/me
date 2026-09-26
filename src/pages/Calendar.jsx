@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { usePhoneBack } from '../components/deviceSettings';
 import { addDays, calendarGroups, dateFromKey, dateKey, eventDate, eventRange, eventsOnDay, eventTime, getCalendarEvents, monthDays } from '../data/calendar';
 import './Calendar.css';
 
@@ -148,6 +149,11 @@ function Calendar() {
       : view === 'month' ? new Date(date.getFullYear(), date.getMonth() + direction, 1)
         : addDays(date, direction * (view === 'week' ? 7 : 1)));
   }
+
+  usePhoneBack(() => {
+    if (activeId) setActiveId(null);
+    else setView('month');
+  }, Boolean(activeId) || view !== 'month', 'Calendar');
 
   const weekStart = addDays(selected, -selected.getDay());
   const days = view === 'day' ? [selected] : Array.from({ length: 7 }, (_, index) => addDays(weekStart, index));

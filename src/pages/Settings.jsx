@@ -11,7 +11,8 @@ import {
   backgroundChoices,
   deviceViewChoices,
   wallpaperChoices,
-  wallpaperSpeedChoices
+  wallpaperSpeedChoices,
+  usePhoneBack
 } from '../components/deviceSettings';
 import { SceneWindow } from '../components/SceneBackground';
 import './Settings.css';
@@ -67,6 +68,11 @@ function Settings() {
     accountName,
     accountImage
   } = useContext(DeviceSettingsContext);
+
+  usePhoneBack(() => {
+    setPanelOpen(false);
+    requestAnimationFrame(() => selectedCategoryRef.current?.focus());
+  }, panelOpen, 'Settings');
 
   return (
     <main className={`settings-page app-view${panelOpen ? ' settings-page--detail' : ''}`} aria-label="Settings">

@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import BlogPostArticle from '../components/BlogPostArticle';
+import { usePhoneBack } from '../components/deviceSettings';
 import {
   formatIncidentCount,
   formatIncidentDate,
@@ -97,6 +98,8 @@ function Dogs() {
   const incidentCount = incident ? formatIncidentCount(incident.incidentCount) : '';
   const selectedPost = dogPosts.find((post) => post.slug === selectedSlug);
   const matchingPosts = dogPosts.filter((post) => `${post.title} ${post.excerpt}`.toLowerCase().includes(query.trim().toLowerCase()));
+
+  usePhoneBack(() => setSelectedSlug(null), Boolean(selectedPost), 'Dog HQ');
 
   if (initialLoad) {
     return (

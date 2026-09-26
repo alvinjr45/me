@@ -4,6 +4,7 @@ import FastRewindRounded from '@mui/icons-material/FastRewindRounded';
 import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
 import SkipNextRounded from '@mui/icons-material/SkipNextRounded';
 import MusicSolarSystem from '../components/MusicSolarSystem';
+import { usePhoneBack } from '../components/deviceSettings';
 import musicPlaylists from '../data/musicPlaylists';
 import './Music.css';
 
@@ -59,6 +60,8 @@ function Music() {
       mobileSelectionRef.current.focus({ preventScroll: true });
     }
   }, [mobilePlaylistOpen]);
+
+  usePhoneBack(() => setMobilePlaylistOpen(false), mobilePlaylistOpen, 'Music');
 
   return (
     <main className="music-page app-view" aria-label="Music">

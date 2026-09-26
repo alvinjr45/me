@@ -1,4 +1,4 @@
-import { createContext } from 'react';
+import { createContext, useContext, useEffect, useRef } from 'react';
 
 export const wallpaperChoices = [
   { key: 'aurora', label: 'Aurora', description: 'Drifting polar light' },
@@ -24,6 +24,19 @@ export const wallpaperChoices = [
 ];
 
 export const DeviceSettingsContext = createContext(null);
+
+export function usePhoneBack(handler, active, label) {
+  const settings = useContext(DeviceSettingsContext);
+  const handlerRef = useRef(handler);
+  handlerRef.current = handler;
+  const registerPhoneBack = settings?.registerPhoneBack;
+  const isPhone = settings?.isPhone;
+
+  useEffect(() => {
+    if (!active || !isPhone || !registerPhoneBack) return undefined;
+    return registerPhoneBack(() => handlerRef.current(), label);
+  }, [active, isPhone, label, registerPhoneBack]);
+}
 
 export const appearanceChoices = [
   { key: 'system', label: 'System' },

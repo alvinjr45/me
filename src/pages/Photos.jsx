@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import { DeviceSettingsContext } from '../components/deviceSettings';
+import { DeviceSettingsContext, usePhoneBack } from '../components/deviceSettings';
 import { getPhotoLibrary } from '../data/photos';
 import { getPhotoImageUrl } from '../lib/photoImages';
 import { notifyPhotoLibraryChanged, requestPhotoLibrary } from '../lib/adminPhotoLibrary';
@@ -145,6 +145,7 @@ function Photos() {
     const next = selectedIndex + direction;
     if (next >= 0 && next < viewerIds.length) setSelectedId(viewerIds[next]);
   };
+  usePhoneBack(() => setSelectedId(null), Boolean(selectedPhoto), 'Photos');
   const toggleFavorite = async () => {
     if (!adminSecret || !selectedPhoto || favoriteStatus === 'saving') return;
     const isFavorite = !selectedPhoto.isFavorite;

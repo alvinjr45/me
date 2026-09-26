@@ -3,7 +3,7 @@ import GuestbookConversation from '../components/GuestbookConversation';
 import GuestbookParticipation, { canParticipate } from '../components/GuestbookParticipation';
 import { getConversations } from '../lib/guestbook';
 import './Guestbook.css';
-import { DeviceSettingsContext } from '../components/deviceSettings';
+import { DeviceSettingsContext, usePhoneBack } from '../components/deviceSettings';
 import GuestbookAuthor from '../components/GuestbookAuthor';
 
 function ConversationAvatar({ title }) {
@@ -104,6 +104,8 @@ export default function Guestbook() {
     setChatOpen(false);
     requestAnimationFrame(() => (creating ? newButton.current : selectedButton.current)?.focus());
   }
+
+  usePhoneBack(goBack, chatOpen, 'Messages');
 
   if (requiresEntry) return <main className="guestbook-messages guestbook-messages--welcome">
     <header className="guestbook-messages__welcome-header"><span>GUESTBOOK</span><h1>Messages</h1></header>

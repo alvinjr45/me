@@ -1035,7 +1035,7 @@ function DeviceShell({ children, home }) {
               >
                 {children}
               </DeviceWindow>
-            ) : null) : windows.filter((item) => (item.key !== 'admin' || isAdmin) && (!item.minimized || item.key === 'admin')).map((item) => {
+            ) : null) : windows.filter((item) => item.key !== 'admin' || isAdmin).map((item) => {
               const app = desktopApps.find((entry) => entry.key === item.key) || { key: 'page', label: 'Page' };
               const Page = appPages[item.key];
               const isRoute = activeApp?.key === item.key && !isHome;

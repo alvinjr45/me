@@ -119,8 +119,8 @@ function Blog() {
               <span className="sr-only">Search blogs</span>
               <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setReaderOpen(false); }} placeholder="Search blogs" />
             </label>
-            <div className="blog-page__folder-filters" role="group" aria-label="Filter by blog folder">
-              <button type="button" aria-pressed={!activeFolder} onClick={() => selectFolder('')}>All blogs</button>
+            <div className="blog-page__folder-filters" role="group" aria-label="Filter by blog type">
+              <button type="button" aria-pressed={!activeFolder} onClick={() => selectFolder('')}>All</button>
               {folders.map((tag) => (
                 <button type="button" key={tag} title={tag} aria-pressed={activeFolder === tag} onClick={() => selectFolder(tag)}>
                   <span>{tag}</span>

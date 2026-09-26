@@ -203,6 +203,27 @@ test('shows a brief launch screen when an app opens', () => {
   }
 });
 
+test('restores a minimized app without replaying its launch screen', () => {
+  jest.useFakeTimers();
+  try {
+    render(<App />);
+    fireEvent.click(screen.getByRole('link', { name: 'Open Music' }));
+    act(() => jest.advanceTimersByTime(720));
+    expect(screen.queryByRole('status', { name: 'Opening Music' })).not.toBeInTheDocument();
+    const musicContent = within(screen.getByRole('region', { name: 'Music app' })).getByRole('heading', { name: 'Music content' });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Minimize Music' }));
+    expect(screen.queryByRole('region', { name: 'Music app' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('link', { name: 'Open Music' }));
+
+    expect(screen.getByRole('region', { name: 'Music app' })).toBeInTheDocument();
+    expect(within(screen.getByRole('region', { name: 'Music app' })).getByRole('heading', { name: 'Music content' })).toBe(musicContent);
+    expect(screen.queryByRole('status', { name: 'Opening Music' })).not.toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
 test.each([false, true])('opens a direct article link and keeps subsequent navigation at home (phone: %s)', (isPhone) => {
   window.matchMedia.mockImplementation((query) => ({
     matches: isPhone && query.includes('max-width'),

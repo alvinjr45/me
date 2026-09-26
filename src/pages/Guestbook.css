@@ -193,3 +193,20 @@
 .device-scene--phone .guestbook-messages__chat-title h2 { font-size: 0.78rem; }
 .device-scene--phone .guestbook-messages__chat-title p { margin-top: 1px; font-size: 0.58rem; line-height: 1.2; }
 .device-scene--phone .guestbook-messages .guestbook-messages__refresh { min-height: 36px; padding: 3px 4px; font-size: 0.66rem; }
+.device-scene--phone .guestbook-messages__feed { padding: 6px 10px 10px; }
+.device-scene--phone .guestbook-messages__public-note { margin: 2px 0 8px; font-size: 0.58rem; line-height: 1.35; }
+.device-scene--phone .guestbook-messages__date { margin: 14px 0 12px; font-size: 0.58rem; }
+.device-scene--phone .guestbook-messages__message { margin-bottom: 10px; }
+.device-scene--phone .guestbook-messages__sender { margin: 0 7px 3px; font-size: 0.6rem; }
+.device-scene--phone .guestbook-messages__bubble { max-width: 88%; padding: 7px 11px; border-radius: 15px 15px 15px 4px; font-size: 0.76rem; line-height: 1.35; }
+.device-scene--phone .guestbook-messages__message--own .guestbook-messages__bubble { border-radius: 15px 15px 4px 15px; }
+.device-scene--phone .guestbook-messages__message time { margin: 3px 7px 0; font-size: 0.52rem; }
+.device-scene--phone .guestbook-messages__composer { padding: 6px 8px 8px; }
+.device-scene--phone .guestbook-messages__composer fieldset { gap: 4px; }
+.device-scene--phone .guestbook-messages__identity { gap: 6px; font-size: 0.64rem; }
+.device-scene--phone .guestbook-messages__identity button { min-height: 34px; padding: 3px 6px; font-size: 0.62rem; }
+.device-scene--phone .guestbook-messages__input-row { gap: 4px; padding: 3px 4px 3px 9px; border-radius: 16px; }
+.device-scene--phone .guestbook-messages__input-row textarea { max-height: 90px; padding: 2px 0; font-size: 0.78rem; line-height: 1.3; }
+.device-scene--phone .guestbook-messages__input-row .guestbook-messages__send { width: 36px; height: 36px; padding: 7px; }
+.device-scene--phone .guestbook-messages__send svg { width: 18px; height: 18px; }
+.device-scene--phone .guestbook-messages__composer-note { margin-top: 4px; font-size: 0.58rem; line-height: 1.3; }

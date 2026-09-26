@@ -64,7 +64,7 @@
 }
 
 .command-terminal__line--system,
-.command-terminal__form > span:first-of-type,
+.command-terminal__prompt,
 .command-terminal__line--command span {
   color: var(--color-main);
 }
@@ -128,6 +128,10 @@
 
 .command-terminal__form > span {
   flex-shrink: 0;
+}
+
+.command-terminal__prompt--compact {
+  display: none;
 }
 
 .command-terminal__cursor-measure {

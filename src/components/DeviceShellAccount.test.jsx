@@ -1,5 +1,5 @@
 import React from 'react';
-import { act, fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import DeviceShell, { desktopApps } from './DeviceShell';
 import Home from '../pages/Home';
@@ -362,12 +362,13 @@ test('updates the admin profile photo in Mission Control, Settings, and the sign
     enterAdminPassword('test-password');
     await screen.findByRole('navigation', { name: 'App dock' });
     openMissionControl();
-    expect(await screen.findByAltText('Administrator')).toHaveAttribute('src', 'https://example.test/old.jpg');
+    const profilePhoto = await screen.findByRole('button', { name: 'Change profile photo' });
+    expect(within(profilePhoto).getByAltText('')).toHaveAttribute('src', 'https://example.test/old.jpg');
     fireEvent.change(screen.getByLabelText('Choose admin profile photo'), { target: { files: [new File(['photo'], 'profile.jpg', { type: 'image/jpeg' })] } });
     fireEvent.click(await screen.findByRole('button', { name: 'Save' }));
     expect(screen.getByRole('button', { name: '02 Blog posts' })).toBeDisabled();
     await screen.findByText('Profile photo updated.');
-    expect(screen.getByAltText('Administrator')).toHaveAttribute('src', 'https://example.test/new.jpg');
+    await waitFor(() => expect(within(profilePhoto).getByAltText('')).toHaveAttribute('src', 'https://example.test/new.jpg'));
     fireEvent.click(within(screen.getByRole('navigation', { name: 'App dock' })).getByRole('link', { name: 'Open Settings' }));
     expect(within(screen.getByRole('main', { name: 'Settings' })).getByAltText('')).toHaveAttribute('src', 'https://example.test/new.jpg');
     fireEvent.click(screen.getByRole('button', { name: 'General' }));

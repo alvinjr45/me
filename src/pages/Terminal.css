@@ -30,3 +30,16 @@
   font-size: 0.72rem;
   line-height: 1.55;
 }
+
+.device-scene--phone .terminal-page .command-terminal__form,
+.device-scene--phone .terminal-page .command-terminal__form input {
+  font-size: 16px;
+}
+
+.device-scene--phone .terminal-page .command-terminal__prompt--full {
+  display: none;
+}
+
+.device-scene--phone .terminal-page .command-terminal__prompt--compact {
+  display: inline;
+}

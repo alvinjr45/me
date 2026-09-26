@@ -37,11 +37,16 @@ async function choosePhoto() {
 
 test('previews a photo and saves it only after confirmation', async () => {
   const { props, rerender } = openProfile();
+  const fileInput = screen.getByLabelText('Choose admin profile photo');
+  const openChooser = jest.spyOn(fileInput, 'click');
+  fireEvent.click(screen.getByRole('button', { name: 'Change profile photo' }));
+  expect(openChooser).toHaveBeenCalledTimes(1);
+  expect(screen.queryByRole('button', { name: 'Change photo' })).not.toBeInTheDocument();
   await choosePhoto();
-  expect(screen.getByAltText('Administrator')).toHaveAttribute('src', 'blob:profile-preview');
+  expect(screen.getByRole('button', { name: 'Change profile photo' }).querySelector('img')).toHaveAttribute('src', 'blob:profile-preview');
   expect(requestPhotoLibrary).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Save' }));
-  expect(screen.getByRole('button', { name: 'Change photo' })).toBeDisabled();
+  expect(screen.getByRole('button', { name: 'Change profile photo' })).toBeDisabled();
   await screen.findByText('Profile photo updated.');
   const [secret, body] = requestPhotoLibrary.mock.calls[0];
   expect(secret).toBe('test-secret');
@@ -50,7 +55,7 @@ test('previews a photo and saves it only after confirmation', async () => {
   expect(props.onChange).toHaveBeenCalledWith('https://example.test/profile.jpg');
   expect(props.onBusy.mock.calls).toEqual([[true], [false], [true], [false]]);
   rerender(<AdminProfile {...props} imageUrl="https://example.test/profile.jpg" />);
-  expect(screen.getByAltText('Administrator')).toHaveAttribute('src', 'https://example.test/profile.jpg');
+  expect(screen.getByRole('button', { name: 'Change profile photo' }).querySelector('img')).toHaveAttribute('src', 'https://example.test/profile.jpg');
   expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:profile-preview');
 });
 
@@ -58,7 +63,7 @@ test('cancel restores the current image without uploading', async () => {
   const { props } = openProfile();
   await choosePhoto();
   fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
-  expect(screen.getByAltText('Administrator')).toHaveAttribute('src', props.imageUrl);
+  expect(screen.getByRole('button', { name: 'Change profile photo' }).querySelector('img')).toHaveAttribute('src', props.imageUrl);
   expect(requestPhotoLibrary).not.toHaveBeenCalled();
   expect(props.onChange).not.toHaveBeenCalled();
 });
@@ -70,7 +75,7 @@ test('retains the selection and saved profile when an upload fails, allowing ret
   fireEvent.click(screen.getByRole('button', { name: 'Save' }));
   expect(await screen.findByRole('alert')).toHaveTextContent('Upload failed');
   expect(props.onChange).not.toHaveBeenCalled();
-  expect(screen.getByAltText('Administrator')).toHaveAttribute('src', 'blob:profile-preview');
+  expect(screen.getByRole('button', { name: 'Change profile photo' }).querySelector('img')).toHaveAttribute('src', 'blob:profile-preview');
   fireEvent.click(screen.getByRole('button', { name: 'Save' }));
   await screen.findByText('Profile photo updated.');
   expect(requestPhotoLibrary).toHaveBeenCalledTimes(2);

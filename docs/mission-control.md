@@ -60,7 +60,8 @@ Deploy the resulting frontend using the site's usual workflow.
 
 ## Photo behavior
 
-The overview includes a profile-photo preview with Change photo, Save, and Cancel.
+The overview profile photo opens the image chooser when clicked. Save and Cancel
+appear after a new photo is selected.
 The saved photo appears on the administrator sign-in tile and in Settings, and
 persists across browsers. Guest initials are unchanged. Before using this control,
 apply `supabase/migrations/20260925000000_create_admin_profile.sql` and redeploy

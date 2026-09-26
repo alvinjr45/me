@@ -352,7 +352,8 @@ function CommandTerminal({ autoFocus = false, onNavigate, showIntro = true, vari
         ))}
         <form className="command-terminal__form" aria-label="Site command" onSubmit={handleSubmit}>
           <label htmlFor={inputId} className="sr-only">Enter a site command</label>
-          <span aria-hidden="true">visitor@ajt3:~$</span>
+          <span className="command-terminal__prompt command-terminal__prompt--full" aria-hidden="true">visitor@ajt3:~$</span>
+          <span className="command-terminal__prompt command-terminal__prompt--compact" aria-hidden="true">~$</span>
           <div className="command-terminal__input">
             <input
               id={inputId}

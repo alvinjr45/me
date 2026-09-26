@@ -66,13 +66,18 @@ export default function AdminProfile({ secret, imageUrl, onChange, onBusy }) {
   return (
     <section className="mission-control__profile" aria-label="Admin profile photo">
       <div className="mission-control__profile-row">
-        <span className="mission-control__profile-avatar">{preview || imageUrl ? <img src={preview || imageUrl} alt="Administrator" /> : <span aria-hidden="true">A/3</span>}</span>
+        <button
+          type="button"
+          className="mission-control__profile-avatar"
+          aria-label="Change profile photo"
+          disabled={working}
+          onClick={() => inputRef.current?.click()}
+        >
+          {preview || imageUrl ? <img src={preview || imageUrl} alt="" /> : <span aria-hidden="true">A/3</span>}
+        </button>
         <div className="mission-control__profile-label"><strong>Profile photo</strong><span>Administrator</span></div>
         <input ref={inputRef} type="file" hidden aria-label="Choose admin profile photo" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif" disabled={working} onChange={choosePhoto} />
-        <div className="mission-control__profile-actions">
-          <button type="button" disabled={working} onClick={() => inputRef.current?.click()}>Change photo</button>
-          {file && <><button type="button" className="mission-control__profile-save" disabled={working} onClick={savePhoto}>Save</button><button type="button" disabled={working} onClick={() => { setFile(null); setStatus('idle'); setMessage(''); }}>Cancel</button></>}
-        </div>
+        {file && <div className="mission-control__profile-actions"><button type="button" className="mission-control__profile-save" disabled={working} onClick={savePhoto}>Save</button><button type="button" disabled={working} onClick={() => { setFile(null); setStatus('idle'); setMessage(''); }}>Cancel</button></div>}
       </div>
       {message && <p role={status === 'error' ? 'alert' : 'status'}>{message}</p>}
     </section>

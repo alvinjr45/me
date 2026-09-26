@@ -33,14 +33,16 @@
 .mission-control__notice h2 { color: #f5f8fc; font-size: 20px; }
 .mission-control__profile { margin-bottom: 20px; padding-bottom: 18px; border-bottom: 1px solid #293948; }
 .mission-control__profile-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
-.mission-control__profile-avatar { display: grid; place-items: center; flex: none; width: 48px; height: 48px; border-radius: 50%; background: #26384a; color: #edf3fa; font: 600 12px var(--font-mono); }
+.mission-control__profile-avatar { display: grid; place-items: center; flex: none; width: 48px; height: 48px; padding: 0; overflow: hidden; border: 2px solid transparent; border-radius: 50%; background: #26384a; color: #edf3fa; cursor: pointer; font: 600 12px var(--font-mono); }
+.mission-control__profile-avatar:hover:not(:disabled) { border-color: var(--color-main); }
+.mission-control__profile-avatar:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
 .mission-control__profile-avatar img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; }
 .mission-control__profile-label { flex: 1; min-width: 100px; }
 .mission-control__profile-label strong { display: block; font-size: 13px; }
 .mission-control__profile-label > span { display: block; margin-top: 4px; color: #a4b8ca; font-size: 11px; }
 .mission-control__profile-actions { display: flex; flex-wrap: wrap; gap: 8px; }
-.mission-control__profile button { min-height: 36px; padding: 7px 12px; border: 1px solid #3b4d60; border-radius: 6px; background: #172331; color: #dbe8f5; font-size: 12px; }
-.mission-control__profile button:hover:not(:disabled) { background: #223449; }
+.mission-control__profile-actions button { min-height: 36px; padding: 7px 12px; border: 1px solid #3b4d60; border-radius: 6px; background: #172331; color: #dbe8f5; font-size: 12px; }
+.mission-control__profile-actions button:hover:not(:disabled) { background: #223449; }
 .mission-control__profile .mission-control__profile-save { background: #fb7f33; border-color: #c96d34; color: #211107; }
 .mission-control__profile > p { margin: 10px 0 0; color: #aec4d7; font-size: 12px; line-height: 1.5; }
 .mission-control__profile > p[role='alert'] { color: #ffb5a4; }
@@ -155,7 +157,7 @@
 }
 
 @media (pointer: coarse) {
-  .mission-control__profile button { min-height: 44px; }
+  .mission-control__profile-actions button { min-height: 44px; }
   .mission-control .admin-page :is(button, input, select), .mission-control .guestbook button { min-height: 44px; }
   .mission-control .admin-page :is(input, select, textarea) { font-size: 16px; }
   .mission-control .admin-page input[type='checkbox'] { min-height: 16px; }

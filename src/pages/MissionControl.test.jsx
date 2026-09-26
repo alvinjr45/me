@@ -149,7 +149,7 @@ test('does not send requests when the backend is not configured', () => {
   delete process.env.REACT_APP_SUPABASE_URL;
   openApp();
   expect(screen.getByRole('button', { name: 'Sign in' })).toBeDisabled();
-  expect(screen.getByRole('status')).toHaveTextContent('Sign-in is unavailable');
+  expect(screen.getByRole('status')).toHaveTextContent('Admin sign-in is unavailable');
   expect(global.fetch).not.toHaveBeenCalled();
 });
 

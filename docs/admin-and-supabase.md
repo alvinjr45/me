@@ -103,7 +103,8 @@ Network panel for the `admin-blog-post` OPTIONS and POST requests.
 - Set the function secret `ADMIN_CORS_ORIGINS` to a comma-separated list of the
   exact allowed site origins (scheme, hostname, and port, without a path or
   trailing slash). Localhost, a LAN IP, and a deployed domain are different
-  origins. Preserve other allowed origins when adding one.
+  origins. Include both `https://ajt3.me` and `https://www.ajt3.me` for the
+  production site, and preserve other allowed origins when adding either one.
 - Confirm the OPTIONS response allows the browser's origin, POST method, and
   `authorization`, `apikey`, and `content-type` headers.
 - A readable 401/403 response indicates rejected access; 404 indicates a missing

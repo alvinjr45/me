@@ -25,3 +25,7 @@
   max-height: none;
   padding: clamp(1rem, 2.5cqw, 1.5rem);
 }
+
+.device-scene--phone .terminal-page .command-terminal__body {
+  font-size: 16px;
+}

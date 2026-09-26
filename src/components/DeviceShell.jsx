@@ -272,31 +272,61 @@ function DeviceWindow({ app, state, isRoute, onClose, onMinimize, onMaximize, on
 }
 
 function GuestAccessDialog({ onDismiss, onLogout }) {
-  const dialogRef = useRef(null);
+  const panelRef = useRef(null);
+  const dismissRef = useRef(onDismiss);
+  dismissRef.current = onDismiss;
 
   useEffect(() => {
-    const dialog = dialogRef.current;
-    dialog.showModal();
-    return () => dialog.close();
+    const panel = panelRef.current;
+    const handleCancel = (event) => {
+      event.preventDefault();
+      dismissRef.current();
+    };
+    panel.addEventListener('cancel', handleCancel);
+    panel.querySelector('button')?.focus();
+    return () => panel.removeEventListener('cancel', handleCancel);
   }, []);
 
+  function handleKeyDown(event) {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      onDismiss();
+      return;
+    }
+
+    if (event.key !== 'Tab') return;
+    const buttons = [...panelRef.current.querySelectorAll('button:not(:disabled)')];
+    const first = buttons[0];
+    const last = buttons[buttons.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last?.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first?.focus();
+    }
+  }
+
   return (
-    <dialog
-      ref={dialogRef}
-      className="device-access-dialog"
-      role="alertdialog"
-      aria-labelledby="device-access-title"
-      aria-describedby="device-access-message"
-      onCancel={(event) => { event.preventDefault(); onDismiss(); }}
-    >
-      <span className="device-access-dialog__icon" aria-hidden="true">!</span>
-      <h2 id="device-access-title">Administrator access required</h2>
-      <p id="device-access-message">You are signed in as Guest. To open Mission Control, you must log out and log in as AJ Thompson, the administrator.</p>
-      <div className="device-access-dialog__actions">
-        <button type="button" onClick={onDismiss} autoFocus>OK</button>
-        <button type="button" onClick={onLogout}>Log out</button>
-      </div>
-    </dialog>
+    <div className="device-access-overlay">
+      <section
+        ref={panelRef}
+        className="device-access-dialog"
+        role="alertdialog"
+        aria-modal="true"
+        aria-labelledby="device-access-title"
+        aria-describedby="device-access-message"
+        onKeyDown={handleKeyDown}
+      >
+        <span className="device-access-dialog__icon" aria-hidden="true">!</span>
+        <h2 id="device-access-title">Administrator access required</h2>
+        <p id="device-access-message">You are signed in as Guest. To open Mission Control, you must log out and log in as AJ Thompson, the administrator.</p>
+        <div className="device-access-dialog__actions">
+          <button type="button" onClick={onDismiss}>OK</button>
+          <button type="button" onClick={onLogout}>Log out</button>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -1045,8 +1075,8 @@ function DeviceShell({ children, home }) {
             </div>
             {(systemState === 'running' || phoneLocked) && <div
               className={`device-screen__session${phoneLocked ? ' device-screen__session--locked' : ''}`}
-              aria-hidden={phoneLocked || buildRedirect ? true : undefined}
-              inert={phoneLocked || buildRedirect ? '' : undefined}
+              aria-hidden={phoneLocked || buildRedirect || guestDenied ? true : undefined}
+              inert={phoneLocked || buildRedirect || guestDenied ? '' : undefined}
             >
             <header className="device-screen__menu">
               <Link to="/" className="device-screen__brand" aria-label="AJ Thompson desktop home" onClick={showDesktop}>A/3</Link>

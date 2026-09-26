@@ -82,7 +82,11 @@ test('starts as Guest even with an old admin password, and blocks Mission Contro
   expect(screen.getByText('Guest')).toBeInTheDocument();
   expect(global.fetch).not.toHaveBeenCalled();
   openMissionControl();
-  expect(screen.getByRole('alertdialog')).toHaveTextContent('you must log out and log in as AJ Thompson');
+  const accessDialog = screen.getByRole('alertdialog');
+  expect(accessDialog).toHaveTextContent('you must log out and log in as AJ Thompson');
+  expect(accessDialog.closest('.device-access-overlay')).toBeInTheDocument();
+  expect(accessDialog.tagName).toBe('SECTION');
+  expect(screen.getByRole('button', { name: 'OK' })).toHaveFocus();
   expect(screen.queryByRole('heading', { name: 'Welcome back.' })).not.toBeInTheDocument();
   expect(global.fetch).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'OK' }));

@@ -42,7 +42,7 @@ beforeEach(() => jest.clearAllMocks());
 test('shows a placeholder, grouped help, and contextual help without running a command', () => {
   const shutdown = jest.fn();
   renderTerminal({ runSystemAction: shutdown });
-  expect(screen.getByPlaceholderText('--help for help')).toHaveValue('');
+  expect(screen.getByPlaceholderText('--help')).toHaveValue('');
   run('--help');
   expect(screen.getByText('Explore')).toBeInTheDocument();
   expect(screen.getByText('Customize')).toBeInTheDocument();

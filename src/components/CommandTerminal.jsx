@@ -361,7 +361,7 @@ function CommandTerminal({ autoFocus = false, onNavigate, showIntro = true, vari
               onSelect={syncCursor}
               onScroll={syncCursor}
               onFocus={syncCursor}
-              placeholder="--help for help"
+              placeholder="--help"
               autoComplete="off"
               autoCapitalize="none"
               spellCheck="false"

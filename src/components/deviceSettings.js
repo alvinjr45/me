@@ -31,6 +31,12 @@ export const appearanceChoices = [
   { key: 'light', label: 'Light' }
 ];
 
+export const deviceViewChoices = [
+  { key: 'auto', label: 'Auto' },
+  { key: 'mobile', label: 'Mobile' },
+  { key: 'desktop', label: 'Desktop' }
+];
+
 export const accentChoices = [
   { key: 'signal', label: 'Signal', main: '#fb7f33', accent: '#33affb' },
   { key: 'ocean', label: 'Ocean', main: '#279bd8', accent: '#65d9cf' },

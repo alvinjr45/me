@@ -7,11 +7,11 @@ export const photoAlbums = [
 ];
 
 export const photos = [
-  { id: 'drake', src: '/images/dogs/drake.jpg', title: 'Drake', album: 'dogs', width: 3024, height: 4032 },
-  { id: 'josh', src: '/images/dogs/josh.jpg', title: 'Josh', album: 'dogs', width: 4284, height: 5712 },
-  { id: 'graduation', src: '/images/IMG_4870.JPG', title: 'A chapter complete', album: 'life', width: 5184, height: 3456 },
-  { id: 'tech-week', src: '/images/tech-week-24.jpg', title: 'IBM Tech 2024', album: 'tech', width: 1290, height: 1233 },
-  { id: 'drone', src: '/images/drone.jpeg', title: 'Ready for takeoff', album: 'tech', width: 1290, height: 1665 }
+  { id: 'drake', src: '/images/dogs/drake.jpg', title: 'Drake', album: 'dogs', width: 3024, height: 4032, isFavorite: false },
+  { id: 'josh', src: '/images/dogs/josh.jpg', title: 'Josh', album: 'dogs', width: 4284, height: 5712, isFavorite: false },
+  { id: 'graduation', src: '/images/IMG_4870.JPG', title: 'A chapter complete', album: 'life', width: 5184, height: 3456, isFavorite: false },
+  { id: 'tech-week', src: '/images/tech-week-24.jpg', title: 'IBM Tech 2024', album: 'tech', width: 1290, height: 1233, isFavorite: false },
+  { id: 'drone', src: '/images/drone.jpeg', title: 'Ready for takeoff', album: 'tech', width: 1290, height: 1665, isFavorite: false }
 ];
 
 export function normalizePhoto(photo) {
@@ -19,7 +19,7 @@ export function normalizePhoto(photo) {
     id: photo.id, src: photo.image_url, title: photo.title, album: photo.album_id,
     caption: photo.caption || '',
     width: photo.width, height: photo.height, sortOrder: photo.sort_order,
-    isPublished: photo.is_published
+    isPublished: photo.is_published, isFavorite: photo.is_favorite
   };
 }
 

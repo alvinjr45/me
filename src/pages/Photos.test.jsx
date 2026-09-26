@@ -3,10 +3,12 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import Photos from './Photos';
 import { DeviceSettingsContext } from '../components/deviceSettings';
 import { getPhotoLibrary } from '../data/photos';
+import { notifyPhotoLibraryChanged, requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 
 jest.mock('../data/photos', () => ({ getPhotoLibrary: jest.fn() }));
+jest.mock('../lib/adminPhotoLibrary', () => ({ notifyPhotoLibraryChanged: jest.fn(), requestPhotoLibrary: jest.fn() }));
 
-const photo = { id: 'uploaded-photo', src: 'https://example.test/photo.jpg', title: 'New memory', album: 'weekends', alt: 'A day outside', caption: 'A good afternoon.', width: 800, height: 600 };
+const photo = { id: 'uploaded-photo', src: 'https://example.test/photo.jpg', title: 'New memory', album: 'weekends', alt: 'A day outside', caption: 'A good afternoon.', width: 800, height: 600, isFavorite: false };
 const album = { id: 'weekends', title: 'Weekends', description: 'Days outside.' };
 const originalProjectUrl = process.env.REACT_APP_SUPABASE_URL;
 
@@ -18,17 +20,41 @@ afterEach(() => {
 beforeEach(() => {
   window.localStorage.clear();
   getPhotoLibrary.mockReset().mockResolvedValue({ photos: [photo], albums: [album] });
+  requestPhotoLibrary.mockReset().mockImplementation(async () => {
+    getPhotoLibrary.mockResolvedValue({ photos: [{ ...photo, isFavorite: true }], albums: [album] });
+    return { photo: { id: photo.id, is_favorite: true } };
+  });
+  notifyPhotoLibraryChanged.mockReset();
 });
 
-test('loads managed photos, captions and albums and favorites new photo IDs', async () => {
+test('loads managed photos, captions and albums without giving guests a favorite control', async () => {
   render(<Photos />);
   fireEvent.click(await screen.findByRole('button', { name: 'Open New memory' }));
   expect(screen.getByText('A good afternoon.')).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Add to favorites' }));
-  expect(JSON.parse(window.localStorage.getItem('ajt3-photo-favorites'))).toEqual(['uploaded-photo']);
+  expect(screen.queryByRole('button', { name: 'Add to favorites' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('button', { name: 'Back' }));
   fireEvent.click(screen.getByRole('button', { name: 'Albums' }));
   expect(screen.getByRole('button', { name: 'Weekends 1 photo' })).toBeInTheDocument();
+});
+
+test('lets the signed-in admin favorite a photo on the server', async () => {
+  render(<DeviceSettingsContext.Provider value={{ adminAccess: { session: { secret: 'admin-test' } } }}><Photos /></DeviceSettingsContext.Provider>);
+  fireEvent.click(await screen.findByRole('button', { name: 'Open New memory' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Add to favorites' }));
+  await waitFor(() => expect(requestPhotoLibrary).toHaveBeenCalledWith('admin-test', {
+    action: 'set_favorite', id: photo.id, is_favorite: true
+  }));
+  expect(await screen.findByRole('button', { name: 'Remove from favorites' })).toBeInTheDocument();
+  expect(notifyPhotoLibraryChanged).toHaveBeenCalledTimes(1);
+  expect(window.localStorage.getItem('ajt3-photo-favorites')).toBeNull();
+});
+
+test('shows server favorites to guests', async () => {
+  getPhotoLibrary.mockResolvedValue({ photos: [{ ...photo, isFavorite: true }], albums: [album] });
+  render(<Photos />);
+  expect(await screen.findByRole('button', { name: 'Open New memory, favorite' })).toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Favorites 1' }));
+  expect(screen.getByRole('button', { name: 'Open New memory, favorite' })).toBeInTheDocument();
 });
 
 test.each([false, true])('restores library scroll and photo focus after closing the viewer (phone: %s)', async (isPhone) => {

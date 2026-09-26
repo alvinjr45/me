@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from 'react';
 import { DeviceSettingsContext } from '../components/deviceSettings';
 import { getPhotoLibrary } from '../data/photos';
 import { getPhotoImageUrl } from '../lib/photoImages';
+import { notifyPhotoLibraryChanged, requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 import './Photos.css';
 
 function PhotoIcon({ name }) {
@@ -15,15 +16,6 @@ function PhotoIcon({ name }) {
     info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7h.01" /></>
   };
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
-}
-
-function readFavorites() {
-  try {
-    const saved = JSON.parse(window.localStorage.getItem('ajt3-photo-favorites'));
-    return Array.isArray(saved) ? saved.filter((id) => typeof id === 'string') : [];
-  } catch {
-    return [];
-  }
 }
 
 function PhotoPreview({ src, width, height, size = 320 }) {
@@ -44,7 +36,9 @@ function PhotoPreview({ src, width, height, size = 320 }) {
 }
 
 function Photos() {
-  const isPhone = useContext(DeviceSettingsContext)?.isPhone;
+  const settings = useContext(DeviceSettingsContext);
+  const isPhone = settings?.isPhone;
+  const adminSecret = settings?.adminAccess?.session?.secret;
   const [library, setLibrary] = useState({ photos: [], albums: [] });
   const { photos, albums: photoAlbums } = library;
   const [libraryStatus, setLibraryStatus] = useState('loading');
@@ -54,7 +48,8 @@ function Photos() {
   const [view, setView] = useState('library');
   const [query, setQuery] = useState('');
   const [size, setSize] = useState('compact');
-  const [favorites, setFavorites] = useState(readFavorites);
+  const [favoriteStatus, setFavoriteStatus] = useState('idle');
+  const [favoriteError, setFavoriteError] = useState('');
   const [selectedId, setSelectedId] = useState(null);
   const [viewerIds, setViewerIds] = useState([]);
   const [showInfo, setShowInfo] = useState(false);
@@ -105,14 +100,6 @@ function Photos() {
     };
   }, [reload]);
 
-  useEffect(() => {
-    try {
-      window.localStorage.setItem('ajt3-photo-favorites', JSON.stringify(favorites));
-    } catch {
-      // Favorites remain usable for this visit when storage is unavailable.
-    }
-  }, [favorites]);
-
   const isViewing = selectedId !== null;
   useEffect(() => {
     if (isViewing) {
@@ -126,9 +113,10 @@ function Photos() {
 
   const album = photoAlbums.find((item) => item.id === collection);
   const title = collection === 'favorites' ? 'Favorites' : album?.title || 'Library';
+  const favorites = photos.filter((photo) => photo.isFavorite);
   const search = query.trim().toLowerCase();
   const visiblePhotos = photos.filter((photo) => {
-    const inCollection = collection === 'library' || (collection === 'favorites' ? favorites.includes(photo.id) : photo.album === collection);
+    const inCollection = collection === 'library' || (collection === 'favorites' ? photo.isFavorite : photo.album === collection);
     const albumTitle = photoAlbums.find((item) => item.id === photo.album)?.title || '';
     return inCollection && `${photo.title} ${albumTitle}`.toLowerCase().includes(search);
   });
@@ -153,9 +141,23 @@ function Photos() {
     const next = selectedIndex + direction;
     if (next >= 0 && next < viewerIds.length) setSelectedId(viewerIds[next]);
   };
-  const toggleFavorite = () => setFavorites((current) => current.includes(selectedId)
-    ? current.filter((id) => id !== selectedId)
-    : [...current, selectedId]);
+  const toggleFavorite = async () => {
+    if (!adminSecret || !selectedPhoto || favoriteStatus === 'saving') return;
+    const isFavorite = !selectedPhoto.isFavorite;
+    setFavoriteStatus('saving');
+    setFavoriteError('');
+    try {
+      const result = await requestPhotoLibrary(adminSecret, { action: 'set_favorite', id: selectedPhoto.id, is_favorite: isFavorite });
+      setLibrary((current) => ({ ...current, photos: current.photos.map((photo) => (
+        photo.id === result.photo.id ? { ...photo, isFavorite: result.photo.is_favorite } : photo
+      )) }));
+      setFavoriteStatus('idle');
+      notifyPhotoLibraryChanged();
+    } catch (error) {
+      setFavoriteStatus('error');
+      setFavoriteError(error.message);
+    }
+  };
 
   return (
     <main className="photos-app">
@@ -205,9 +207,10 @@ function Photos() {
           </div>
           <footer className="photos-viewer__footer">
             <span>{selectedIndex + 1} of {viewerIds.length}</span>
-            <button type="button" className="photos-app__favorite" aria-label={favorites.includes(selectedId) ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={favorites.includes(selectedId)} onClick={toggleFavorite}><PhotoIcon name="heart" /></button>
+            {adminSecret && <button type="button" className="photos-app__favorite" aria-label={selectedPhoto.isFavorite ? 'Remove from favorites' : 'Add to favorites'} aria-pressed={selectedPhoto.isFavorite} disabled={favoriteStatus === 'saving'} onClick={toggleFavorite}><PhotoIcon name="heart" /></button>}
             <span className="photos-viewer__hint">Swipe or use arrow keys</span>
           </footer>
+          {favoriteError && <p className="photos-app__favorite-error" role="alert">{favoriteError}</p>}
         </section>
       ) : (
         <div className="photos-app__browser" ref={isPhone ? scrollRef : undefined}>
@@ -238,7 +241,7 @@ function Photos() {
                 {!albumsView && <div className="photos-app__density" aria-label="Photo size"><button type="button" aria-label="Smaller thumbnails" aria-pressed={size === 'compact'} onClick={() => setSize('compact')}>-</button><PhotoIcon name="library" /><button type="button" aria-label="Larger thumbnails" aria-pressed={size === 'comfortable'} onClick={() => setSize('comfortable')}>+</button></div>}
               </header>
               {visiblePhotos.length === 0 ? (libraryStatus === 'ready' &&
-                <div className="photos-app__empty"><PhotoIcon name={collection === 'favorites' && !search ? 'heart' : 'search'} /><h2>{search ? 'No photos found' : collection === 'favorites' ? 'Your favorites live here' : 'No photos yet'}</h2><p>{search ? 'Try a different name or collection.' : collection === 'favorites' ? 'Open a photo and tap the heart to save it here. Favorites stay in this browser.' : 'New moments will appear here when they are published.'}</p><button type="button" onClick={() => chooseCollection('library')}>View all photos</button></div>
+                <div className="photos-app__empty"><PhotoIcon name={collection === 'favorites' && !search ? 'heart' : 'search'} /><h2>{search ? 'No photos found' : collection === 'favorites' ? 'No favorites yet' : 'No photos yet'}</h2><p>{search ? 'Try a different name or collection.' : collection === 'favorites' ? (adminSecret ? 'Open a photo and tap the heart to add it here.' : 'AJ has not added any favorites yet.') : 'New moments will appear here when they are published.'}</p><button type="button" onClick={() => chooseCollection('library')}>View all photos</button></div>
               ) : albumsView ? (
                 <div className="photos-app__albums">{photoAlbums.map((item) => {
                   const items = visiblePhotos.filter((photo) => photo.album === item.id);
@@ -246,10 +249,10 @@ function Photos() {
                 })}</div>
               ) : (
                 <div className={`photos-app__grid photos-app__grid--${size}`}>
-                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${favorites.includes(photo.id) ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><PhotoPreview src={photo.src} width={photo.width} height={photo.height} />{favorites.includes(photo.id) && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
+                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${photo.isFavorite ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><PhotoPreview src={photo.src} width={photo.width} height={photo.height} />{photo.isFavorite && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
                 </div>
               )}
-              <footer className="photos-app__count" aria-live="polite">{visiblePhotos.length} {visiblePhotos.length === 1 ? 'photo' : 'photos'}<span>{collection === 'favorites' ? 'Saved in this browser' : 'A collection by AJ Thompson'}</span></footer>
+              <footer className="photos-app__count" aria-live="polite">{visiblePhotos.length} {visiblePhotos.length === 1 ? 'photo' : 'photos'}<span>{collection === 'favorites' ? 'Selected by AJ Thompson' : 'A collection by AJ Thompson'}</span></footer>
             </div>
           </div>
         </div>

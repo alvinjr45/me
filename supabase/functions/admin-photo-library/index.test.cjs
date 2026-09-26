@@ -49,7 +49,7 @@ const validPhoto = { action: 'save_photo', id: 'drake', title: 'Drake', album_id
 
 test('requires the admin secret before any database or storage access', async () => {
   const { send, state } = service();
-  for (const action of ['list', 'save_photo', 'save_album', 'save_profile', 'remove_from_album']) assert.equal((await send({ action }, 'wrong')).status, 401);
+  for (const action of ['list', 'save_photo', 'save_album', 'save_profile', 'remove_from_album', 'set_favorite']) assert.equal((await send({ action }, 'wrong')).status, 401);
   assert.equal(state.clients, 0);
   assert.equal(state.writes.length, 0);
 });
@@ -121,6 +121,29 @@ test('rejects incomplete, stale and failed album removals', async () => {
   const removal = { action: 'remove_from_album', id: 'drake', album_id: 'dogs' };
   assert.equal((await service({ missingPhoto: true }).send(removal)).status, 409);
   assert.equal((await service({ failSave: true }).send(removal)).status, 500);
+});
+
+test('updates only the favorite flag for an existing photo', async () => {
+  const { send, state } = service();
+  const result = await send({ action: 'set_favorite', id: 'drake', is_favorite: true });
+  assert.equal(result.status, 200);
+  const { photo } = await result.json();
+  assert.equal(photo.is_favorite, true);
+  assert.equal(state.writes[0].table, 'ajt3_photos');
+  assert.equal(state.writes[0].row.is_favorite, true);
+  assert.deepEqual(Object.keys(state.writes[0].row), ['is_favorite']);
+  assert.deepEqual(state.filters, [['id', 'drake']]);
+});
+
+test('rejects invalid, stale and failed favorite updates', async () => {
+  const invalid = service();
+  for (const fields of [{ is_favorite: true }, { id: 'drake' }, { id: 'drake', is_favorite: 'maybe' }]) {
+    assert.equal((await invalid.send({ action: 'set_favorite', ...fields })).status, 400);
+  }
+  assert.equal(invalid.state.writes.length, 0);
+  const favorite = { action: 'set_favorite', id: 'drake', is_favorite: false };
+  assert.equal((await service({ missingPhoto: true }).send(favorite)).status, 409);
+  assert.equal((await service({ failSave: true }).send(favorite)).status, 500);
 });
 
 test('saves photos without an album while preserving visibility', async () => {

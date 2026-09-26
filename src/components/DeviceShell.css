@@ -1164,33 +1164,32 @@
   .device-window__content h1 { font-size: clamp(2rem, 10cqw, 3.8rem); }
 }
 
-@media (max-width: 1024px), (max-height: 500px) {
-  .device-scene {
+.device-scene.device-scene--phone {
     --device-monitor-width: min(330px, 78vw, 36.5svh);
     --device-phone-viewport-height: 100svh;
     --device-phone-top: max(72px, 12svh, env(safe-area-inset-top, 0px));
     --device-phone-bottom: max(44px, 7svh, env(safe-area-inset-bottom, 0px));
     /* Leave a deliberate scenic frame around the handset on portrait screens. */
-    --device-monitor-height: clamp(420px, 76svh, 690px);
+    --device-monitor-height: clamp(360px, min(76svh, 162vw), 690px);
     --device-offset-y: 0px;
     height: auto;
     min-height: calc(max(100svh, var(--device-monitor-height) + var(--device-phone-top) + var(--device-phone-bottom)) + var(--device-scene-entry-offset, 0px));
     min-height: calc(max(100lvh, var(--device-monitor-height) + var(--device-phone-top) + var(--device-phone-bottom)) + var(--device-scene-entry-offset, 0px));
     padding-top: calc(var(--device-phone-top) + var(--device-scene-entry-offset, 0px));
     align-items: start;
-  }
+}
 
-  @supports (height: 100dvh) {
-    .device-scene {
+@supports (height: 100dvh) {
+  .device-scene.device-scene--phone {
       --device-phone-viewport-height: 100dvh;
       --device-monitor-width: min(330px, 78vw, 36.5dvh);
       --device-phone-top: max(72px, 12dvh, env(safe-area-inset-top, 0px));
       --device-phone-bottom: max(44px, 7dvh, env(safe-area-inset-bottom, 0px));
-      --device-monitor-height: clamp(420px, 76dvh, 690px);
-    }
+      --device-monitor-height: clamp(360px, min(76dvh, 162vw), 690px);
   }
+}
 
-  .device-scene.device-scene--keyboard {
+.device-scene.device-scene--phone.device-scene--keyboard {
     --device-monitor-height: var(--keyboard-monitor-height);
     position: fixed;
     top: var(--keyboard-scene-top);
@@ -1200,7 +1199,7 @@
     min-height: var(--keyboard-scene-height);
   }
 
-  .device-scene--keyboard .device-system-screen--locked {
+.device-scene--phone.device-scene--keyboard .device-system-screen--locked {
     bottom: auto;
     height: var(--keyboard-login-height);
     grid-template-rows: auto;
@@ -1209,16 +1208,16 @@
     overscroll-behavior: contain;
   }
 
-  .device-scene--keyboard .device-system-screen__clock { display: none; }
+.device-scene--phone.device-scene--keyboard .device-system-screen__clock { display: none; }
 
-  .device-scene__ambient { display: none; }
+.device-scene--phone .device-scene__ambient { display: none; }
 
-  .device-scene__monitor {
+.device-scene--phone .device-scene__monitor {
     height: var(--device-monitor-height);
     filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.45));
   }
 
-  .device-scene__bezel {
+.device-scene--phone .device-scene__bezel {
     height: 100%;
     padding: 5px;
     border: 1px solid #565a5e;
@@ -1227,13 +1226,13 @@
     box-shadow: inset 0 0 0 2px #080a0c, inset 0 0 0 4px #2e3338, 0 0 0 1px #000;
   }
 
-  .device-scene__camera,
-  .device-scene__chin,
-  .device-scene__stand,
-  .device-scene__foot,
-  .device-screen__menu { display: none; }
+.device-scene--phone .device-scene__camera,
+.device-scene--phone .device-scene__chin,
+.device-scene--phone .device-scene__stand,
+.device-scene--phone .device-scene__foot,
+.device-scene--phone .device-screen__menu { display: none; }
 
-  .device-screen {
+.device-scene--phone .device-screen {
     --phone-safe-top: 44px;
     --phone-safe-bottom: 36px;
     height: 100%;
@@ -1243,12 +1242,12 @@
     background: #09141e;
   }
 
-  .device-screen__wallpaper { background: #09141e; }
-  .device-screen__wallpaper::after {
+.device-scene--phone .device-screen__wallpaper { background: #09141e; }
+.device-scene--phone .device-screen__wallpaper::after {
     background: linear-gradient(180deg, rgba(3, 10, 16, 0.6), rgba(5, 13, 21, 0.2) 45%, rgba(3, 8, 14, 0.82));
   }
 
-  .device-screen__phone-status {
+.device-scene--phone .device-screen__phone-status {
     position: absolute;
     z-index: 15;
     top: 0;
@@ -1258,45 +1257,79 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 7px 8% 0;
+    padding: 7px 5% 0;
     color: #fff;
-    font-size: 0.85rem;
+    font-size: clamp(0.7rem, 4cqw, 0.85rem);
     font-weight: 700;
   }
 
-  .device-screen__island {
+.device-scene--phone .device-screen__phone-status time {
+    width: 27%;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+.device-scene--phone .device-screen__island {
     position: absolute;
     top: 10px;
     left: 50%;
-    width: 92px;
-    height: 26px;
+    width: min(92px, 31%);
+    height: clamp(22px, 8cqw, 26px);
     border-radius: 99px;
     background: #000;
     box-shadow: inset -16px 0 0 -14px #172f40;
     transform: translateX(-50%);
   }
 
-  .device-screen__phone-signals { flex: none; }
-  .device-screen__phone-signals svg { display: block; width: clamp(60px, 20cqw, 76px); height: 16px; }
+.device-scene--phone .device-screen__phone-signals {
+    width: min(76px, 27%);
+    min-width: 0;
+    display: flex;
+    justify-content: flex-end;
+  }
+.device-scene--phone .device-screen__phone-signals svg { display: block; width: 100%; height: 16px; }
 
-  .device-screen__dock {
+.device-scene--phone .device-screen__dock {
     left: 7%;
     right: 7%;
     bottom: 28px;
-    justify-content: space-around;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 4px;
     padding: 10px 5px;
     transform: none;
   }
 
-  .device-screen__dock-home,
-  .device-screen__dock-divider,
-  .device-screen__dock-app--active::after { display: none; }
-  .device-screen__dock-app .device-app-icon { width: clamp(32px, 11cqw, 44px); height: clamp(32px, 11cqw, 44px); border-radius: 12px; }
-  .device-screen__dock-app { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-  .device-screen__dock-label { display: block; color: #fff; font-size: 0.69rem; line-height: 1; text-shadow: 0 1px 5px #000; }
+.device-scene--phone .device-screen__dock-home,
+.device-scene--phone .device-screen__dock-divider,
+.device-scene--phone .device-screen__dock-app--active::after { display: none; }
+.device-scene--phone .device-screen__dock-app .device-app-icon {
+    width: min(72%, 44px);
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 27%;
+  }
+.device-scene--phone .device-screen__dock-app {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: clamp(5px, 2.5cqw, 10px);
+  }
+.device-scene--phone .device-screen__dock-label {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    color: #fff;
+    font-size: clamp(0.56rem, 3cqw, 0.69rem);
+    line-height: 1;
+    text-overflow: ellipsis;
+    text-shadow: 0 1px 5px #000;
+    white-space: nowrap;
+  }
 
-  .device-window {
+.device-scene--phone .device-window {
     left: 0;
     top: 0;
     width: 100%;
@@ -1308,18 +1341,18 @@
     box-shadow: none;
   }
 
-  .device-window--maximized { left: 0; top: 0; width: 100%; height: 100%; }
+.device-scene--phone .device-window--maximized { left: 0; top: 0; width: 100%; height: 100%; }
 
-  .device-window__titlebar,
-  .device-window__resize { display: none; }
+.device-scene--phone .device-window__titlebar,
+.device-scene--phone .device-window__resize { display: none; }
 
-  .device-screen--app .device-window__content > main {
+.device-scene--phone .device-screen--app .device-window__content > main {
     min-height: 100%;
     padding-top: var(--app-safe-top, var(--phone-safe-top));
     padding-bottom: var(--app-safe-bottom, var(--phone-safe-bottom));
   }
 
-  .device-screen--app .device-screen__phone-status {
+.device-scene--phone .device-screen--app .device-screen__phone-status {
     pointer-events: none;
     background: rgba(8, 12, 18, 0.62);
     -webkit-backdrop-filter: blur(10px);
@@ -1327,7 +1360,7 @@
     text-shadow: 0 1px 3px #0008;
   }
 
-  .device-screen--app::after {
+.device-scene--phone .device-screen--app::after {
     content: '';
     position: absolute;
     z-index: 19;
@@ -1339,9 +1372,9 @@
     mask-image: linear-gradient(transparent, #000 45%);
   }
 
-  .device-screen--app .device-screen__dock { display: none; }
+.device-scene--phone .device-screen--app .device-screen__dock { display: none; }
 
-  .device-screen__home-preview {
+.device-scene--phone .device-screen__home-preview {
     position: absolute;
     inset: 0;
     z-index: 1;
@@ -1349,7 +1382,7 @@
     opacity: 0;
   }
 
-  .device-screen--home-gesture .device-window {
+.device-scene--phone .device-screen--home-gesture .device-window {
     z-index: 10;
     transform-origin: 50% 65%;
     transform: translate3d(0, calc(var(--home-offset, 0px) * -0.45), 0) scale(calc(1 - var(--home-progress, 0) * 0.85));
@@ -1359,19 +1392,19 @@
     will-change: transform, opacity;
   }
 
-  .device-screen--home-gesture .device-screen__home-preview {
+.device-scene--phone .device-screen--home-gesture .device-screen__home-preview {
     opacity: var(--home-progress, 0);
     transform: scale(calc(0.94 + var(--home-progress, 0) * 0.06));
     will-change: transform, opacity;
   }
 
-  .device-screen--app.device-screen--home-gesture .device-screen__dock {
+.device-scene--phone .device-screen--app.device-screen--home-gesture .device-screen__dock {
     display: flex;
     opacity: var(--home-progress, 0);
     pointer-events: none;
   }
 
-  .device-screen__home-indicator {
+.device-scene--phone .device-screen__home-indicator {
     position: absolute;
     z-index: 20;
     left: 50%;
@@ -1385,7 +1418,7 @@
     -webkit-user-select: none;
   }
 
-  .device-screen__home-indicator::after {
+.device-scene--phone .device-screen__home-indicator::after {
     content: '';
     position: absolute;
     left: 50%;
@@ -1398,14 +1431,13 @@
     transform: translateX(-50%);
   }
 
-  .device-screen--home-gesture .device-screen__home-indicator::after {
+.device-scene--phone .device-screen--home-gesture .device-screen__home-indicator::after {
     transform: translate(-50%, calc(var(--home-offset, 0px) * -0.45));
     opacity: calc(1 - var(--home-progress, 0));
-  }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
-  .device-scene {
+  .device-scene.device-scene--phone {
     --device-monitor-width: min(340px, 46vw);
     --device-monitor-height: calc(100svh - 32px);
     --device-phone-top: 16px;
@@ -1415,9 +1447,9 @@
   }
 
   @supports (height: 100dvh) {
-    .device-scene { --device-monitor-height: calc(100dvh - 32px); }
+    .device-scene.device-scene--phone { --device-monitor-height: calc(100dvh - 32px); }
   }
 
-  .device-screen__dock { bottom: 22px; gap: 4px; padding-block: 6px; }
-  .device-screen__dock-app { gap: 6px; }
+  .device-scene--phone .device-screen__dock { bottom: 22px; gap: 4px; padding-block: 6px; }
+  .device-scene--phone .device-screen__dock-app { gap: 6px; }
 }

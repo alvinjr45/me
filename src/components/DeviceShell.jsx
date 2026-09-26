@@ -21,6 +21,7 @@ import {
   accentChoices,
   appearanceChoices,
   backgroundChoices,
+  deviceViewChoices,
   wallpaperChoices,
   wallpaperSpeedChoices
 } from './deviceSettings';
@@ -619,18 +620,21 @@ function DeviceShell({ children, home }) {
   const redirectRef = useRef(null);
   const nextZRef = useRef(10);
   const [now, setNow] = useState(() => new Date());
-  const [isPhone, setIsPhone] = useState(() => window.matchMedia(phoneMediaQuery).matches);
+  const [viewportIsPhone, setViewportIsPhone] = useState(() => window.matchMedia(phoneMediaQuery).matches);
   const [systemPrefersLight, setSystemPrefersLight] = useState(() => window.matchMedia('(prefers-color-scheme: light)').matches);
   const [windows, setWindows] = useState([]);
   const [wallpaper, setWallpaper] = useState(getSavedWallpaper);
   const [background, setBackground] = useState(getRandomBackground);
   const [appearance, setAppearance] = useState(() => getSavedChoice('ajt3-appearance', appearanceChoices, 'system'));
+  const [deviceView, setDeviceView] = useState(() => getSavedChoice('ajt3-device-view', deviceViewChoices, 'auto'));
   const [accent, setAccent] = useState(() => getSavedChoice('ajt3-accent', accentChoices, 'signal'));
   const [wallpaperSpeed, setWallpaperSpeed] = useState(() => getSavedChoice('ajt3-wallpaper-speed', wallpaperSpeedChoices, 'normal'));
   const [wallpaperDim, setWallpaperDim] = useState(() => getSavedNumber('ajt3-wallpaper-dim', 18, 0, 65));
   const [wallpaperIntensity, setWallpaperIntensity] = useState(() => getSavedNumber('ajt3-wallpaper-intensity', 100, 60, 140));
   const [clock24, setClock24] = useState(() => getSavedBoolean('ajt3-clock24', false));
   const [motion, setMotion] = useState(() => getSavedBoolean('ajt3-motion', true));
+  const canChooseDeviceView = !viewportIsPhone;
+  const isPhone = viewportIsPhone || deviceView === 'mobile';
   const [systemState, setSystemState] = useState(() => isPhone ? 'locked' : 'running');
   const [buildRedirect, setBuildRedirect] = useState(null);
   const isHome = pathname === '/';
@@ -672,7 +676,7 @@ function DeviceShell({ children, home }) {
 
   useEffect(() => {
     const media = window.matchMedia(phoneMediaQuery);
-    const update = () => setIsPhone(media.matches);
+    const update = () => setViewportIsPhone(media.matches);
     media.addEventListener('change', update);
     return () => media.removeEventListener('change', update);
   }, []);
@@ -703,6 +707,7 @@ function DeviceShell({ children, home }) {
     try {
       window.localStorage.setItem('ajt3-wallpaper', wallpaper);
       window.localStorage.setItem('ajt3-appearance', appearance);
+      window.localStorage.setItem('ajt3-device-view', deviceView);
       window.localStorage.setItem('ajt3-accent', accent);
       window.localStorage.setItem('ajt3-wallpaper-speed', wallpaperSpeed);
       window.localStorage.setItem('ajt3-wallpaper-dim', String(wallpaperDim));
@@ -712,7 +717,7 @@ function DeviceShell({ children, home }) {
     } catch {
       // Preferences still work for this visit when storage is unavailable.
     }
-  }, [wallpaper, appearance, accent, wallpaperSpeed, wallpaperDim, wallpaperIntensity, clock24, motion]);
+  }, [wallpaper, appearance, deviceView, accent, wallpaperSpeed, wallpaperDim, wallpaperIntensity, clock24, motion]);
 
   useEffect(() => {
     if (!activeKey || isPhone || systemState !== 'running' || (activeKey === 'admin' && !isAdmin)) {
@@ -746,14 +751,11 @@ function DeviceShell({ children, home }) {
 
   useEffect(() => {
     const screen = screenRef.current;
-    if (!screen || !window.ResizeObserver) {
+    if (!screen || !window.ResizeObserver || isPhone) {
       return;
     }
 
     const observer = new ResizeObserver(() => {
-      if (window.matchMedia(phoneMediaQuery).matches) {
-        return;
-      }
       const screenWidth = screen.clientWidth;
       const screenHeight = screen.clientHeight;
       setWindows((current) => current.map((item) => {
@@ -770,7 +772,7 @@ function DeviceShell({ children, home }) {
     });
     observer.observe(screen);
     return () => observer.disconnect();
-  }, []);
+  }, [isPhone]);
 
   const focusWindow = (key) => {
     setWindows((current) => {
@@ -909,6 +911,9 @@ function DeviceShell({ children, home }) {
       setBackground,
       appearance,
       setAppearance,
+      deviceView,
+      setDeviceView,
+      canChooseDeviceView,
       accent,
       setAccent,
       wallpaperSpeed,
@@ -927,7 +932,7 @@ function DeviceShell({ children, home }) {
       adminAccess: { ...adminAccess, logout: () => runSystemAction('logout') },
       runSystemAction
     }}>
-    <div className="device-scene">
+    <div data-testid="device-scene" className={`device-scene device-scene--${isPhone ? 'phone' : 'desktop'}`}>
       <SceneBackground background={background} />
       <div className="device-scene__ambient" aria-hidden="true" />
       <div className="device-scene__monitor">

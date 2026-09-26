@@ -316,6 +316,35 @@ test('allows logging out from Settings and returning as Guest without a password
   expect(global.fetch).not.toHaveBeenCalled();
 });
 
+test('switches between mobile and desktop views from Settings and saves the choice', () => {
+  openDesktop('/settings');
+  fireEvent.click(screen.getByRole('button', { name: 'General' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Mobile' }));
+  expect(screen.getByTestId('device-scene')).toHaveClass('device-scene--phone');
+  expect(window.localStorage.getItem('ajt3-device-view')).toBe('mobile');
+
+  fireEvent.click(screen.getByRole('button', { name: 'General' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Desktop' }));
+  expect(screen.getByTestId('device-scene')).toHaveClass('device-scene--desktop');
+  expect(window.localStorage.getItem('ajt3-device-view')).toBe('desktop');
+});
+
+test('hides the device view setting and enforces mobile on a mobile viewport', () => {
+  window.localStorage.setItem('ajt3-device-view', 'desktop');
+  window.matchMedia.mockImplementation((query) => ({
+    matches: query.includes('max-width'),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn()
+  }));
+
+  openDesktop('/settings');
+  expect(screen.getByTestId('device-scene')).toHaveClass('device-scene--phone');
+  fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
+  fireEvent.click(screen.getByRole('button', { name: 'General' }));
+  expect(screen.queryByRole('group', { name: 'Device view' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Desktop' })).not.toBeInTheDocument();
+});
+
 test('updates the admin profile photo in Mission Control, Settings, and the sign-in screen', async () => {
   const oldCreateURL = URL.createObjectURL;
   const oldRevokeURL = URL.revokeObjectURL;

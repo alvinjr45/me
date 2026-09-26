@@ -87,13 +87,18 @@ and album assignments.
 The public Photos app reads Supabase when it is configured. It uses the original
 static collection only when Supabase is not configured. An empty published
 library stays empty; failures display a retry message instead of restoring
-hidden seed photos. Successful photo/album saves notify open Photos windows;
-other tabs refresh on focus or the storage event.
+hidden seed photos. Favorites are a shared server-side property rather than
+browser storage. Everyone can view AJ's Favorites collection, but only the
+verified admin sees the heart control, and the photo function independently
+checks the admin secret before changing it. Apply
+`supabase/migrations/20260929000000_add_photo_favorites.sql` and redeploy
+`admin-photo-library` before deploying the updated frontend. Successful photo,
+album, and favorite saves notify open Photos windows; other tabs refresh on
+focus or the storage event.
 
 ## Verification
 
-No build, server, migration, or deployment is run by the coding agent. The
-following checks run without starting a server or connecting to production:
+The following checks run without starting a server or connecting to production:
 
 ```sh
 CI=true node node_modules/react-scripts/scripts/test.js --watchAll=false --runInBand src/pages/MissionControl.test.jsx src/pages/Photos.test.jsx
@@ -114,6 +119,8 @@ uploads on the user-managed test deployment:
    Drafts should remain editable, and blog management should still work.
 7. Check desktop resizing and the phone layout, keyboard focus, and saving after
    switching between dashboard sections.
+8. As a guest, confirm favorites are visible but no heart control is available.
+   As the admin, toggle a favorite and confirm it updates in another browser.
 
 ## Main files
 

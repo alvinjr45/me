@@ -9,6 +9,7 @@ import {
   accentChoices,
   appearanceChoices,
   backgroundChoices,
+  deviceViewChoices,
   wallpaperChoices,
   wallpaperSpeedChoices
 } from '../components/deviceSettings';
@@ -47,6 +48,9 @@ function Settings() {
     setBackground,
     appearance,
     setAppearance,
+    deviceView,
+    setDeviceView,
+    canChooseDeviceView,
     accent,
     setAccent,
     wallpaperSpeed,
@@ -198,9 +202,17 @@ function Settings() {
 
       <section className="settings-page__section" aria-labelledby="preferences-title" hidden={activeCategory !== 'system'}>
         <div className="settings-page__section-heading">
-          <h2 id="preferences-title">Date &amp; Time</h2>
+          <h2 id="preferences-title">General</h2>
           <p className="settings-page__background-note">Signed in as {accountName}</p>
         </div>
+        {canChooseDeviceView && <div className="settings-page__preference">
+          <div><strong>Device view</strong><p>Follow the browser size or choose a mobile or desktop emulator.</p></div>
+          <div className="settings-page__segments" role="group" aria-label="Device view">
+            {deviceViewChoices.map((choice) => (
+              <button key={choice.key} type="button" aria-pressed={deviceView === choice.key} onClick={() => setDeviceView(choice.key)}>{choice.label}</button>
+            ))}
+          </div>
+        </div>}
         <div className="settings-page__preference">
           <div><strong>24-hour time</strong><p>Use a 24-hour clock in the menu bar.</p></div>
           <button className="settings-page__switch" type="button" role="switch" aria-label="Use 24-hour clock" aria-checked={clock24} onClick={() => setClock24((current) => !current)}><span /></button>

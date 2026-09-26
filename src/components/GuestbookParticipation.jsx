@@ -60,17 +60,23 @@ export default function GuestbookParticipation({ participant, onContinue, blocke
     <label className="guestbook-messages__join-name" htmlFor="guestbook-display-name">Display name</label>
     <input id="guestbook-display-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={40} required autoComplete="nickname" aria-describedby="guestbook-name-notice" placeholder="What should we call you?" />
     <p id="guestbook-name-notice" className="guestbook-messages__join-hint">Your display name and messages will be public.</p>
-    {published ? <details className="guestbook-messages__terms"><summary>Read the Terms and Conditions</summary><p>{guestbookTerms.content}</p><small>Version: {guestbookTerms.version}</small></details> : <p className="guestbook-messages__terms-pending" role="status">Terms and Conditions are being prepared. Message entry will open once they are published.</p>}
-    <details className="guestbook-messages__terms"><summary>Read the Privacy Policy</summary><p>{privacyPolicy.content}</p><small>Version: {privacyPolicy.version}</small></details>
-    <fieldset className="guestbook-messages__agreements">
-      <legend className="sr-only">Requirements to join</legend>
-      <label className="guestbook-messages__agreement"><input type="checkbox" required checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} /><span>I confirm that I am at least 18 years old.</span></label>
-      <label className="guestbook-messages__agreement"><input type="checkbox" required disabled={!published} checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} /><span>I have read and agree to the Terms and Conditions.</span></label>
-    </fieldset>
-    {sessionReady ? <p className="guestbook-messages__join-hint">Your bot verification is still active.</p> : sitekey ? <>
-      <GuestbookChallenge sitekey={sitekey} onToken={setToken} resetKey={challengeKey} appearance="always" />
-      <p className="guestbook-messages__join-hint" role="status">{token ? 'Bot check complete.' : 'Complete the Cloudflare verification to continue.'}</p>
-    </> : null}
+    <div className="guestbook-messages__policy-links">
+      {published ? <details className="guestbook-messages__terms"><summary>Read the Terms and Conditions</summary><p>{guestbookTerms.content}</p><small>Version: {guestbookTerms.version}</small></details> : <p className="guestbook-messages__terms-pending" role="status">Terms and Conditions are being prepared. Message entry will open once they are published.</p>}
+      <details className="guestbook-messages__terms"><summary>Read the Privacy Policy</summary><p>{privacyPolicy.content}</p><small>Version: {privacyPolicy.version}</small></details>
+    </div>
+    <div className={`guestbook-messages__entry-checks${sessionReady || sitekey ? '' : ' guestbook-messages__entry-checks--requirements-only'}`}>
+      <fieldset className="guestbook-messages__agreements">
+        <legend className="sr-only">Requirements to join</legend>
+        <label className="guestbook-messages__agreement"><input type="checkbox" required checked={ageConfirmed} onChange={(event) => setAgeConfirmed(event.target.checked)} /><span>I confirm that I am at least 18 years old.</span></label>
+        <label className="guestbook-messages__agreement"><input type="checkbox" required disabled={!published} checked={termsAccepted} onChange={(event) => setTermsAccepted(event.target.checked)} /><span>I have read and agree to the Terms and Conditions.</span></label>
+      </fieldset>
+      <div className="guestbook-messages__verification">
+        {sessionReady ? <p className="guestbook-messages__join-hint">Your bot verification is still active.</p> : sitekey ? <>
+          <GuestbookChallenge sitekey={sitekey} onToken={setToken} resetKey={challengeKey} appearance="always" />
+          <p className="guestbook-messages__join-hint" role="status">{token ? 'Bot check complete.' : 'Complete the Cloudflare verification to continue.'}</p>
+        </> : null}
+      </div>
+    </div>
     {blockedMessage && <p role="alert">{blockedMessage}</p>}
     {error && <p role="alert">{error}</p>}
     <button type="submit" disabled={!ready}>{verifying ? 'Verifying...' : 'Continue to messages'}</button>

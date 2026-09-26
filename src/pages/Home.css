@@ -102,13 +102,12 @@
   .desktop-home__app .device-app-icon { width: 44px; height: 44px; }
 }
 
-@media (max-width: 1024px), (max-height: 500px) {
-  .desktop-home { inset: 0; }
+.device-scene--phone .desktop-home { inset: 0; }
 
-  .desktop-home__apps {
+.device-scene--phone .desktop-home__apps {
     --app-columns: 4;
-    --app-row-height: 104px;
-    --app-row-gap: 16px;
+    --app-row-height: 88px;
+    --app-row-gap: 8px;
     top: 82px;
     left: 6%;
     right: 6%;
@@ -122,9 +121,9 @@
     scrollbar-width: none;
   }
 
-  .desktop-home__apps::-webkit-scrollbar { display: none; }
+.device-scene--phone .desktop-home__apps::-webkit-scrollbar { display: none; }
 
-  .desktop-home__page {
+.device-scene--phone .desktop-home__page {
     flex: 0 0 100%;
     min-width: 0;
     display: grid;
@@ -136,25 +135,28 @@
     scroll-snap-stop: always;
   }
 
-  .desktop-home__app {
+.device-scene--phone .desktop-home__app {
     width: auto;
     padding: 0.4rem 0.1rem;
   }
 
-  .desktop-home__app .device-app-icon {
-    width: clamp(44px, 16cqw, 60px);
-    height: clamp(44px, 16cqw, 60px);
-    border-radius: 15px;
+.device-scene--phone .desktop-home__app .device-app-icon {
+    width: min(78%, 60px);
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 25%;
   }
 
-  .desktop-home__app-label {
-    font-size: clamp(0.6rem, 3.4cqw, 0.68rem);
+.device-scene--phone .desktop-home__app-label {
+    max-width: 100%;
+    font-size: clamp(0.56rem, 3.4cqw, 0.68rem);
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .desktop-home__app--admin .desktop-home__app-label { white-space: normal; }
+.device-scene--phone .desktop-home__app--admin .desktop-home__app-label { white-space: normal; }
 
-  .desktop-home__pagination {
+.device-scene--phone .desktop-home__pagination {
     position: absolute;
     bottom: 110px;
     left: 6%;
@@ -163,7 +165,7 @@
     justify-content: center;
   }
 
-  .desktop-home__pagination button {
+.device-scene--phone .desktop-home__pagination button {
     width: 32px;
     height: 44px;
     padding: 0;
@@ -172,7 +174,7 @@
     background: transparent;
   }
 
-  .desktop-home__pagination button::after {
+.device-scene--phone .desktop-home__pagination button::after {
     content: '';
     display: block;
     width: 7px;
@@ -182,14 +184,13 @@
     border-radius: 50%;
   }
 
-  .desktop-home__pagination button[aria-current='page']::after { background: #fff; }
-}
+.device-scene--phone .desktop-home__pagination button[aria-current='page']::after { background: #fff; }
 
 @media (max-width: 360px) {
-  .desktop-home__apps { --app-columns: 3; }
+  .device-scene--phone .desktop-home__apps { --app-columns: 3; }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
-  .desktop-home__apps { top: 60px; }
-  .desktop-home__app .device-app-icon { width: 40px; height: 40px; }
+  .device-scene--phone .desktop-home__apps { top: 60px; }
+  .device-scene--phone .desktop-home__app .device-app-icon { width: 40px; height: 40px; }
 }

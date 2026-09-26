@@ -100,6 +100,23 @@ Deno.serve(async (request) => {
       return respond({ photo: data });
     }
 
+    if (action === 'set_favorite') {
+      let id, isFavorite;
+      try {
+        id = text(value('id'), 100, true);
+        const favorite = value('is_favorite');
+        if (![true, false, 'true', 'false'].includes(favorite)) throw new Error('Choose a favorite status.');
+        isFavorite = favorite === true || favorite === 'true';
+      } catch {
+        return respond({ error: 'Choose a photo and favorite status.' }, 400);
+      }
+      const { data, error } = await client.from('ajt3_photos').update({ is_favorite: isFavorite })
+        .eq('id', id).select('*').maybeSingle();
+      if (error) return respond({ error: 'Unable to update this favorite. Please retry.' }, 500);
+      if (!data) return respond({ error: 'This photo is no longer available. Refresh the library.' }, 409);
+      return respond({ photo: data });
+    }
+
     if (action !== 'save_photo' && action !== 'save_album') return respond({ error: 'Unknown action' }, 400);
 
     let record;

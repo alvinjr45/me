@@ -103,6 +103,7 @@
 .guestbook-messages__join-name { display: block; margin: 8px 0 4px; font-size: 0.8rem; }
 .guestbook-messages__participation > input { display: block; width: 100%; min-height: 44px; padding: 9px 12px; border: 1px solid #62636c; border-radius: 9px; background: #2c2d33; color: #fff; font: inherit; font-size: 1rem; }
 .guestbook-messages__participation .guestbook-messages__join-hint { color: #b5b7c4; font-size: 0.67rem; }
+.guestbook-messages__policy-links, .guestbook-messages__entry-checks, .guestbook-messages__verification { min-width: 0; }
 .guestbook-messages__agreements { min-width: 0; margin: 4px 0; padding: 0; border: 0; }
 .guestbook-messages__agreement { display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 4px 0; font-size: 0.78rem; line-height: 1.45; }
 .guestbook-messages__agreement input { flex: none; width: 18px; height: 18px; margin: 1px 0 0; accent-color: #339cff; }
@@ -153,3 +154,24 @@
   .guestbook-messages__identity button, .guestbook-messages__list-heading button, .guestbook-messages .guestbook-messages__refresh { min-height: 44px; }
   .guestbook-messages__search input, .guestbook-messages__input-row textarea { font-size: 1rem; }
 }
+
+/* Keep the complete entry flow visible inside the phone emulator. */
+.device-scene--phone .guestbook-messages--welcome { overflow: hidden; }
+.device-scene--phone .guestbook-messages--welcome:has(.guestbook-messages__terms[open]),
+.device-scene--phone .guestbook-messages--welcome:has([role='alert']) { overflow-y: auto; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__welcome-header { display: none; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation { padding: 7px 8px; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation h2 { margin-bottom: 2px; font-size: 1rem; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation p { margin: 2px 0 4px; font-size: 0.66rem; line-height: 1.3; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__join-name { margin: 4px 0 2px; font-size: 0.72rem; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation > input { min-height: 40px; padding: 7px 10px; font-size: 0.9rem; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__policy-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; margin: 3px 0; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__terms { margin: 0; padding: 0 6px; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__terms summary { display: flex; align-items: center; min-height: 40px; padding: 5px 0; font-size: 0.66rem; line-height: 1.2; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__entry-checks { display: grid; grid-template-columns: minmax(0, 1fr) 150px; align-items: center; gap: 5px; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__entry-checks--requirements-only { grid-template-columns: 1fr; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__agreements { margin: 0; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__agreement { align-items: flex-start; min-height: 44px; gap: 6px; padding: 3px 0; font-size: 0.66rem; line-height: 1.25; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__agreement input { width: 16px; height: 16px; }
+.device-scene--phone .guestbook-messages--welcome .guestbook__challenge { width: 150px; margin: 0; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation > button { width: 100%; min-height: 44px; margin-top: 2px; padding: 8px 12px; }

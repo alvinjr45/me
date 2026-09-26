@@ -84,58 +84,56 @@
 
 .app-empty { margin: 0; padding: 1.5rem; color: var(--color-muted-strong); line-height: 1.6; }
 
-@media (max-width: 1024px), (max-height: 500px) {
-  .device-screen--app :is(.music-page, .settings-page, .terminal-page, .dogs-app, .blog-page, .calendar-app, .store-page, .mission-control, .guestbook-messages:not(.guestbook-messages--welcome)) {
+.device-scene--phone .device-screen--app :is(.music-page, .settings-page, .terminal-page, .dogs-app, .blog-page, .calendar-app, .store-page, .mission-control, .guestbook-messages:not(.guestbook-messages--welcome)) {
     --app-safe-top: 0px;
     --app-safe-bottom: 0px;
   }
 
   /* Insets belong to the scrolling pane or toolbar, never outside the app. */
-  .device-screen--app :is(.app-scroll, .music-mobile__library, .settings-page__sidebar, .settings-page__content, .guestbook-messages__list, .command-terminal__body) {
+.device-scene--phone .device-screen--app :is(.app-scroll, .music-mobile__library, .settings-page__sidebar, .settings-page__content, .guestbook-messages__list, .command-terminal__body) {
     scroll-padding-block: calc(var(--phone-safe-top) + 8px) calc(var(--phone-safe-bottom) + 8px);
   }
 
-  .device-screen--app .music-mobile__library {
+.device-scene--phone .device-screen--app .music-mobile__library {
     padding-top: calc(1.25rem + var(--phone-safe-top));
     padding-bottom: calc(2.5rem + var(--phone-safe-bottom));
   }
-  .device-screen--app .music-mobile__navigation { padding-top: calc(0.35rem + var(--phone-safe-top)); }
-  .device-screen--app .music-mobile .music-player__preview { padding-bottom: calc(2.5rem + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .music-mobile__navigation { padding-top: calc(0.35rem + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .music-mobile .music-player__preview { padding-bottom: calc(2.5rem + var(--phone-safe-bottom)); }
 
-  .device-screen--app .settings-page__sidebar { padding-top: calc(20px + var(--phone-safe-top)); }
-  .device-screen--app .settings-page__toolbar { padding-top: calc(8px + var(--phone-safe-top)); }
-  .device-screen--app .settings-page__content { padding-bottom: calc(16px + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .settings-page__sidebar { padding-top: calc(20px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .settings-page__toolbar { padding-top: calc(8px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .settings-page__content { padding-bottom: calc(16px + var(--phone-safe-bottom)); }
 
-  .device-screen--app .terminal-page .command-terminal__body {
+.device-scene--phone .device-screen--app .terminal-page .command-terminal__body {
     padding-top: calc(1rem + var(--phone-safe-top));
     padding-bottom: calc(1rem + var(--phone-safe-bottom));
   }
 
-  .device-screen--app .dogs-app__toolbar { padding-top: calc(6px + var(--phone-safe-top)); }
-  .device-screen--app .dogs-app__scroll { padding-bottom: var(--phone-safe-bottom); }
-  .device-screen--app .dogs-app__reader .blog-post-page__article { padding-bottom: calc(28px + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .dogs-app__toolbar { padding-top: calc(6px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .dogs-app__scroll { padding-bottom: var(--phone-safe-bottom); }
+.device-scene--phone .device-screen--app .dogs-app__reader .blog-post-page__article { padding-bottom: calc(28px + var(--phone-safe-bottom)); }
 
-  .device-screen--app .blog-page__list-header { padding-top: calc(16px + var(--phone-safe-top)); }
-  .device-screen--app .blog-page__count { padding-bottom: calc(8px + var(--phone-safe-bottom)); }
-  .device-screen--app .blog-page .blog-post-page.blog-post-page--note > nav.app-toolbar { padding-top: calc(3px + var(--phone-safe-top)); }
-  .device-screen--app .blog-page .blog-post-page.blog-post-page--note .blog-post-page__article { padding-bottom: calc(28px + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .blog-page__list-header { padding-top: calc(16px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .blog-page__count { padding-bottom: calc(8px + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .blog-page .blog-post-page.blog-post-page--note > nav.app-toolbar { padding-top: calc(3px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .blog-page .blog-post-page.blog-post-page--note .blog-post-page__article { padding-bottom: calc(28px + var(--phone-safe-bottom)); }
 
-  .device-screen--app .calendar-toolbar { padding-top: calc(8px + var(--phone-safe-top)); }
-  .device-screen--app .calendar-agenda { padding-bottom: calc(12px + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .calendar-toolbar { padding-top: calc(8px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .calendar-agenda { padding-bottom: calc(12px + var(--phone-safe-bottom)); }
 
-  .device-screen--app .store-sidebar { padding-top: calc(10px + var(--phone-safe-top)); }
-  .device-screen--app .store-layout { padding-bottom: calc(58px + var(--phone-safe-bottom)); }
-  .device-screen--app .store-nav { padding-bottom: calc(4px + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .store-sidebar { padding-top: calc(10px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .store-layout { padding-bottom: calc(58px + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .store-nav { padding-bottom: calc(4px + var(--phone-safe-bottom)); }
 
-  .device-screen--app .mission-control__sidebar { padding-top: calc(8px + var(--phone-safe-top)); }
-  .device-screen--app .mission-control__content { padding-bottom: calc(20px + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .mission-control__sidebar { padding-top: calc(8px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .mission-control__content { padding-bottom: calc(20px + var(--phone-safe-bottom)); }
 
-  .device-screen--app .guestbook-messages__sidebar-header { padding-top: calc(23px + var(--phone-safe-top)); }
-  .device-screen--app .guestbook-messages__list { padding-bottom: var(--phone-safe-bottom); }
-  .device-screen--app .guestbook-messages__chat-header { padding-top: calc(10px + var(--phone-safe-top)); }
-  .device-screen--app .guestbook-messages__composer { padding-bottom: calc(14px + var(--phone-safe-bottom)); }
-  .device-screen--app .guestbook-messages__join-prompt { padding-bottom: calc(16px + var(--phone-safe-bottom)); }
-}
+.device-scene--phone .device-screen--app .guestbook-messages__sidebar-header { padding-top: calc(23px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .guestbook-messages__list { padding-bottom: var(--phone-safe-bottom); }
+.device-scene--phone .device-screen--app .guestbook-messages__chat-header { padding-top: calc(10px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .guestbook-messages__composer { padding-bottom: calc(14px + var(--phone-safe-bottom)); }
+.device-scene--phone .device-screen--app .guestbook-messages__join-prompt { padding-bottom: calc(16px + var(--phone-safe-bottom)); }
 
 .app-view .blog-post-card {
   display: grid;

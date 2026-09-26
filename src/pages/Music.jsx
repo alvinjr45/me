@@ -8,7 +8,7 @@ import { usePhoneBack } from '../components/deviceSettings';
 import musicPlaylists from '../data/musicPlaylists';
 import './Music.css';
 
-function MusicPlaylistPlayer({ playlist, id, titleId, titleRef }) {
+function MusicPlaylistPlayer({ playlist, id, titleId, titleRef, showMore = false }) {
   const playlistUrl = playlist.src.replace('embed.music.apple.com', 'music.apple.com');
 
   return (
@@ -37,6 +37,9 @@ function MusicPlaylistPlayer({ playlist, id, titleId, titleRef }) {
               </li>
             ))}
           </ol>
+          {showMore && playlist.tracks.length === 15 && (
+            <span className="music-player__more">+ more on Apple Music &rarr;</span>
+          )}
         </div>
       </a>
     </aside>
@@ -102,7 +105,8 @@ function Music() {
                 <ArrowBackRounded aria-hidden="true" /> All playlists
               </button>
             </div>
-            <MusicPlaylistPlayer playlist={current} titleId="music-mobile-title" titleRef={mobileTitleRef} />
+            <MusicPlaylistPlayer playlist={current} titleId="music-mobile-title" titleRef={mobileTitleRef}
+              showMore />
           </section>
         )}
       </section>

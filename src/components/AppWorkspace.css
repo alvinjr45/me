@@ -144,7 +144,7 @@
 
 .device-scene--phone .device-screen--app .guestbook-messages__sidebar-header { padding-top: calc(23px + var(--phone-safe-top)); }
 .device-scene--phone .device-screen--app .guestbook-messages__list { padding-bottom: var(--phone-safe-bottom); }
-.device-scene--phone .device-screen--app .guestbook-messages__chat-header { padding-top: calc(10px + var(--phone-safe-top)); }
+.device-scene--phone .device-screen--app .guestbook-messages__chat-header { padding-top: calc(4px + var(--phone-safe-top)); }
 .device-scene--phone .device-screen--app .guestbook-messages__composer { padding-bottom: calc(14px + var(--phone-safe-bottom)); }
 .device-scene--phone .device-screen--app .guestbook-messages__join-prompt { padding-bottom: calc(16px + var(--phone-safe-bottom)); }
 

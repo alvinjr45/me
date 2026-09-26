@@ -92,7 +92,8 @@
 .guestbook-messages__input-row .guestbook-messages__send { display: grid; place-items: center; flex: none; width: 34px; height: 34px; padding: 7px; border: 0; border-radius: 50%; background: #0873e7; }
 .guestbook-messages__send svg { width: 20px; height: 20px; stroke: #fff; stroke-width: 2.5; }
 .guestbook-messages__composer .guestbook__challenge { margin: 4px 0; }
-.guestbook-messages__composer-note { display: flex; justify-content: space-between; gap: 10px; margin-top: 8px; color: #bfc0cb; font-size: 0.64rem; line-height: 1.5; }
+.guestbook-messages__composer-note { display: flex; justify-content: flex-end; gap: 10px; margin-top: 8px; color: #bfc0cb; font-size: 0.64rem; line-height: 1.5; }
+.guestbook-messages__composer-note > span:first-child:not(:last-child) { margin-right: auto; }
 .guestbook-messages__composer-note > span:last-child { flex: none; }
 .guestbook-messages__identity strong { color: #f2f2f7; overflow-wrap: anywhere; }
 .guestbook-messages__admin-label { color: #ff8585; }
@@ -184,3 +185,11 @@
 @container guestbook (min-width: 320px) {
   .device-scene--phone .guestbook-messages--welcome .guestbook__challenge { margin-bottom: 0; transform: none; }
 }
+
+.device-scene--phone .guestbook-messages__chat-header { min-height: 0; gap: 6px; padding-right: 8px; padding-bottom: 4px; padding-left: 8px; }
+.device-scene--phone .guestbook-messages__back { min-width: 28px; min-height: 36px; font-size: 1.4rem; }
+.device-scene--phone .guestbook-messages__group-avatar { width: 28px; height: 28px; }
+.device-scene--phone .guestbook-messages__group-avatar svg { width: 17px; height: 17px; }
+.device-scene--phone .guestbook-messages__chat-title h2 { font-size: 0.78rem; }
+.device-scene--phone .guestbook-messages__chat-title p { margin-top: 1px; font-size: 0.58rem; line-height: 1.2; }
+.device-scene--phone .guestbook-messages .guestbook-messages__refresh { min-height: 36px; padding: 3px 4px; font-size: 0.66rem; }

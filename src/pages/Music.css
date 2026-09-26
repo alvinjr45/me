@@ -396,6 +396,14 @@
 .music-player__track-number,
 .music-player__duration { color: #a8b3c3; font: 0.65rem var(--font-mono); font-variant-numeric: tabular-nums; }
 
+.music-player__more {
+  display: block;
+  min-height: 44px;
+  padding: 0.9rem 0 0;
+  color: var(--color-accent);
+  font: 0.72rem var(--font-mono);
+}
+
 .music-player__note {
   margin: 0;
   padding: 1rem 1.25rem;

@@ -56,7 +56,7 @@ export default function GuestbookParticipation({ participant, onContinue, blocke
 
   return <form className="guestbook-messages__participation" aria-labelledby="guestbook-join-title" onSubmit={continueToMessages}>
     <h2 id="guestbook-join-title" ref={heading} tabIndex={-1}>Before you join</h2>
-    <p>Enter a display name, confirm both requirements, and complete the bot check to open the conversations.</p>
+    <p>Enter a display name and confirm both requirements to open the conversations.</p>
     <label className="guestbook-messages__join-name" htmlFor="guestbook-display-name">Display name</label>
     <input id="guestbook-display-name" value={name} onChange={(event) => setName(event.target.value)} maxLength={40} required autoComplete="nickname" aria-describedby="guestbook-name-notice" placeholder="What should we call you?" />
     <p id="guestbook-name-notice" className="guestbook-messages__join-hint">Your display name and messages will be public.</p>

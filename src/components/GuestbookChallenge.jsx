@@ -21,7 +21,7 @@ function loadTurnstile() {
   return scriptPromise;
 }
 
-export default function GuestbookChallenge({ sitekey, onToken, resetKey, appearance = 'interaction-only' }) {
+export default function GuestbookChallenge({ sitekey, onToken, resetKey, appearance = 'interaction-only', size = 'auto' }) {
   const container = useRef(null);
   const [error, setError] = useState('');
   const [retry, setRetry] = useState(0);
@@ -34,14 +34,15 @@ export default function GuestbookChallenge({ sitekey, onToken, resetKey, appeara
     loadTurnstile().then((loaded) => {
       if (!mounted) return;
       api = loaded;
+      const widgetSize = size === 'auto' ? (container.current.clientWidth < 300 ? 'compact' : 'flexible') : size;
       widget = api.render(container.current, {
-        sitekey, action: 'guestbook', theme: 'dark', appearance, size: container.current.clientWidth < 300 ? 'compact' : 'flexible',
+        sitekey, action: 'guestbook', theme: 'dark', appearance, size: widgetSize,
         callback: (token) => { if (mounted) { onToken(token); setError(''); } },
         'expired-callback': () => { if (mounted) onToken(''); },
         'error-callback': () => { if (mounted) { onToken(''); setError('Bot check failed. Please retry.'); } }
       });
     }).catch(() => { if (mounted) setError('Bot check could not load. Check your connection or content blocker.'); });
     return () => { mounted = false; if (widget !== undefined) api.remove(widget); };
-  }, [sitekey, onToken, resetKey, retry, appearance]);
+  }, [sitekey, onToken, resetKey, retry, appearance, size]);
   return <div className="guestbook__challenge"><div ref={container} />{error && <p role="alert">{error} <button type="button" onClick={() => setRetry((value) => value + 1)}>Retry bot check</button></p>}</div>;
 }

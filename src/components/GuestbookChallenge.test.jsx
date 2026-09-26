@@ -8,14 +8,15 @@ test('expires tokens, resets after each attempt, and removes the widget on unmou
   window.turnstile = { render: jest.fn((element, options) => { callbacks = options; return 'widget'; }), remove: jest.fn() };
   const onToken = jest.fn();
   try {
-    const view = render(<GuestbookChallenge sitekey="test-key" onToken={onToken} resetKey={0} />);
+    const view = render(<GuestbookChallenge sitekey="test-key" onToken={onToken} resetKey={0} size="flexible" />);
     await waitFor(() => expect(window.turnstile.render).toHaveBeenCalledTimes(1));
     expect(callbacks.action).toBe('guestbook');
+    expect(callbacks.size).toBe('flexible');
     act(() => callbacks.callback('token'));
     expect(onToken).toHaveBeenLastCalledWith('token');
     act(() => callbacks['expired-callback']());
     expect(onToken).toHaveBeenLastCalledWith('');
-    view.rerender(<GuestbookChallenge sitekey="test-key" onToken={onToken} resetKey={1} />);
+    view.rerender(<GuestbookChallenge sitekey="test-key" onToken={onToken} resetKey={1} size="flexible" />);
     await waitFor(() => expect(window.turnstile.render).toHaveBeenCalledTimes(2));
     expect(window.turnstile.remove).toHaveBeenCalledTimes(1);
     view.unmount();

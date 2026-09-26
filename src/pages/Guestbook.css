@@ -160,7 +160,7 @@
 .device-scene--phone .guestbook-messages--welcome:has(.guestbook-messages__terms[open]),
 .device-scene--phone .guestbook-messages--welcome:has([role='alert']) { overflow-y: auto; }
 .device-scene--phone .guestbook-messages--welcome .guestbook-messages__welcome-header { display: none; }
-.device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation { padding: 7px 8px; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation { padding: 7px 4px; }
 .device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation h2 { margin-bottom: 2px; font-size: 1rem; }
 .device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation p { margin: 2px 0 4px; font-size: 0.66rem; line-height: 1.3; }
 .device-scene--phone .guestbook-messages--welcome .guestbook-messages__join-name { margin: 4px 0 2px; font-size: 0.72rem; }
@@ -173,6 +173,6 @@
 .device-scene--phone .guestbook-messages--welcome .guestbook-messages__agreements { margin: 0; }
 .device-scene--phone .guestbook-messages--welcome .guestbook-messages__agreement { align-items: flex-start; min-height: 44px; gap: 6px; padding: 3px 0; font-size: 0.66rem; line-height: 1.25; }
 .device-scene--phone .guestbook-messages--welcome .guestbook-messages__agreement input { width: 16px; height: 16px; }
-.device-scene--phone .guestbook-messages--welcome .guestbook-messages__verification { justify-self: center; }
-.device-scene--phone .guestbook-messages--welcome .guestbook__challenge { width: 150px; margin: 0; }
+.device-scene--phone .guestbook-messages--welcome .guestbook-messages__verification { width: 100%; }
+.device-scene--phone .guestbook-messages--welcome .guestbook__challenge { width: 100%; margin: 0; }
 .device-scene--phone .guestbook-messages--welcome .guestbook-messages__participation > button { width: 100%; min-height: 44px; margin-top: 2px; padding: 8px 12px; }

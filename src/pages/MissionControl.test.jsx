@@ -138,10 +138,10 @@ test('keeps access locked on network errors and malformed successful responses',
   global.fetch.mockRejectedValueOnce(new Error('Connection failed'));
   openApp();
   await signIn();
-  expect(await screen.findByRole('alert')).toHaveTextContent('Cannot reach the sign-in service');
+  expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't verify your password because the sign-in service is unavailable");
   global.fetch.mockResolvedValueOnce(response(200, { unexpected: true }));
   await signIn();
-  expect(await screen.findByRole('alert')).toHaveTextContent('Unable to verify your login');
+  expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't complete sign-in");
   expect(screen.queryByRole('heading', { name: 'Posts' })).not.toBeInTheDocument();
 });
 
@@ -154,8 +154,8 @@ test('does not send requests when the backend is not configured', () => {
 });
 
 test.each([
-  [404, 'The sign-in service was not found'],
-  [503, 'The sign-in service is unavailable']
+  [404, 'Admin sign-in is temporarily unavailable'],
+  [503, 'Admin sign-in is temporarily unavailable']
 ])('explains backend status %s without unlocking access', async (status, message) => {
   global.fetch.mockResolvedValueOnce(response(status, { error: 'Unavailable' }));
   openApp();

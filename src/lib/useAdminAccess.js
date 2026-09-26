@@ -19,7 +19,7 @@ export default function useAdminAccess() {
     setError('');
 
     try {
-      if (!serviceUrl) throw new Error('Sign-in is unavailable until the site connection is configured.');
+      if (!serviceUrl) throw new Error('Admin sign-in is unavailable right now. Please try again later.');
       if (!secret) throw new Error('Enter your admin password to continue.');
 
       let response;
@@ -33,13 +33,12 @@ export default function useAdminAccess() {
         });
         payload = await readResponsePayload(response);
       } catch {
-        throw new Error(`Cannot reach the sign-in service. Check your connection. If it continues, confirm admin-blog-post is deployed and ADMIN_CORS_ORIGINS includes ${window.location.origin}. Your password could not be verified.`);
+        throw new Error("We couldn't verify your password because the sign-in service is unavailable. Please try again later.");
       }
       if (controller.signal.aborted) return;
-      if (response.status === 404) throw new Error('The sign-in service was not found. Deploy the admin-blog-post function to the configured Supabase project.');
-      if (response.status >= 500) throw new Error('The sign-in service is unavailable. Check the admin-blog-post function logs and its ADMIN_POST_SECRET configuration.');
+      if (response.status === 404 || response.status >= 500) throw new Error('Admin sign-in is temporarily unavailable. Please try again later.');
       if (response.status === 401 || response.status === 403) throw new Error('That password was not accepted. Please try again.');
-      if (!response.ok || !Array.isArray(payload.data?.posts)) throw new Error('Unable to verify your login. Please try again.');
+      if (!response.ok || !Array.isArray(payload.data?.posts)) throw new Error("We couldn't complete sign-in. Please try again.");
 
       setSession({ secret, posts: payload.data.posts });
       setPassword('');

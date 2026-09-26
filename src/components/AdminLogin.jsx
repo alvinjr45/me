@@ -31,7 +31,7 @@ function AdminLogin({ access }) {
         </button>
         <p className="admin-page__hint">Use your existing admin password. Access is verified before the dashboard opens.</p>
       </section>
-      {!access.isConfigured && <p className="admin-page__message" role="status">Sign-in is unavailable until the site connection is configured.</p>}
+      {!access.isConfigured && <p className="admin-page__message" role="status">Admin sign-in is unavailable right now.</p>}
       {access.error && <p id="mission-control-login-error" className="admin-page__message admin-page__message--error" role="alert">{access.error}</p>}
     </form>
   );

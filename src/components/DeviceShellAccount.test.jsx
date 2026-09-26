@@ -388,8 +388,8 @@ test('explains a network failure and clears credentials when selecting Guest', a
   openDesktop('/admin');
   fireEvent.click(screen.getByRole('button', { name: 'Log out' }));
   enterAdminPassword('test-password');
-  expect(await screen.findByRole('alert')).toHaveTextContent('Cannot reach the sign-in service');
-  expect(screen.getByRole('alert')).toHaveTextContent(window.location.origin);
+  expect(await screen.findByRole('alert')).toHaveTextContent("We couldn't verify your password because the sign-in service is unavailable");
+  expect(screen.getByRole('alert')).not.toHaveTextContent('ADMIN_CORS_ORIGINS');
   expect(screen.queryByRole('heading', { name: 'Welcome back.' })).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole('radio', { name: 'Guest Visitor' }));
   expect(screen.queryByRole('alert')).not.toBeInTheDocument();

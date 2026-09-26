@@ -534,7 +534,7 @@ function SystemScreen({ state, isPhone, time, date, access, profileImage, onGues
             aria-invalid={Boolean(access.error)}
             aria-describedby={access.error ? 'device-login-error' : undefined}
           />
-          {!access.isConfigured && <p role="status">Admin sign-in is unavailable until the site connection is configured.</p>}
+          {!access.isConfigured && <p role="status">Admin sign-in is unavailable right now.</p>}
           {access.error && <p id="device-login-error" role="alert">{access.error}</p>}
         </>}
         <button type="submit" disabled={access.isChecking || (selectedAccount === 'admin' && !access.isConfigured)}>

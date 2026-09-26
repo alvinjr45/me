@@ -108,7 +108,7 @@
 .blog-page .blog-post-page.blog-post-page--note .blog-post-page__excerpt { margin-top: 10px; font-size: 13px; line-height: 1.6; }
 .blog-page .blog-post-page.blog-post-page--note .blog-post-page__image-wrap { aspect-ratio: auto; max-height: none; }
 .blog-page .blog-post-page__image-button { height: auto; }
-.blog-page .blog-post-page__image { height: auto; max-height: 160px; object-fit: contain; }
+.blog-page .blog-post-page__image { height: auto; max-height: none; }
 .blog-page .blog-post-page.blog-post-page--note .blog-post-page__content { padding-top: 18px; }
 .blog-page .blog-post-page.blog-post-page--note .blog-post-page__section h2 { margin-bottom: 8px; font-size: 16px; }
 .blog-page .blog-post-page.blog-post-page--note .blog-post-page__section p,
@@ -117,7 +117,7 @@
 .blog-page .blog-post-page__section p + p { margin-top: 12px; }
 .blog-page .blog-post-page__section li + li { margin-top: 8px; }
 .blog-page .blog-post-page.blog-post-page--note .blog-post-page__media { margin-top: 18px; gap: 12px; }
-.blog-page .blog-post-page__media-item img,
+.blog-page .blog-post-page__media-item img { height: auto; max-height: none; aspect-ratio: auto; }
 .blog-page .blog-post-page__media-item video { height: auto; max-height: 200px; aspect-ratio: auto; object-fit: contain; }
 .blog-page .blog-post-page__image-button--media { aspect-ratio: auto; }
 .blog-page .blog-post-page__media-item figcaption { padding: 8px 10px; font-size: 12px; }

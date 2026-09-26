@@ -109,15 +109,18 @@ function CommandTerminal({ autoFocus = false, onNavigate, showIntro = true, vari
       }
       return;
     }
-    addLine('Start here: ls lists pages. Type a page name to open it.');
-    addLine('Examples: guestbook | posts dogs | listen michael | set theme dark', 'accent');
-    ['Get started', 'Explore', 'Customize', 'Terminal', 'System'].forEach((group) => {
-      addLine(group, 'system');
-      terminalHelp.filter((entry) => entry.group === group).forEach((entry) => {
-        addLine(`${entry.usage}\n  ${entry.description}`);
-      });
-    });
-    addLine('More help: help <command> or <command> --help. Up/Down: history. Tab: complete commands, pages, and settings.', 'muted');
+    addLine('QUICK GUIDE', 'system');
+    addLine('Type a page name to open it, or use ls to browse.', 'muted');
+    addLine('Try: guestbook | posts dogs | set theme dark', 'accent');
+    addLine('EXPLORE', 'system');
+    addLine('ls / open        Find or open pages\nposts / read     Find or open blog posts\nplaylists / listen  Find or play music\nalbums / events  Browse photos or events', 'accent');
+    addLine('CUSTOMIZE', 'system');
+    addLine('get / set        View or change device settings', 'violet');
+    addLine('TERMINAL', 'system');
+    addLine('whoami | pwd | date | history | clear', 'success');
+    addLine('SYSTEM', 'system');
+    addLine('logout | restart | shutdown', 'warning');
+    addLine('Details: help <command> | Complete: Tab | History: Up/Down', 'muted');
   };
 
   const readContent = async (verb, query) => {

@@ -77,6 +77,18 @@
   color: var(--color-accent);
 }
 
+.command-terminal__line--violet {
+  color: #c7a7ff;
+}
+
+.command-terminal__line--success {
+  color: #72ddb0;
+}
+
+.command-terminal__line--warning {
+  color: #ffd166;
+}
+
 .command-terminal__line--error {
   color: #ff9a78;
 }

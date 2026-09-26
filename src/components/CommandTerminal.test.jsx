@@ -39,14 +39,15 @@ function run(command) {
 
 beforeEach(() => jest.clearAllMocks());
 
-test('shows a placeholder, grouped help, and contextual help without running a command', () => {
+test('shows a placeholder, condensed help, and contextual help without running a command', () => {
   const shutdown = jest.fn();
   renderTerminal({ runSystemAction: shutdown });
   expect(screen.getByPlaceholderText('--help')).toHaveValue('');
   run('--help');
-  expect(screen.getByText('Explore')).toBeInTheDocument();
-  expect(screen.getByText('Customize')).toBeInTheDocument();
-  expect(screen.getByText(/Start here: ls lists pages/)).toBeInTheDocument();
+  expect(screen.getByText('EXPLORE')).toBeInTheDocument();
+  expect(screen.getByText('CUSTOMIZE')).toBeInTheDocument();
+  expect(screen.getByText(/Type a page name to open it/)).toBeInTheDocument();
+  expect(screen.getByText(/Details: help <command>/)).toBeInTheDocument();
   run('set --help');
   expect(screen.getByText(/theme: system \| dark \| light/)).toBeInTheDocument();
   run('shutdown --help');

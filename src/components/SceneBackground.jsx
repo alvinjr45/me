@@ -161,11 +161,128 @@ export function SceneLandscape({ background = 'alpine' }) {
   );
 }
 
+export function MobileSceneLandscape({ background = 'alpine' }) {
+  const id = useId();
+  const skyId = `${id}-mobile-sky`;
+  const waterId = `${id}-mobile-water`;
+  const auroraId = `${id}-mobile-aurora`;
+
+  return (
+    <svg className="scene-background__landscape scene-background__landscape--mobile" viewBox="0 0 430 760" preserveAspectRatio="xMidYMid slice" focusable="false">
+      <defs>
+        <linearGradient id={skyId} x2="0" y2="1">
+          <stop stopColor="var(--scene-sky-top)" />
+          <stop offset="0.5" stopColor="var(--scene-sky-middle)" />
+          <stop offset="1" stopColor="var(--scene-sky-bottom)" />
+        </linearGradient>
+        <linearGradient id={waterId} x2="0" y2="1">
+          <stop stopColor="#7fa8b2" />
+          <stop offset="1" stopColor="#173e4d" />
+        </linearGradient>
+        <linearGradient id={auroraId} x2="0.3" y2="1">
+          <stop stopColor="#6ff1c3" stopOpacity="0" />
+          <stop offset="0.55" stopColor="#65e2c0" stopOpacity="0.75" />
+          <stop offset="1" stopColor="#8587e8" stopOpacity="0.04" />
+        </linearGradient>
+      </defs>
+      <path fill={`url(#${skyId})`} d="M0 0h430v760H0z" />
+
+      {background === 'alpine' && <>
+        <circle cx="345" cy="92" r="28" fill="#ffdfb6" />
+        <path d="m0 350 82-185 64 102 78-169 92 168 54-98 60 174v418H0Z" fill="#728f9d" />
+        <path d="m50 236 32-71 30 48-22-8-10-20-12 37Zm132-47 42-91 46 84-34-20-14-34-20 43Z" fill="#d6dfdd" />
+        <path d="m0 395 98-118 92 133 73-104 110 99 57-61v416H0Z" fill="#355c6b" />
+        <path d="M0 455q110-22 217 4t213-2v303H0Z" fill={`url(#${waterId})`} />
+        <path d="M38 525h132m-84 52h225m-158 63h210" stroke="#c8dedb" strokeWidth="3" opacity="0.35" />
+        <path d="M15 570v-92m0 10-38 68h76Zm398 40V493m0 12-42 76h84Z" fill="#173b3e" stroke="#173b3e" strokeWidth="7" />
+      </>}
+
+      {background === 'coast' && <>
+        <circle cx="336" cy="100" r="34" fill="#ffe0ae" />
+        <path d="M0 292q103-19 218 3t212-1v466H0Z" fill="#3b8297" />
+        <path d="M0 430q102-35 218 3t212-1v328H0Z" fill="#246072" />
+        <path d="M0 358q76-42 154 5l54 78-86 83L0 570Z" fill="#68736a" />
+        <path d="m57 355 12-168h39l13 168Z" fill="#e7dcc1" />
+        <path d="M68 230h42v34H68z" fill="#a96050" />
+        <path d="m62 188 27-25 27 25Z" fill="#a96050" />
+        <path d="M73 192h32v20H73z" fill="#ffe2a2" />
+        <path d="M217 378q91-19 213 0M167 468q118-25 263-4M42 638q153-32 331-5" fill="none" stroke="#d7ebe4" strokeWidth="4" opacity="0.6" />
+        <path d="M327 164q-13-14-27 0-13-14-27 0M202 95q-10-11-21 0-10-11-21 0" fill="none" stroke="#3f606b" strokeWidth="4" />
+      </>}
+
+      {background === 'desert' && <>
+        <circle cx="330" cy="122" r="48" fill="#ffc17d" />
+        <path d="M0 397 36 361 65 197h91l28 160 75 24 43-93h80l48 76v396H0Z" fill="#99534d" />
+        <path d="m0 445 96-64 88 90 104-17 67 61 75-47v292H0Z" fill="#c17853" />
+        <path d="M0 581q105-92 223-24t207-19v222H0Z" fill="#74483c" />
+        <path d="M50 633V477m0 68H22v-43m28 78h29v-54m300 122V531m0 54h29v-42" fill="none" stroke="#30423a" strokeWidth="12" strokeLinecap="round" strokeLinejoin="round" />
+        <path d="M78 221h73m-80 22h87m190 5h66" stroke="#e9aa77" strokeWidth="4" opacity="0.55" />
+      </>}
+
+      {background === 'forest' && <>
+        <circle cx="333" cy="90" r="29" fill="#e3e4c8" opacity="0.72" />
+        <path d="M0 350Q108 174 232 329T430 224v536H0Z" fill="#577c76" />
+        <path d="M0 455q102-52 218 0t212-11v316H0Z" fill="#8eaaa0" opacity="0.52" />
+        <path d="M0 590q107-75 225-18t205-42v230H0Z" fill="#2b5147" />
+        {[24, 84, 148, 285, 350, 416].map((x, index) => <g key={x} transform={`translate(${x} ${index % 2 ? 585 : 625}) scale(${index % 2 ? 0.85 : 1.15})`}>
+          <path d="M-4 115h8V0h-8Z" fill="#182e2d" />
+          <path d="M0-54 34 10H20l36 55H31l43 61H-74l43-61h-25l36-55h-14Z" fill="#193a35" />
+        </g>)}
+        <path d="M152 760q20-105 111-118t84-58q50 54-40 92t-52 84Z" fill="#a4b7a9" opacity="0.38" />
+      </>}
+
+      {background === 'city' && <>
+        <circle cx="348" cy="79" r="27" fill="#e4ddc2" />
+        <path d="M0 333h64V215h77v68h72V150h88v155h68v-94h61v549H0Z" fill="#303959" />
+        {[[0, 280, 76], [68, 355, 92], [151, 238, 91], [233, 327, 82], [303, 262, 82], [375, 370, 55]].map(([x, y, width], index) => <g key={x}>
+          <path d={`M${x} 760V${y}h${width}V760Z`} fill={index % 2 ? '#182b39' : '#132433'} />
+          {Array.from({ length: 4 }, (_, row) => Array.from({ length: 2 }, (_, column) => <rect key={`${row}-${column}`} x={x + 13 + column * 27} y={y + 24 + row * 49} width="9" height="17" rx="1" fill={(row + column + index) % 3 ? '#dca36f' : '#6f9dad'} opacity="0.78" />))}
+        </g>)}
+        <path d="M195 150V77m-18 73v-23h36v23M412 370v-56" fill="none" stroke="#77889b" strokeWidth="5" />
+      </>}
+
+      {background === 'winter' && <>
+        <circle cx="338" cy="86" r="31" fill="#edf2f5" />
+        <path d="m0 408 78-268 102 235 81-191 112 229 57-174v521H0Z" fill="#7b9aaf" />
+        <path d="m41 267 37-127 55 126-38-30-18-52-18 62Zm174 23 46-106 54 111-37-29-17-43-23 57Z" fill="#dae7eb" />
+        <path d="M0 508q108-107 225-23t205-13v288H0Z" fill="#bdd3dc" />
+        <path d="M95 760q40-102 175-116t125-68q4 73-107 111T221 760Z" fill="#6b99ae" />
+        {[24, 82, 350, 413].map((x, index) => <g key={x} transform={`translate(${x} ${index % 2 ? 610 : 660})`}>
+          <path d="M-4 83h8V0h-8Z" fill="#244248" />
+          <path d="M0-55 31 0H18l30 47H27l34 47H-61l34-47h-21l30-47h-13Z" fill="#31545a" />
+          <path d="m0-55 14 27-14-8-14 8Zm0 35 25 34-25-11-25 11Z" fill="#e5edef" />
+        </g>)}
+      </>}
+
+      {background === 'aurora' && <>
+        {[[42, 62], [95, 140], [172, 75], [252, 125], [337, 54], [392, 172], [216, 220]].map(([cx, cy]) => <circle key={cx} cx={cx} cy={cy} r="2" fill="#dbf1ee" />)}
+        <path d="M-45 18q112 244 245 81T480 65v234q-138-83-271 31T-45 171Z" fill={`url(#${auroraId})`} />
+        <path d="M-30 181Q109 40 220 204T468 113v166Q342 391 215 282T-30 310Z" fill={`url(#${auroraId})`} opacity="0.68" />
+        <path d="m0 501 68-143 97 151 95-109 99 125 71-151v386H0Z" fill="#263e51" />
+        <path d="M0 585q108-32 220 5t210-2v172H0Z" fill="#265058" />
+        <path d="M58 637q102-26 242 7m-175 62q90-18 184 3" fill="none" stroke="#72c5aa" strokeWidth="5" opacity="0.38" />
+      </>}
+
+      {background === 'garden' && <>
+        <circle cx="335" cy="104" r="35" fill="#ffe8bf" />
+        <path d="M0 380q111-160 221-25t209-54v459H0Z" fill="#7e9f89" />
+        <path d="M0 506q107-96 225-23t205-34v311H0Z" fill="#416f61" />
+        <ellipse cx="231" cy="672" rx="185" ry="95" fill="#78aaa2" />
+        <path d="M107 657q109-183 218 0" fill="none" stroke="#67433c" strokeWidth="20" />
+        <path d="M111 626q105-153 210 0m-172-48v56m52-92v55m54-47v56" fill="none" stroke="#a07059" strokeWidth="8" />
+        <path d="M18 494Q64 246 31 0m21 183 101-96M412 510q-53-277 3-510m-29 171-101-83" fill="none" stroke="#55453e" strokeWidth="18" />
+        {[[24, 44, 58], [76, 80, 51], [126, 102, 40], [403, 42, 66], [352, 91, 53], [302, 115, 34]].map(([cx, cy, r], index) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={r} fill={index % 2 ? '#cf9daa' : '#e6babc'} />)}
+      </>}
+    </svg>
+  );
+}
+
 export function SceneWindow({ background = 'alpine' }) {
   return (
     <span className="scene-background__window">
       <span className="scene-background__window-view">
         <SceneLandscape background={background} />
+        <MobileSceneLandscape background={background} />
         <span className="scene-background__window-bars" />
       </span>
     </span>

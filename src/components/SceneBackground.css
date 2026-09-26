@@ -212,6 +212,8 @@
   height: 100%;
 }
 
+.scene-background__landscape--mobile { display: none; }
+
 .scene-background__window-bars {
   position: absolute;
   inset: 0;
@@ -403,17 +405,27 @@
 @media (max-width: 1024px), (max-height: 500px) {
   .scene-background {
     --scene-bar-width: 3px;
-    --desk-top: calc(var(--device-phone-top) + var(--device-scene-entry-offset, 0px) + var(--device-monitor-height) - 20px);
+    --desk-top: calc(var(--device-phone-top) + var(--device-scene-entry-offset, 0px) + var(--device-monitor-height) - 34px);
+    background:
+      radial-gradient(circle at 14% 16%, color-mix(in srgb, var(--scene-wall-light), white 8%) 0, transparent 34%),
+      var(--scene-wall-texture, repeating-linear-gradient(90deg, transparent 0 119px, #ffffff03 120px, transparent 121px)),
+      linear-gradient(145deg, var(--scene-wall-dark), var(--scene-wall-light) 58%, var(--scene-wall-dark));
   }
 
   .scene-background__window {
-    top: 16px;
-    left: 5%;
-    width: 90%;
-    height: clamp(120px, 24svh, 220px);
-    border-width: 6px;
+    top: 12px;
+    left: 4%;
+    width: 92%;
+    height: calc(var(--desk-top) - 46px);
+    min-height: 300px;
+    border-width: 5px;
     box-shadow: 0 0 0 2px var(--scene-frame-rim), 0 0 0 5px var(--scene-wall-dark), 6px 12px 18px #080e1466;
   }
+
+  .scene-theme--city .scene-background__window { border-width: 2px; }
+
+  .scene-background__landscape:not(.scene-background__landscape--mobile) { display: none; }
+  .scene-background__landscape--mobile { display: block; }
 
   .scene-background__window::after {
     left: -12px;
@@ -422,15 +434,64 @@
     height: 9px;
     border-top-width: 2px;
   }
+
+  .scene-background__desk {
+    box-shadow: 0 -8px 28px #10171988;
+  }
+
+  .scene-background__plant,
+  .scene-background__mug,
+  .scene-background__lantern,
+  .scene-background__desk-lamp { display: block; }
+
+  .scene-background__plant {
+    left: -8px;
+    top: -82px;
+    transform: scale(0.68);
+    transform-origin: bottom left;
+  }
+
+  .scene-background__mug {
+    right: -4px;
+    top: -35px;
+    transform: scale(0.7);
+    transform-origin: bottom right;
+  }
+
+  .scene-background__lantern {
+    left: -2px;
+    top: -56px;
+    transform: scale(0.68);
+    transform-origin: bottom left;
+  }
+
+  .scene-background__desk-lamp {
+    right: -10px;
+    top: -80px;
+    transform: scale(0.68);
+    transform-origin: bottom right;
+  }
+
+  .scene-theme--winter .scene-background__plant,
+  .scene-theme--aurora .scene-background__plant,
+  .scene-theme--city .scene-background__mug { display: none; }
 }
 
 @media (max-height: 500px) and (orientation: landscape) {
+  .scene-background {
+    --desk-top: calc(var(--device-phone-top) + var(--device-scene-entry-offset, 0px) + var(--device-monitor-height) - 22px);
+  }
+
   .scene-background__window {
     top: 8%;
     left: 3%;
-    width: 35%;
+    width: 42%;
     height: auto;
-    aspect-ratio: 16 / 10;
-    max-height: calc(100svh - 120px);
+    min-height: 0;
+    aspect-ratio: 4 / 3;
+    max-height: calc(100svh - 96px);
   }
+
+  .scene-background__plant { left: 3%; }
+  .scene-background__mug { right: 2%; }
 }

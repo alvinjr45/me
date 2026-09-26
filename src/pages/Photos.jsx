@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { DeviceSettingsContext } from '../components/deviceSettings';
 import { getPhotoLibrary } from '../data/photos';
+import { getPhotoImageUrl } from '../lib/photoImages';
 import './Photos.css';
 
 function PhotoIcon({ name }) {
@@ -25,7 +26,7 @@ function readFavorites() {
   }
 }
 
-function PhotoPreview({ src, width, height }) {
+function PhotoPreview({ src, width, height, size = 320 }) {
   const imageRef = useRef(null);
   const [visible, setVisible] = useState(() => typeof IntersectionObserver === 'undefined');
 
@@ -39,7 +40,7 @@ function PhotoPreview({ src, width, height }) {
   }, []);
 
   // Native lazy loading alone retains sources after previews leave the viewport.
-  return <img ref={imageRef} src={visible ? src : undefined} alt="" width={width} height={height} loading="lazy" decoding="async" />;
+  return <img ref={imageRef} src={visible ? getPhotoImageUrl(src, size) : undefined} alt="" width={width} height={height} loading="lazy" decoding="async" />;
 }
 
 function Photos() {
@@ -190,7 +191,7 @@ function Photos() {
               if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) movePhoto(dx < 0 ? 1 : -1);
             }}
           >
-            <img key={selectedPhoto.id} src={selectedPhoto.src} alt="" decoding="async" />
+            <img key={selectedPhoto.id} src={getPhotoImageUrl(selectedPhoto.src, isPhone ? 1600 : 2400)} alt="" decoding="async" />
             <button type="button" className="photos-viewer__previous photos-app__icon-button" aria-label="Previous photo" disabled={selectedIndex === 0} onClick={() => movePhoto(-1)}><PhotoIcon name="back" /></button>
             <button type="button" className="photos-viewer__next photos-app__icon-button" aria-label="Next photo" disabled={selectedIndex === viewerIds.length - 1} onClick={() => movePhoto(1)}><PhotoIcon name="next" /></button>
           </div>
@@ -199,7 +200,7 @@ function Photos() {
           <div className="photos-viewer__filmstrip" aria-label="Browse photos">
             {viewerIds.map((id) => {
               const photo = photos.find((item) => item.id === id);
-              return <button type="button" key={id} aria-label={`View ${photo.title}`} aria-pressed={id === selectedId} onClick={() => setSelectedId(id)}><PhotoPreview src={photo.src} /></button>;
+              return <button type="button" key={id} aria-label={`View ${photo.title}`} aria-pressed={id === selectedId} onClick={() => setSelectedId(id)}><PhotoPreview src={photo.src} size={96} /></button>;
             })}
           </div>
           <footer className="photos-viewer__footer">
@@ -241,7 +242,7 @@ function Photos() {
               ) : albumsView ? (
                 <div className="photos-app__albums">{photoAlbums.map((item) => {
                   const items = visiblePhotos.filter((photo) => photo.album === item.id);
-                  return items.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => { setCollection(item.id); setView('library'); }}><span className="photos-app__album-cover"><PhotoPreview src={items[0].src} /></span><strong>{item.title}</strong><span>{items.length} {items.length === 1 ? 'photo' : 'photos'}</span></button> : null;
+                  return items.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => { setCollection(item.id); setView('library'); }}><span className="photos-app__album-cover"><PhotoPreview src={items[0].src} size={640} /></span><strong>{item.title}</strong><span>{items.length} {items.length === 1 ? 'photo' : 'photos'}</span></button> : null;
                 })}</div>
               ) : (
                 <div className={`photos-app__grid photos-app__grid--${size}`}>

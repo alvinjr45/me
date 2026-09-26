@@ -2,6 +2,11 @@ import React, { useEffect, useRef } from 'react';
 
 const TAU = Math.PI * 2;
 const ECCENTRICITY = 0.035;
+const PLANET_SIZES = [42, 20, 32, 25, 38, 17, 29, 22, 35, 19, 27, 40, 23, 31, 18, 36, 24, 33, 21];
+
+function planetSize(index) {
+  return PLANET_SIZES[index % PLANET_SIZES.length];
+}
 
 function orbitalPoint(radius, meanAnomaly) {
   let angle = meanAnomaly;
@@ -20,7 +25,7 @@ function createOrbits(count) {
   return Array.from({ length: laneCount }, (_, lane) => {
     const remaining = count - start;
     const size = lane === laneCount - 1 ? remaining : Math.min(count <= 8 ? 2 : lane + 3, remaining);
-    const orbit = { start, size, radius: 110 + lane * (250 / Math.max(1, laneCount - 1)) };
+    const orbit = { start, size, radius: 150 + lane * (210 / Math.max(1, laneCount - 1)) };
     start += size;
     return orbit;
   }).filter((orbit) => orbit.size > 0);
@@ -53,9 +58,12 @@ function overlap(a, b) {
 
 // Keep labels clear of every planet, then reserve space for each placed label.
 function positionLabels(points, widths, viewport, previous, selectedIndex) {
-  const clearance = Math.max(12, Math.min(18, Math.min(viewport.width, viewport.height) * 0.025 + 4));
-  const occupied = points.map(({ x, y }) => ({ left: x - clearance, right: x + clearance,
-    top: y - clearance, bottom: y + clearance }));
+  const baseClearance = Math.max(12, Math.min(18, Math.min(viewport.width, viewport.height) * 0.025 + 4));
+  const occupied = points.map(({ x, y, radius }) => {
+    const clearance = Math.max(baseClearance, radius + 7);
+    return { left: x - clearance, right: x + clearance,
+      top: y - clearance, bottom: y + clearance };
+  });
   occupied.push({ left: viewport.width / 2 - 25, right: viewport.width / 2 + 25,
     top: viewport.height / 2 - 25, bottom: viewport.height / 2 + 25 });
   const result = [];
@@ -125,6 +133,7 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
     const paint = (delta) => {
       if (!viewport.width || !viewport.height) return;
       const scale = Math.min(viewport.width, viewport.height) / 800;
+      const planetScale = Math.min(1, Math.max(0.65, Math.min(viewport.width, viewport.height) / 650));
       const previewSize = Math.min(144, Math.max(104, Math.min(viewport.width, viewport.height) * 0.3));
       stage.style.setProperty('--preview-size', `${previewSize}px`);
       const points = [];
@@ -132,13 +141,13 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
         const button = planetRefs.current[index];
         if (!button) return;
         const { radius } = orbitFor(index);
-        // Kepler's third law: outer playlists take longer to circle the star.
-        const period = 85 * (radius / 100) ** 1.5;
+        // Outer playlists still trail the inner ones, but every orbit stays visibly active.
+        const period = 34 * (radius / 100) ** 1.3;
         anomalies[index] = (anomalies[index] + delta * TAU / period) % TAU;
         const point = orbitalPoint(radius, anomalies[index]);
         const x = viewport.width / 2 + point.x * scale;
         const y = viewport.height / 2 + point.y * scale;
-        points.push({ x, y });
+        points.push({ x, y, radius: planetSize(index) * planetScale / 2 });
         button.style.transform = `translate3d(${point.x * scale}px, ${point.y * scale}px, 0) translate(-50%, -50%)`;
         button.style.setProperty('--preview-x', `${Math.max(previewSize / 2 + 8,
           Math.min(viewport.width - previewSize / 2 - 8, x)) - x}px`);
@@ -189,6 +198,8 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
     const resizeObserver = new ResizeObserver(([entry]) => {
       viewport = { width: entry.contentRect.width, height: entry.contentRect.height };
       stage.style.setProperty('--system-size', `${Math.min(viewport.width, viewport.height)}px`);
+      stage.style.setProperty('--planet-scale', Math.min(1,
+        Math.max(0.65, Math.min(viewport.width, viewport.height) / 650)));
       labelPositions = [];
       paint(0);
     });
@@ -229,7 +240,9 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
               aria-label={`Open ${playlist.title} playlist`} aria-pressed={selectedKey === playlist.key}
               aria-controls="music-playlist-player" onClick={() => onSelect(playlist.key)}
               title={playlist.title}
-              style={{ '--planet-color': playlist.color, '--planet-size': `${Math.round(playlist.size * 0.4)}px`,
+              style={{ '--planet-color': playlist.color, '--planet-size': `${planetSize(index)}px`,
+                '--texture-angle': `${18 + (index * 23) % 130}deg`,
+                '--texture-offset': `${(index * 37) % 100}%`,
                 transform: `translate3d(calc(var(--system-size, 400px) * ${point.x / 800}), calc(var(--system-size, 400px) * ${point.y / 800}), 0) translate(-50%, -50%)` }}>
               <span className="music-planet__leader" aria-hidden="true" />
               <span className="music-planet__sphere">

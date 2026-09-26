@@ -1166,12 +1166,12 @@
 
 @media (max-width: 1024px), (max-height: 500px) {
   .device-scene {
-    --device-monitor-width: min(400px, calc(100vw - 40px));
+    --device-monitor-width: min(330px, 78vw, 36.5svh);
     --device-phone-viewport-height: 100svh;
-    --device-phone-top: max(12px, env(safe-area-inset-top, 0px));
-    --device-phone-bottom: max(12px, env(safe-area-inset-bottom, 0px));
-    /* Keep a usable screen on short displays; otherwise fill the visible height. */
-    --device-monitor-height: max(360px, calc(var(--device-phone-viewport-height) - var(--device-phone-top) - var(--device-phone-bottom)));
+    --device-phone-top: max(72px, 12svh, env(safe-area-inset-top, 0px));
+    --device-phone-bottom: max(44px, 7svh, env(safe-area-inset-bottom, 0px));
+    /* Leave a deliberate scenic frame around the handset on portrait screens. */
+    --device-monitor-height: clamp(420px, 76svh, 690px);
     --device-offset-y: 0px;
     height: auto;
     min-height: calc(max(100svh, var(--device-monitor-height) + var(--device-phone-top) + var(--device-phone-bottom)) + var(--device-scene-entry-offset, 0px));
@@ -1181,7 +1181,13 @@
   }
 
   @supports (height: 100dvh) {
-    .device-scene { --device-phone-viewport-height: 100dvh; }
+    .device-scene {
+      --device-phone-viewport-height: 100dvh;
+      --device-monitor-width: min(330px, 78vw, 36.5dvh);
+      --device-phone-top: max(72px, 12dvh, env(safe-area-inset-top, 0px));
+      --device-phone-bottom: max(44px, 7dvh, env(safe-area-inset-bottom, 0px));
+      --device-monitor-height: clamp(420px, 76dvh, 690px);
+    }
   }
 
   .device-scene.device-scene--keyboard {
@@ -1400,9 +1406,16 @@
 
 @media (max-height: 500px) and (orientation: landscape) {
   .device-scene {
-    --device-monitor-width: min(430px, 56vw);
-    --device-offset-x: 18vw;
+    --device-monitor-width: min(340px, 46vw);
+    --device-monitor-height: calc(100svh - 32px);
+    --device-phone-top: 16px;
+    --device-phone-bottom: 16px;
+    --device-offset-x: 23vw;
     --device-offset-y: 0px;
+  }
+
+  @supports (height: 100dvh) {
+    .device-scene { --device-monitor-height: calc(100dvh - 32px); }
   }
 
   .device-screen__dock { bottom: 22px; gap: 4px; padding-block: 6px; }

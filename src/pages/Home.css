@@ -148,10 +148,11 @@
   }
 
   .desktop-home__app-label {
-    font-size: 0.68rem;
-    overflow-wrap: anywhere;
-    white-space: normal;
+    font-size: clamp(0.6rem, 3.4cqw, 0.68rem);
+    white-space: nowrap;
   }
+
+  .desktop-home__app--admin .desktop-home__app-label { white-space: normal; }
 
   .desktop-home__pagination {
     position: absolute;

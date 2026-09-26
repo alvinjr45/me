@@ -161,8 +161,8 @@
   top: 50%;
   display: grid;
   place-items: center;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   padding: 0;
   border: 0;
   border-radius: 50%;
@@ -176,7 +176,7 @@
   left: 50%;
   top: 50%;
   display: block;
-  width: clamp(16px, calc(var(--system-size, 400px) * 0.05), var(--planet-size));
+  width: clamp(14px, calc(var(--planet-size) * var(--planet-scale, 0.65)), var(--planet-size));
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--planet-color);
@@ -192,12 +192,36 @@
   overflow: hidden;
   border-radius: inherit;
   background:
-    radial-gradient(circle at 20% 50%, #ffffff94, #ffffff08 30%, #00000030 58%, #000000ef 100%),
-    linear-gradient(164deg, transparent 15%, #1b233326 40%, #ffffff0c 65%, transparent 85%),
+    radial-gradient(circle at 20% 50%, #ffffffa3, #ffffff08 29%, #00000038 60%, #000000ef 100%),
+    repeating-linear-gradient(var(--texture-angle, 25deg), #ffffff12 0 2px, transparent 2px 7px, #00000018 7px 9px),
     var(--planet-color);
   transform: rotate(var(--light-angle, 0rad));
   box-shadow: inset 0 0 5px #fff2;
   transition: opacity 0.2s ease;
+}
+
+.music-planet__surface::before,
+.music-planet__surface::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.music-planet__surface::before {
+  background:
+    radial-gradient(circle at var(--texture-offset, 28%) 28%, #ffffff38 0 7%, transparent 8%),
+    radial-gradient(ellipse at 68% 62%, #05080c42 0 12%, transparent 13%),
+    radial-gradient(circle at 43% 78%, #ffffff20 0 5%, transparent 6%),
+    radial-gradient(ellipse at 76% 22%, #00000038 0 8%, transparent 9%);
+  mix-blend-mode: soft-light;
+}
+
+.music-planet__surface::after {
+  background: linear-gradient(90deg, transparent 42%, #ffffff22 48%, transparent 55%);
+  opacity: 0.5;
+  transform: rotate(var(--texture-angle, 25deg));
 }
 
 .music-planet__leader {

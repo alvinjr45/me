@@ -137,7 +137,7 @@
   .calendar-sidebar { display: none; }
   .calendar-toolbar { gap: 6px; padding: 8px; }
   .calendar-toolbar__views button { min-width: 44px; padding-inline: 6px; }
-  .calendar-heading { padding: 14px 12px; }
+  .calendar-heading { flex-direction: column; justify-content: center; padding: 14px 12px; text-align: center; }
   .calendar-year { grid-template-columns: repeat(2, minmax(0, 1fr)); padding: 8px 12px 20px; gap: 22px 16px; }
   .calendar-agenda { padding: 12px; }
 }

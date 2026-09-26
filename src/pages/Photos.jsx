@@ -124,6 +124,10 @@ function Photos() {
   const selectedIndex = viewerIds.indexOf(selectedId);
   const selectedAlbum = photoAlbums.find((item) => item.id === selectedPhoto?.album);
   const albumsView = view === 'albums' && collection === 'library';
+  const albumCollections = [
+    { id: 'favorites', title: 'Favorites', photos: visiblePhotos.filter((photo) => photo.isFavorite) },
+    ...photoAlbums.map((item) => ({ ...item, photos: visiblePhotos.filter((photo) => photo.album === item.id) }))
+  ];
 
   const chooseCollection = (id) => {
     setCollection(id);
@@ -222,7 +226,7 @@ function Photos() {
         </section>
       ) : (
         <div className="photos-app__browser" ref={isPhone ? scrollRef : undefined}>
-          <aside className="photos-app__sidebar">
+          {!isPhone && <aside className="photos-app__sidebar">
             <div className="photos-app__identity"><span className="photos-app__monogram">AJ</span><div><strong>Photos</strong><span>A little of my world.</span></div></div>
             <nav className="photos-app__navigation" aria-label="Photo collections">
               <p>Library</p>
@@ -232,7 +236,7 @@ function Photos() {
               {photoAlbums.map((item) => <button type="button" key={item.id} aria-current={collection === item.id ? 'page' : undefined} onClick={() => chooseCollection(item.id)}><PhotoIcon name="album" /><span>{item.title}</span></button>)}
             </nav>
             <p className="photos-app__sidebar-note">THE PERSONAL COLLECTION<br /><span>AJ Thompson</span></p>
-          </aside>
+          </aside>}
           <div className="photos-app__library" ref={libraryRef} tabIndex={-1} aria-label="Photo library">
             <header className="photos-app__toolbar">
               <div className="photos-app__segments" aria-label="Library view">
@@ -251,9 +255,8 @@ function Photos() {
               {visiblePhotos.length === 0 ? (libraryStatus === 'ready' &&
                 <div className="photos-app__empty"><PhotoIcon name={collection === 'favorites' && !search ? 'heart' : 'search'} /><h2>{search ? 'No photos found' : collection === 'favorites' ? 'No favorites yet' : 'No photos yet'}</h2><p>{search ? 'Try a different name or collection.' : collection === 'favorites' ? (adminSecret ? 'Open a photo and tap the heart to add it here.' : 'AJ has not added any favorites yet.') : 'New moments will appear here when they are published.'}</p><button type="button" onClick={() => chooseCollection('library')}>View all photos</button></div>
               ) : albumsView ? (
-                <div className="photos-app__albums">{photoAlbums.map((item) => {
-                  const items = visiblePhotos.filter((photo) => photo.album === item.id);
-                  return items.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => { setCollection(item.id); setView('library'); }}><span className="photos-app__album-cover"><PhotoPreview src={items[0].src} size={640} /></span><strong>{item.title}</strong><span>{items.length} {items.length === 1 ? 'photo' : 'photos'}</span></button> : null;
+                <div className="photos-app__albums">{albumCollections.map((item) => {
+                  return item.photos.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => chooseCollection(item.id)}><span className="photos-app__album-cover"><PhotoPreview src={item.photos[0].src} size={640} /></span><strong>{item.title}</strong><span>{item.photos.length} {item.photos.length === 1 ? 'photo' : 'photos'}</span></button> : null;
                 })}</div>
               ) : (
                 <div className={`photos-app__grid photos-app__grid--${size}`}>

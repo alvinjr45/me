@@ -73,6 +73,19 @@ test('shows server favorites to guests', async () => {
   expect(screen.getByRole('button', { name: 'Open New memory, favorite' })).toBeInTheDocument();
 });
 
+test('replaces the phone collection scroller with a Favorites album', async () => {
+  getPhotoLibrary.mockResolvedValue({ photos: [{ ...photo, isFavorite: true }], albums: [album] });
+  render(<DeviceSettingsContext.Provider value={{ isPhone: true }}><Photos /></DeviceSettingsContext.Provider>);
+
+  expect(await screen.findByRole('heading', { name: 'Library' })).toBeInTheDocument();
+  expect(screen.queryByRole('navigation', { name: 'Photo collections' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Albums' }));
+  fireEvent.click(screen.getByRole('button', { name: 'Favorites 1 photo' }));
+
+  expect(screen.getByRole('heading', { name: 'Favorites' })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: 'Open New memory, favorite' })).toBeInTheDocument();
+});
+
 test.each([false, true])('restores library scroll and photo focus after closing the viewer (phone: %s)', async (isPhone) => {
   const { container } = render(<DeviceSettingsContext.Provider value={{ isPhone }}><Photos /></DeviceSettingsContext.Provider>);
   const photoButton = await screen.findByRole('button', { name: 'Open New memory' });

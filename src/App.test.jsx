@@ -188,6 +188,21 @@ test('opens multiple desktop apps and closes them without changing browser histo
   expectHomeUrl(historyLength);
 });
 
+test('shows a brief launch screen when an app opens', () => {
+  jest.useFakeTimers();
+  try {
+    render(<App />);
+    fireEvent.click(screen.getByRole('link', { name: 'Open Music' }));
+    expect(screen.getByRole('status', { name: 'Opening Music' })).toHaveClass('device-app-launch--music');
+    act(() => jest.advanceTimersByTime(719));
+    expect(screen.getByRole('status', { name: 'Opening Music' })).toBeInTheDocument();
+    act(() => jest.advanceTimersByTime(1));
+    expect(screen.queryByRole('status', { name: 'Opening Music' })).not.toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
 test.each([false, true])('opens a direct article link and keeps subsequent navigation at home (phone: %s)', (isPhone) => {
   window.matchMedia.mockImplementation((query) => ({
     matches: isPhone && query.includes('max-width'),

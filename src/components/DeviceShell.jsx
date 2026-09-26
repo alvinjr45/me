@@ -193,6 +193,18 @@ export function AppIcon({ name }) {
 function DeviceWindow({ app, state, isRoute, onClose, onMinimize, onMaximize, onFocus, onStartInteraction, onMoveInteraction, onEndInteraction, onKeyboardResize, children }) {
   const contentRef = useRef(null);
   const { pathname } = useLocation();
+  const [launching, setLaunching] = useState(app.key !== 'page');
+
+  useEffect(() => {
+    if (app.key === 'page') {
+      setLaunching(false);
+      return undefined;
+    }
+
+    setLaunching(true);
+    const timer = window.setTimeout(() => setLaunching(false), 720);
+    return () => window.clearTimeout(timer);
+  }, [app.key]);
 
   useEffect(() => {
     if (isRoute && app.key === 'blog') {
@@ -232,9 +244,15 @@ function DeviceWindow({ app, state, isRoute, onClose, onMinimize, onMaximize, on
         <span className="device-window__title">{app.label}</span>
         <span className="device-window__path">ajt3://{app.key}</span>
       </header>
-      <div className={`device-window__content${app.key === 'terminal' ? ' device-window__content--terminal' : ''}`} ref={contentRef}>
+      <div className={`device-window__content${app.key === 'terminal' ? ' device-window__content--terminal' : ''}`} ref={contentRef} inert={launching ? '' : undefined}>
         {children}
       </div>
+      {launching && (
+        <div className={`device-app-launch device-app-launch--${app.key}`} role="status" aria-label={`Opening ${app.label}`}>
+          <AppIcon name={app.key} />
+          <strong>{app.label}</strong>
+        </div>
+      )}
       {resizeCorners.map((corner) => (
         <button
           key={corner.key}
@@ -1003,6 +1021,7 @@ function DeviceShell({ children, home }) {
 
             {isPhone ? (!phoneLocked && !isHome && activeApp && !guestDenied ? (
               <DeviceWindow
+                key={activeApp.key}
                 app={activeApp}
                 isRoute
                 onClose={closeWindow}

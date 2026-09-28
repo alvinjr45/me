@@ -90,6 +90,19 @@ test.each([
         expect(page.childElementCount).toBeLessThanOrEqual(12);
       });
       expect(screen.getByRole('button', { name: 'Show app page 2' })).toHaveAttribute('aria-current', 'page');
+      if (linkName === 'Build') {
+        homeScreen.setPointerCapture = jest.fn();
+        const swipe = (from, to) => {
+          fireEvent(homeScreen, Object.assign(new Event('pointerdown', { bubbles: true }), { pointerId: 1, button: 0, clientX: from, clientY: 100 }));
+          fireEvent(homeScreen, Object.assign(new Event('pointermove', { bubbles: true }), { pointerId: 1, button: 0, clientX: to, clientY: 102 }));
+          fireEvent(homeScreen, Object.assign(new Event('pointerup', { bubbles: true }), { pointerId: 1, button: 0, clientX: to, clientY: 102 }));
+        };
+        swipe(120, 220);
+        expect(screen.getByRole('button', { name: 'Show app page 1' })).toHaveAttribute('aria-current', 'page');
+        swipe(220, 120);
+        expect(screen.getByRole('button', { name: 'Show app page 2' })).toHaveAttribute('aria-current', 'page');
+        act(() => jest.advanceTimersByTime(0));
+      }
     }
     fireEvent.click(screen.getByRole('link', { name: linkName }));
     const redirect = screen.getByRole('region', { name: 'Redirecting to ajt3.website...' });

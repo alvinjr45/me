@@ -9,6 +9,8 @@ const MAX_APPS_PER_PAGE = 12;
 function Home() {
   const { isPhone = false, openExternalApp, installedApps = [], installProgress = {}, pendingInstall } = useContext(DeviceSettingsContext) || {};
   const appsRef = useRef(null);
+  const pageSwipeRef = useRef(null);
+  const suppressClickRef = useRef(false);
   const builtInApps = desktopApps.filter((app) => !app.downloadable);
   const downloadedKeys = [...installedApps, ...Object.keys(installProgress), pendingInstall?.key]
     .filter((key, index, keys) => key && keys.indexOf(key) === index);
@@ -69,15 +71,58 @@ function Home() {
     if (isPhone) container.scrollTo({ left: page * container.clientWidth });
   };
 
+  const startPageSwipe = (event) => {
+    if (isPhone || pages.length < 2 || (event.button !== undefined && event.button !== 0)) return;
+    pageSwipeRef.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, moved: false };
+  };
+
+  const movePageSwipe = (event) => {
+    const swipe = pageSwipeRef.current;
+    if (!swipe || event.pointerId !== swipe.pointerId) return;
+    const dx = event.clientX - swipe.x;
+    const dy = event.clientY - swipe.y;
+    if (!swipe.moved && Math.abs(dx) > 8 && Math.abs(dx) > Math.abs(dy)) {
+      swipe.moved = true;
+      event.currentTarget.setPointerCapture?.(event.pointerId);
+    }
+    if (swipe.moved) event.preventDefault();
+  };
+
+  const finishPageSwipe = (event) => {
+    const swipe = pageSwipeRef.current;
+    if (!swipe || event.pointerId !== swipe.pointerId) return;
+    pageSwipeRef.current = null;
+    if (!swipe.moved) return;
+
+    const dx = event.clientX - swipe.x;
+    const dy = event.clientY - swipe.y;
+    const threshold = Math.max(44, (appsRef.current?.clientWidth || 0) * 0.12);
+    suppressClickRef.current = true;
+    window.setTimeout(() => { suppressClickRef.current = false; }, 0);
+    if (Math.abs(dx) >= threshold && Math.abs(dx) > Math.abs(dy)) {
+      showPage(activePage + (dx < 0 ? 1 : -1));
+    }
+  };
+
   return (
     <main className="desktop-home">
       <h1 className={isPhone ? 'sr-only' : 'desktop-home__title'}>
         <span>AJ's </span><span>Personal Site</span>
       </h1>
       <nav
-        className="desktop-home__apps"
+        className={`desktop-home__apps${!isPhone && pages.length > 1 ? ' desktop-home__apps--paged' : ''}`}
         aria-label="Open a site app"
         ref={appsRef}
+        onPointerDown={startPageSwipe}
+        onPointerMove={movePageSwipe}
+        onPointerUp={finishPageSwipe}
+        onPointerCancel={() => { pageSwipeRef.current = null; }}
+        onClickCapture={(event) => {
+          if (!suppressClickRef.current) return;
+          event.preventDefault();
+          event.stopPropagation();
+          suppressClickRef.current = false;
+        }}
         onScroll={(event) => {
           const container = event.currentTarget;
           if (isPhone && container.clientWidth) {

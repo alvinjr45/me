@@ -42,6 +42,8 @@
   gap: clamp(0.8rem, 1.5vw, 1.4rem) clamp(0.7rem, 1.3vw, 1.2rem);
 }
 
+.desktop-home__apps--paged { touch-action: pan-y; user-select: none; }
+
 .desktop-home__app {
   position: relative;
   width: clamp(76px, 7vw, 92px);

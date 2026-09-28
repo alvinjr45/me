@@ -571,7 +571,15 @@
 }
 
 .device-app-icon svg { display: block; width: 100%; height: 100%; }
-.device-app-icon--tech { background: linear-gradient(#39bffa, #0874d9); }
+.device-app-icon img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.device-app-icon--tech { background: #fff; }
+.device-app-icon--tech img { padding: 3px; }
+.device-app-icon--newtrinity { background: #f4f1f2; }
+.device-app-icon--newtrinity img { padding: 4px; }
+.device-app-icon--lattaco { background: #f7f3ea; }
+.device-app-icon--lattaco img { transform: scale(1.05); }
+.device-app-icon--jazzed { background: #fff; }
+.device-app-icon--jazzed img { padding: 3px; }
 .device-app-icon--store { background: linear-gradient(#30b9ff, #0964ee); }
 .device-app-icon--music { background: linear-gradient(#ff6176, #ee254b); }
 .device-app-icon--dogs { background: linear-gradient(#ffbd62, #ee8332); }
@@ -579,6 +587,7 @@
 .device-app-icon--photos { background: linear-gradient(#fff, #fafafa); }
 .device-app-icon--calendar { background: #f8f8f5; }
 .device-app-icon--instagram { background: radial-gradient(circle at 25% 100%, #ffd776, #f77737 25%, #e1306c 50%, #833ab4 80%, #405de6); }
+.device-app-icon--resume { background: linear-gradient(#1686d9, #075c9e); }
 .device-app-icon--guestbook { background: linear-gradient(#65dc68, #20b942); }
 .device-app-icon--terminal { background: linear-gradient(#d1d5dc, #8d95a1); }
 .device-app-icon--settings { background: linear-gradient(#e3e6eb, #a6aeba); }
@@ -1298,6 +1307,19 @@
     background: #09141e;
   }
 
+.device-scene--phone .device-screen,
+.device-scene--phone .device-screen * {
+    scrollbar-width: none;
+    scrollbar-gutter: auto;
+  }
+
+.device-scene--phone .device-screen::-webkit-scrollbar,
+.device-scene--phone .device-screen *::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
 .device-scene--phone .device-screen__wallpaper { background: #09141e; }
 .device-scene--phone .device-screen__wallpaper::after {
     background: linear-gradient(180deg, rgba(3, 10, 16, 0.6), rgba(5, 13, 21, 0.2) 45%, rgba(3, 8, 14, 0.82));
@@ -1431,6 +1453,37 @@
   }
 
 .device-scene--phone .device-screen--app .device-screen__dock { display: none; }
+
+.device-screen--install-home .device-window[aria-label='App Store app'] {
+    pointer-events: none;
+    animation: device-install-go-home 360ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+@keyframes device-install-go-home {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(18%) scale(0.28); }
+}
+
+.device-scene--phone .device-screen--install-home .device-screen__home-preview {
+    animation: device-install-show-home 360ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+.device-scene--phone .device-screen--app.device-screen--install-home .device-screen__dock {
+    display: flex;
+    pointer-events: none;
+    animation: device-install-show-home 360ms cubic-bezier(0.32, 0.72, 0, 1) both;
+  }
+
+@keyframes device-install-show-home {
+  from { opacity: 0; transform: scale(0.94); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.device-screen[data-motion='off'].device-screen--install-home .device-window[aria-label='App Store app'],
+.device-screen[data-motion='off'].device-screen--install-home .device-screen__home-preview,
+.device-screen[data-motion='off'].device-screen--install-home .device-screen__dock {
+  animation-duration: 1ms;
+}
 
 .device-scene--phone .device-screen__home-preview {
     position: absolute;

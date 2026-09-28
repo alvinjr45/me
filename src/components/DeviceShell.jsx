@@ -10,6 +10,7 @@ import Guestbook from '../pages/Guestbook';
 import Terminal from '../pages/Terminal';
 import Settings from '../pages/Settings';
 import AppStore from '../pages/AppStore';
+import LinkedIn from '../pages/LinkedIn';
 import MissionControl from '../pages/MissionControl';
 import SceneBackground from './SceneBackground';
 import PhoneBackGesture from './PhoneBackGesture';
@@ -33,6 +34,7 @@ export const desktopApps = [
   { key: 'guestbook', label: 'Guestbook', path: '/guestbook', description: 'Leave a little note' },
   { key: 'photos', label: 'Photos', path: '/photos', description: 'A little of my world' },
   { key: 'blog', label: 'Blog', path: '/blog', description: 'Notes from the build' },
+  { key: 'resume', label: 'Resume', path: '/resume', description: 'Professional profile & selected work' },
   { key: 'calendar', label: 'Calendar', path: '/calendar', description: 'Make time for what matters', utility: true },
   { key: 'music', label: 'Music', path: '/music', description: 'The current rotation' },
   { key: 'store', label: 'App Store', path: '/app-store', description: 'Find your next favorite', utility: true },
@@ -40,11 +42,14 @@ export const desktopApps = [
   { key: 'instagram', label: 'Instagram', path: 'https://www.instagram.com/_ajt3_/', description: 'Follow me on Instagram', external: true },
   { key: 'terminal', label: 'Terminal', path: '/terminal', description: 'Command center', utility: true },
   { key: 'admin', label: 'Mission Control', path: '/admin', description: 'Behind the scenes', utility: true },
-  { key: 'tech', label: 'Build', path: 'https://ajt3.website', description: 'Projects & experiments', external: true },
+  { key: 'tech', label: 'Build', path: 'https://ajt3.website', description: 'Projects & experiments', external: true, downloadable: true },
+  { key: 'newtrinity', label: 'New Trinity Missionary Baptist Church', path: 'https://www.newtrinity.org', description: 'Faith, community & connection', external: true, downloadable: true },
+  { key: 'lattaco', label: 'Lattaco Welding', path: 'https://lattacowelding.com', description: 'Precision metalwork', external: true, downloadable: true },
+  { key: 'jazzed', label: 'Jazzed To Be Jones', path: 'https://www.jazzedtobejones.com', description: 'Jazmine & Tyler', external: true, downloadable: true },
   { key: 'settings', label: 'Settings', path: '/settings', description: 'Make it yours', utility: true }
 ];
 
-const appPages = { tech: Tech, music: Music, dogs: Dogs, blog: Blog, photos: Photos, calendar: Calendar, guestbook: Guestbook, store: AppStore, admin: MissionControl, terminal: Terminal, settings: Settings };
+const appPages = { tech: Tech, music: Music, dogs: Dogs, blog: Blog, resume: LinkedIn, photos: Photos, calendar: Calendar, guestbook: Guestbook, store: AppStore, admin: MissionControl, terminal: Terminal, settings: Settings };
 const phoneMediaQuery = '(max-width: 1024px), (max-height: 500px)';
 const phoneDockApps = desktopApps.slice(0, 4);
 
@@ -72,17 +77,9 @@ function resizeRect(rect, corner, dx, dy, screenWidth, screenHeight) {
   return { x: left, y: top, width: right - left, height: bottom - top };
 }
 
-function getSavedWallpaper() {
-  try {
-    const saved = window.localStorage.getItem('ajt3-wallpaper');
-    return wallpaperChoices.some((item) => item.key === saved) ? saved : 'aurora';
-  } catch {
-    return 'aurora';
-  }
-}
-
-function getRandomBackground() {
-  return backgroundChoices[Math.floor(Math.random() * backgroundChoices.length)].key;
+function getRandomChoice(choices) {
+  const availableChoices = choices.filter((choice) => choice.key !== 'random');
+  return availableChoices[Math.floor(Math.random() * availableChoices.length)].key;
 }
 
 function getSavedBoolean(key, fallback) {
@@ -114,7 +111,24 @@ function getSavedNumber(key, fallback, min, max) {
   }
 }
 
+const brandedAppIcons = {
+  tech: '/images/app-store/build-logo.png',
+  newtrinity: '/images/app-store/new-trinity-logo.png',
+  lattaco: '/images/app-store/lattaco-logo.png',
+  jazzed: '/images/app-store/jazzed-logo.png'
+};
+
 export function AppIcon({ name }) {
+  const brandedIcon = brandedAppIcons[name];
+
+  if (brandedIcon) {
+    return (
+      <span className={`device-app-icon device-app-icon--${name}`} aria-hidden="true">
+        <img src={brandedIcon} alt="" />
+      </span>
+    );
+  }
+
   const paths = {
     calendar: <>
       <rect width="64" height="64" rx="13" fill="#f8f8f5" />
@@ -127,6 +141,11 @@ export function AppIcon({ name }) {
       <rect x="14" y="14" width="36" height="36" rx="11" stroke="#fff" strokeWidth="3.5" />
       <circle cx="32" cy="32" r="9" stroke="#fff" strokeWidth="3.5" />
       <circle cx="43" cy="21" r="2.5" fill="#fff" />
+    </>,
+    resume: <>
+      <rect x="12" y="12" width="40" height="40" rx="5" fill="#fff" />
+      <circle cx="22" cy="25" r="3" fill="#0a66c2" />
+      <path d="M19 30h6v16h-6Zm10 0h6v2.2c1.3-1.8 3.1-2.8 5.7-2.8 4.5 0 6.3 2.8 6.3 7.8V46h-6v-7.8c0-2.2-.7-3.7-2.8-3.7-2.3 0-3.2 1.6-3.2 4.2V46h-6Z" fill="#0a66c2" />
     </>,
     guestbook: <path d="M32 11C18 11 8 19 8 30c0 7 4 13 11 16l-3 8 12-5 4 1c14 0 24-8 24-20S46 11 32 11Z" fill="#fff" />,
     admin: <>
@@ -148,6 +167,20 @@ export function AppIcon({ name }) {
       <path d="M8 16h48M8 24h48M8 32h48M8 40h48M8 48h48M16 8v48M24 8v48M32 8v48M40 8v48M48 8v48" stroke="#fff" strokeOpacity="0.18" strokeWidth="0.7" />
       <rect x="11" y="11" width="42" height="42" rx="3" stroke="#c6efff" strokeOpacity="0.65" />
       <path d="m22 27-7 7 7 7m20-14 7 7-7 7m-7-20-6 29" stroke="#fff" strokeWidth="3.5" />
+    </>,
+    newtrinity: <>
+      <path d="M32 12v39M22 25h20" stroke="#fff" strokeWidth="4" />
+      <path d="M29 20C20 13 12 15 8 21c7-1 12 2 16 8M35 20c9-7 17-5 21 1-7-1-12 2-16 8M28 38c-7-7-15-7-20-2 7 1 11 5 15 11M36 38c7-7 15-7 20-2-7 1-11 5-15 11" fill="none" stroke="#d8b7da" strokeWidth="2.6" />
+    </>,
+    lattaco: <>
+      <path d="M19 14h26l4 29-9 9H24l-9-9Z" fill="#151515" stroke="#f5cc59" strokeWidth="2.5" />
+      <path d="M23 22h18l-2 13H25Z" fill="#9bc6d2" stroke="#fff" strokeWidth="2" />
+      <path d="m49 17 5-5m-2 12 7-1m-10 8 6 4" stroke="#ffd45c" strokeWidth="2.5" />
+    </>,
+    jazzed: <>
+      <text x="23" y="43" fill="#1f4033" fontFamily="Georgia, serif" fontSize="35">J</text>
+      <text x="33" y="49" fill="#1f4033" fontFamily="Georgia, serif" fontSize="35">T</text>
+      <text x="31" y="44" textAnchor="middle" fill="#6f8b73" fontFamily="Georgia, serif" fontSize="23">&amp;</text>
     </>,
     music: <>
       <path d="M27 20v24.5c0 3.4-3.7 5.7-7.2 5.7-3.1 0-5.3-1.7-5.3-4.3 0-3.1 3.2-5.1 7-5.6l2.5-.4V18.7c0-1.3.5-2 1.8-2.3l19-4.1c1.2-.3 2.2.4 2.2 1.7v26c0 3.5-3.6 5.8-7.2 5.8-3.1 0-5.3-1.7-5.3-4.3 0-3 3.1-5 7-5.6l2.5-.4V20.4l-17 3.7Z" fill="#fff" />
@@ -668,14 +701,18 @@ function DeviceShell({ children, home }) {
   const phoneHistoryRef = useRef({ appKey: null, entries: [], pending: null });
   const phoneBackHandlerRef = useRef(null);
   const systemTimerRef = useRef(null);
+  const installTimersRef = useRef({});
+  const installSequenceTimersRef = useRef([]);
   const redirectRef = useRef(null);
   const nextZRef = useRef(10);
   const [now, setNow] = useState(() => new Date());
   const [viewportIsPhone, setViewportIsPhone] = useState(() => window.matchMedia(phoneMediaQuery).matches);
   const [systemPrefersLight, setSystemPrefersLight] = useState(() => window.matchMedia('(prefers-color-scheme: light)').matches);
   const [windows, setWindows] = useState([]);
-  const [wallpaper, setWallpaper] = useState(getSavedWallpaper);
-  const [background, setBackground] = useState(getRandomBackground);
+  const [wallpaper, setWallpaperChoice] = useState('random');
+  const [resolvedWallpaper, setResolvedWallpaper] = useState(() => getRandomChoice(wallpaperChoices));
+  const [background, setBackgroundChoice] = useState('random');
+  const [resolvedBackground, setResolvedBackground] = useState(() => getRandomChoice(backgroundChoices));
   const [appearance, setAppearance] = useState(() => getSavedChoice('ajt3-appearance', appearanceChoices, 'system'));
   const [deviceView, setDeviceView] = useState(() => getSavedChoice('ajt3-device-view', deviceViewChoices, 'auto'));
   const [accent, setAccent] = useState(() => getSavedChoice('ajt3-accent', accentChoices, 'signal'));
@@ -684,6 +721,9 @@ function DeviceShell({ children, home }) {
   const [wallpaperIntensity, setWallpaperIntensity] = useState(() => getSavedNumber('ajt3-wallpaper-intensity', 100, 60, 140));
   const [clock24, setClock24] = useState(() => getSavedBoolean('ajt3-clock24', false));
   const [motion, setMotion] = useState(() => getSavedBoolean('ajt3-motion', true));
+  const [installedApps, setInstalledApps] = useState([]);
+  const [installProgress, setInstallProgress] = useState({});
+  const [pendingInstall, setPendingInstall] = useState(null);
   const canChooseDeviceView = !viewportIsPhone;
   const isPhone = viewportIsPhone || deviceView === 'mobile';
   const [systemState, setSystemState] = useState(() => isPhone ? 'locked' : 'running');
@@ -698,6 +738,15 @@ function DeviceShell({ children, home }) {
   const guestDenied = systemState === 'running' && activeKey === 'admin' && !isAdmin;
   const phoneLocked = isPhone && systemState === 'locked';
   const currentRoute = `${pathname}${location.search}${location.hash}`;
+  const redirectApp = desktopApps.find((app) => app.path === buildRedirect);
+  const setWallpaper = useCallback((choice) => {
+    setWallpaperChoice(choice);
+    setResolvedWallpaper(choice === 'random' ? getRandomChoice(wallpaperChoices) : choice);
+  }, []);
+  const setBackground = useCallback((choice) => {
+    setBackgroundChoice(choice);
+    setResolvedBackground(choice === 'random' ? getRandomChoice(backgroundChoices) : choice);
+  }, []);
   const [phoneBackState, setPhoneBackState] = useState({ canGoBack: false, label: '' });
   const [localPhoneBack, setLocalPhoneBack] = useState(null);
 
@@ -712,11 +761,41 @@ function DeviceShell({ children, home }) {
     };
   }, []);
 
-  const openBuild = (event) => {
+  const openExternalApp = useCallback((key, event) => {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    const app = desktopApps.find((item) => item.key === key && item.external);
+    if (!app || (app.downloadable && !installedApps.includes(key))) return;
     event.preventDefault();
-    setBuildRedirect(desktopApps.find((app) => app.key === 'tech').path);
-  };
+    setBuildRedirect(app.path);
+  }, [installedApps]);
+
+  const openBuild = useCallback((event) => openExternalApp('tech', event), [openExternalApp]);
+
+  const startInstall = useCallback((key) => {
+    if (!desktopApps.some((app) => app.key === key && app.downloadable) || installedApps.includes(key) || installTimersRef.current[key]) return;
+
+    setInstallProgress((current) => ({ ...current, [key]: 0 }));
+    let progress = 0;
+    installTimersRef.current[key] = window.setInterval(() => {
+      progress = Math.min(progress + 4, 100);
+      if (progress < 100) {
+        setInstallProgress((current) => ({ ...current, [key]: progress }));
+        return;
+      }
+
+      window.clearInterval(installTimersRef.current[key]);
+      delete installTimersRef.current[key];
+      setInstalledApps((currentApps) => {
+        return currentApps.includes(key) ? currentApps : [...currentApps, key];
+      });
+      setPendingInstall(null);
+      setInstallProgress((current) => {
+        const next = { ...current };
+        delete next[key];
+        return next;
+      });
+    }, 200);
+  }, [installedApps]);
 
   useEffect(() => {
     if (!buildRedirect) return;
@@ -781,7 +860,11 @@ function DeviceShell({ children, home }) {
     return () => media.removeEventListener('change', update);
   }, []);
 
-  useEffect(() => () => window.clearTimeout(systemTimerRef.current), []);
+  useEffect(() => () => {
+    window.clearTimeout(systemTimerRef.current);
+    Object.values(installTimersRef.current).forEach((timer) => window.clearInterval(timer));
+    installSequenceTimersRef.current.forEach((timer) => window.clearTimeout(timer));
+  }, []);
 
   useEffect(() => {
     const openTerminal = (event) => {
@@ -798,7 +881,15 @@ function DeviceShell({ children, home }) {
 
   useEffect(() => {
     try {
-      window.localStorage.setItem('ajt3-wallpaper', wallpaper);
+      window.localStorage.removeItem('ajt3-wallpaper');
+      window.localStorage.removeItem('ajt3-background');
+    } catch {
+      // Non-persistent choices still work when storage is unavailable.
+    }
+  }, []);
+
+  useEffect(() => {
+    try {
       window.localStorage.setItem('ajt3-appearance', appearance);
       window.localStorage.setItem('ajt3-device-view', deviceView);
       window.localStorage.setItem('ajt3-accent', accent);
@@ -810,7 +901,7 @@ function DeviceShell({ children, home }) {
     } catch {
       // Preferences still work for this visit when storage is unavailable.
     }
-  }, [wallpaper, appearance, deviceView, accent, wallpaperSpeed, wallpaperDim, wallpaperIntensity, clock24, motion]);
+  }, [appearance, deviceView, accent, wallpaperSpeed, wallpaperDim, wallpaperIntensity, clock24, motion]);
 
   useEffect(() => {
     if (!activeKey || isPhone || systemState !== 'running' || (activeKey === 'admin' && !isAdmin)) {
@@ -950,9 +1041,33 @@ function DeviceShell({ children, home }) {
     } : item));
   };
 
-  const showDesktop = () => {
+  const showDesktop = useCallback(() => {
     setWindows((current) => current.map((item) => ({ ...item, minimized: true })));
-  };
+  }, []);
+
+  const goHome = useCallback(() => {
+    showDesktop();
+    navigate('/');
+  }, [navigate, showDesktop]);
+
+  const installApp = useCallback((key) => {
+    if (!desktopApps.some((app) => app.key === key && app.downloadable) || installedApps.includes(key) || pendingInstall || installTimersRef.current[key]) return;
+
+    const homeDuration = motion ? 360 : 0;
+    const pageDuration = isPhone && motion ? 420 : 0;
+    setPendingInstall({ key, phase: 'closing' });
+
+    const homeTimer = window.setTimeout(() => {
+      goHome();
+      setPendingInstall({ key, phase: 'paging' });
+      const pageTimer = window.setTimeout(() => {
+        setPendingInstall({ key, phase: 'downloading' });
+        startInstall(key);
+      }, pageDuration);
+      installSequenceTimersRef.current.push(pageTimer);
+    }, homeDuration);
+    installSequenceTimersRef.current.push(homeTimer);
+  }, [goHome, installedApps, isPhone, motion, pendingInstall, startInstall]);
 
   const goBackInPhoneApp = () => {
     if (phoneBackHandlerRef.current) {
@@ -1019,9 +1134,16 @@ function DeviceShell({ children, home }) {
     <DeviceSettingsContext.Provider value={{
       isPhone,
       openBuild,
+      openExternalApp,
+      installedApps,
+      installProgress,
+      installApp,
+      pendingInstall,
       wallpaper,
+      resolvedWallpaper,
       setWallpaper,
       background,
+      resolvedBackground,
       setBackground,
       appearance,
       setAppearance,
@@ -1048,14 +1170,14 @@ function DeviceShell({ children, home }) {
       registerPhoneBack
     }}>
     <div data-testid="device-scene" className={`device-scene device-scene--${isPhone ? 'phone' : 'desktop'}`}>
-      <SceneBackground background={background} />
+      <SceneBackground background={resolvedBackground} />
       <div className="device-scene__ambient" aria-hidden="true" />
       <div className="device-scene__monitor">
         <div className="device-scene__bezel">
           <div className="device-scene__camera" aria-hidden="true" />
           <div
-            className={`device-screen${isHome || guestDenied ? '' : ' device-screen--app'}`}
-            data-wallpaper={wallpaper}
+            className={`device-screen${isHome || guestDenied ? '' : ' device-screen--app'}${pendingInstall?.phase === 'closing' ? ' device-screen--install-home' : ''}`}
+            data-wallpaper={resolvedWallpaper}
             data-wallpaper-speed={wallpaperSpeed}
             data-appearance={resolvedAppearance}
             data-motion={motion ? 'on' : 'off'}
@@ -1161,8 +1283,8 @@ function DeviceShell({ children, home }) {
               <Link className={`device-screen__dock-home${isHome ? ' device-screen__dock-home--active' : ''}`} to="/" aria-label="Show desktop" onClick={showDesktop}>A/3</Link>
               <span className="device-screen__dock-divider" aria-hidden="true" />
               </>}
-              {(isPhone ? phoneDockApps : desktopApps).map((app) => (
-                <Link key={app.key} to={app.path} onClick={app.key === 'tech' ? openBuild : undefined} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`device-screen__dock-app${app.utility ? ' device-screen__dock-app--utility' : ''}${windows.some((item) => item.key === app.key) || activeApp?.key === app.key ? ' device-screen__dock-app--active' : ''}`} aria-label={`Open ${app.label}`} title={app.label}>
+              {(isPhone ? phoneDockApps : desktopApps.filter((app) => !app.downloadable || installedApps.includes(app.key))).map((app) => (
+                <Link key={app.key} to={app.path} onClick={app.external ? (event) => openExternalApp(app.key, event) : undefined} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`device-screen__dock-app${app.utility ? ' device-screen__dock-app--utility' : ''}${windows.some((item) => item.key === app.key) || activeApp?.key === app.key ? ' device-screen__dock-app--active' : ''}`} aria-label={`Open ${app.label}`} title={app.label}>
                   <AppIcon name={app.key} />
                   <span className="device-screen__dock-label">{app.label}</span>
                 </Link>
@@ -1196,7 +1318,7 @@ function DeviceShell({ children, home }) {
             />
             {buildRedirect && (
               <section className="device-system-screen device-system-screen--redirect" aria-labelledby="build-redirect-title">
-                <AppIcon name="tech" />
+                <AppIcon name={redirectApp?.key || 'tech'} />
                 <h1 id="build-redirect-title" ref={redirectRef} tabIndex={-1}>
                   Redirecting to <span>{new URL(buildRedirect).hostname}...</span>
                 </h1>

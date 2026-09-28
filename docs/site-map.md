@@ -8,6 +8,7 @@ This site is a single-page React app with route-based views. The router is defin
 | --- | --- | --- | --- |
 | `/` | `src/pages/Home.jsx` | Personal-system home with interactive terminal and four pillars | Static component data and dog incident data |
 | `/tech` | `src/pages/Tech.jsx` | Technical interests, focus areas, and external portfolio link | Static component data |
+| `/resume` | `src/pages/LinkedIn.jsx` | LinkedIn-inspired professional profile and resume | Static component data |
 | `/blog` | `src/pages/Blog.jsx` | Blog index with featured post and archive grid | `src/data/blogPosts.js` or Supabase |
 | `/blog/:slug` | `src/pages/BlogPost.jsx` | Full blog post reader | `src/data/blogPosts.js` or Supabase |
 | `/music` | `src/pages/Music.jsx` | Tabbed Apple Music library for playlists, artists, and songs | Static component data |

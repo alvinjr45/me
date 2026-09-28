@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import PhotoImage from '../components/PhotoImage';
 import { normalizeUploadFile } from '../lib/adminPostEditor';
 import { notifyPhotoLibraryChanged, requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 import AdminPhotoUpload from './AdminPhotoUpload';
@@ -164,14 +165,14 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
               <label>Search photos<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
               <label>Visibility<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All photos</option><option value="published">Published</option><option value="hidden">Hidden</option></select></label>
             </div>
-            <div className="admin-photos__items">{matching.map((item) => <button type="button" key={item.id} disabled={working} aria-pressed={photo?.id === item.id} onClick={() => selectPhoto(item)}><img src={item.image_url} alt="" loading="lazy" /><span><strong>{item.title}</strong><small>{item.is_published ? 'Published' : 'Hidden'} / {library.albums.find((entry) => entry.id === item.album_id)?.title || 'No album'}</small></span></button>)}</div>
+            <div className="admin-photos__items">{matching.map((item) => <button type="button" key={item.id} disabled={working} aria-pressed={photo?.id === item.id} onClick={() => selectPhoto(item)}><PhotoImage src={item.image_url} size={96} alt="" /><span><strong>{item.title}</strong><small>{item.is_published ? 'Published' : 'Hidden'} / {library.albums.find((entry) => entry.id === item.album_id)?.title || 'No album'}</small></span></button>)}</div>
             {!matching.length && <p className="admin-page__hint">{library.photos.length ? 'No matching photos.' : 'Start your library with a photo.'}</p>}
           </section>
           {photo ? (
             <form className="admin-photos__editor" onSubmit={savePhoto}>
               <fieldset disabled={working}>
                 <legend>{photo.id ? 'Edit photo' : 'New photo'}</legend>
-                {(preview || photo.image_url) && <img className="admin-photos__preview" src={preview || photo.image_url} alt="" onLoad={(event) => {
+                {(preview || photo.image_url) && <PhotoImage className="admin-photos__preview" src={preview || photo.image_url} size={1200} initiallyVisible alt="" onLoad={(event) => {
                   if (file) { const { naturalWidth, naturalHeight } = event.currentTarget; setPhoto((current) => ({ ...current, width: naturalWidth, height: naturalHeight })); }
                 }} />}
                 <label>Upload image<input type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif" onChange={chooseFile} /></label>
@@ -203,7 +204,7 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
                 <h2>Photos ({albumPhotos.length})</h2>
                 {!!albumPhotos.length && <p className="admin-page__hint">Removing a photo here keeps it in your library.</p>}
                 <ul>{albumPhotos.map((item) => <li key={item.id}>
-                  <img src={item.image_url} alt="" loading="lazy" />
+                  <PhotoImage src={item.image_url} size={96} alt="" />
                   <div><strong>{item.title}</strong><span>{item.is_published ? 'Published' : 'Hidden'}</span></div>
                   <button type="button" aria-label={`Remove ${item.title} from album`} onClick={() => removeFromAlbum(item)}>Remove</button>
                 </li>)}</ul>

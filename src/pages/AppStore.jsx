@@ -1,25 +1,36 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
+import { DeviceSettingsContext } from '../components/deviceSettings';
 import './AppStore.css';
 
 const catalog = [
-  { id: 'orbit', name: 'Orbit', subtitle: 'A little space to focus.', category: 'Productivity', rating: '4.9', reviews: '2.4K', color: 'orange', glyph: 'orbit', description: 'Find your flow with thoughtful focus sessions, a calmer task list, and a daily rhythm that leaves room to breathe.', features: ['Focus on one thing at a time', 'Build a rhythm that works for you', 'See the progress behind your projects'] },
-  { id: 'form', name: 'Form', subtitle: 'Big ideas start here.', category: 'Creativity', rating: '4.8', reviews: '1.8K', color: 'purple', glyph: 'form', description: 'A playful canvas for your next big idea. Bring sketches, colors, and inspiration together in one beautifully simple workspace.', features: ['An open canvas for every idea', 'Collect your favorite colors', 'Turn rough sketches into something new'] },
-  { id: 'wave', name: 'Wave', subtitle: 'Soundtrack your day.', category: 'Music', rating: '4.9', reviews: '3.1K', color: 'pink', glyph: 'wave', description: 'Set the mood for whatever comes next. Explore a world of ambient sound, build your own mix, and give every moment its own soundtrack.', features: ['Find a sound for every mood', 'Mix your own atmosphere', 'Keep your favorite sessions close'] },
-  { id: 'stack', name: 'Stack', subtitle: 'Your snippets, sorted.', category: 'Developer Tools', rating: '4.7', reviews: '986', color: 'blue', glyph: 'code', description: 'A home for the little pieces of code you reach for every day. Organize your snippets, capture a useful command, and get back to building.', features: ['Keep useful snippets together', 'Find the right command faster', 'Organize by project or language'] },
-  { id: 'moss', name: 'Moss', subtitle: 'Grow at your own pace.', category: 'Lifestyle', rating: '4.8', reviews: '1.2K', color: 'green', glyph: 'leaf', description: 'Make space for small, good habits. Tend to a personal garden as you build routines that make everyday life feel a little better.', features: ['Start with one small habit', 'Watch your personal garden grow', 'Make time for a daily reflection'] },
-  { id: 'lumina', name: 'Lumina', subtitle: 'Every photo, a new perspective.', category: 'Creativity', rating: '4.6', reviews: '754', color: 'gold', glyph: 'lens', description: 'Rediscover the pictures you love. Explore light, color, and composition with a collection of intuitive tools made for everyday creativity.', features: ['Explore light and color', 'Give your favorites a fresh look', 'Build a collection worth keeping'] },
-  { id: 'drift', name: 'Drift', subtitle: 'Take the scenic route.', category: 'Games', rating: '4.9', reviews: '2.7K', color: 'teal', glyph: 'mountain', description: 'Take a quiet journey through an ever-changing landscape. Follow winding paths, discover hidden places, and enjoy the view along the way.', features: ['Explore a peaceful little world', 'Discover a different path each day', 'Play at your own pace'] },
-  { id: 'blocks', name: 'Blocks', subtitle: 'A fresh angle on puzzles.', category: 'Games', rating: '4.7', reviews: '1.6K', color: 'red', glyph: 'blocks', description: 'Simple shapes. Satisfying solutions. Make a little time for a colorful puzzle collection that starts easy and keeps you thinking.', features: ['Find the perfect fit', 'Explore colorful puzzle collections', 'Try a new challenge every day'] }
+  { id: 'tech', name: 'Build', subtitle: 'Projects, experiments, and ideas.', category: 'Developer Tools', rating: '5.0', reviews: '1', color: 'blue', glyph: 'code', icon: '/images/app-store/build-logo.png', description: 'AJT3 brings website discovery, client access, project briefs, update requests, and day-to-day delivery into one focused workspace.', features: [
+    { title: 'A bold first impression', view: 'home' },
+    { title: 'Secure client access', view: 'login' },
+    { title: 'The work, organized', view: 'dashboard' }
+  ] },
+  { id: 'newtrinity', name: 'New Trinity Missionary Baptist Church', subtitle: 'Faith, community, and connection.', category: 'Community', rating: 'New', reviews: 'No', color: 'plum', glyph: 'church', icon: '/images/app-store/new-trinity-logo.png', description: 'A welcoming home for New Trinity Missionary Baptist Church in Clayton, with worship information, church resources, ministry news, and ways to connect.', features: [
+    { title: 'Find worship times and events', image: '/images/app-store/new-trinity-worship.webp', alt: 'New Trinity worship service' },
+    { title: 'Meet the church family', image: '/images/app-store/new-trinity-community.webp', alt: 'Members of the New Trinity community' },
+    { title: 'Connect, serve, and grow', image: '/images/app-store/new-trinity-family.webp', alt: 'New Trinity community gathering' }
+  ] },
+  { id: 'lattaco', name: 'Lattaco Welding', subtitle: 'Creative metalwork, built to last.', category: 'Business', rating: 'New', reviews: 'No', color: 'steel', glyph: 'weld', icon: '/images/app-store/lattaco-logo.png', description: 'Explore more than 30 years of welding experience across the Research Triangle, from structural systems and access solutions to artistic metalwork.', features: [
+    { title: 'Built for heavy work', image: '/images/app-store/lattaco-construction.jpg', alt: 'Custom welded construction equipment' },
+    { title: 'Security with craft', image: '/images/app-store/lattaco-gates.jpg', alt: 'Custom industrial security gates' },
+    { title: 'Made for the details', image: '/images/app-store/lattaco-grill.jpg', alt: 'Custom welded grill beside a kitchen' }
+  ] },
+  { id: 'jazzed', name: 'Jazzed To Be Jones', subtitle: 'Jazmine & Tyler are tying the knot.', category: 'Lifestyle', rating: 'New', reviews: 'No', color: 'sage', glyph: 'monogram', icon: '/images/app-store/jazzed-logo.png', description: 'A private wedding destination created for Jazmine and Tyler, bringing their celebration and guest experience together in one elegant place.', features: [
+    { title: 'Celebrate Jazmine and Tyler', image: '/images/app-store/jazzed-home.jpg', alt: 'Jazmine and Tyler holding hands beneath a conservatory ceiling' },
+    { title: 'Their story, beautifully told', image: '/images/app-store/jazzed-conservatory.jpg', alt: 'Jazmine and Tyler together in a glass conservatory' },
+    { title: 'Raise a glass to forever', image: '/images/app-store/jazzed-toast.jpg', alt: 'Jazmine and Tyler toasting with green champagne glasses' }
+  ] }
 ];
 
 const sections = [
   { id: 'discover', label: 'Discover', icon: 'discover' },
   { id: 'apps', label: 'Apps', icon: 'apps' },
-  { id: 'games', label: 'Games', icon: 'games' },
   { id: 'library', label: 'Library', icon: 'library' }
 ];
-const categories = ['All', 'Productivity', 'Creativity', 'Music', 'Developer Tools', 'Lifestyle'];
-const storageKey = 'ajt3-store-library';
+const categories = ['All', 'Developer Tools', 'Community', 'Business', 'Lifestyle'];
 
 function StoreIcon({ name }) {
   const shapes = {
@@ -32,6 +43,9 @@ function StoreIcon({ name }) {
     form: <><path d="m12 2 10 17H2Z" /><circle cx="12" cy="14" r="5" /></>,
     wave: <path d="M3 10v4m4-8v12m5-16v20m5-16v12m4-8v4" />,
     code: <path d="m8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18" />,
+    church: <><path d="M12 3v18M7 8h10" /><path d="M10 7C6 4 3 5 2 8c3-1 6 1 8 4m4-5c4-3 7-2 8 1-3-1-6 1-8 4M9 15c-3-3-6-3-8-1 3 1 5 3 7 6m7-5c3-3 6-3 8-1-3 1-5 3-7 6" /></>,
+    weld: <><path d="M7 4h10l2 11-4 4H9l-4-4Z" /><path d="M8 8h8l-1 5H9Zm11-3 3-3m-2 7h3m-4 4 3 2" /></>,
+    monogram: <><text x="8" y="17" fill="currentColor" stroke="none" fontFamily="Georgia, serif" fontSize="16">J</text><text x="13" y="20" fill="currentColor" stroke="none" fontFamily="Georgia, serif" fontSize="16">T</text><text x="12" y="17" textAnchor="middle" fill="currentColor" stroke="none" fontFamily="Georgia, serif" fontSize="10">&amp;</text></>,
     leaf: <><path d="M20 3C5 1 1 12 7 17S23 16 20 3Z" /><path d="M4 22 16 8" /></>,
     lens: <><circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="5" /><path d="m12 2 4 7m5 7h-8m-8 3 4-7" /></>,
     mountain: <><path d="m1 20 8-14 5 8 3-5 6 11ZM6 11h6" /><circle cx="18" cy="4" r="2" /></>,
@@ -41,25 +55,58 @@ function StoreIcon({ name }) {
 }
 
 function ProductIcon({ app }) {
-  return <span className={`store-product-icon store-product-icon--${app.color}`}><StoreIcon name={app.glyph} /></span>;
+  return (
+    <span className={`store-product-icon store-product-icon--${app.color}${app.icon ? ' store-product-icon--branded' : ''}`}>
+      {app.icon ? <img src={app.icon} alt="" /> : <StoreIcon name={app.glyph} />}
+    </span>
+  );
 }
 
-function readLibrary() {
-  try {
-    const saved = JSON.parse(window.localStorage.getItem(storageKey));
-    return Array.isArray(saved) ? catalog.filter((app) => saved.includes(app.id)).map((app) => app.id) : [];
-  } catch {
-    return [];
+function BuildPreviewArtwork({ view }) {
+  if (view === 'home') {
+    return (
+      <div className="store-product-screen store-product-screen--home" role="img" aria-label="AJT3 marketing homepage preview">
+        <img src="/images/app-store/build-logo.png" alt="" />
+        <strong>WE BUILD<br />WEBSITES</strong>
+        <span>Fast, striking sites with a sharp product feel.</span>
+        <i>SEE OUR WORK</i>
+      </div>
+    );
   }
+
+  if (view === 'login') {
+    return (
+      <div className="store-product-screen store-product-screen--login" role="img" aria-label="AJT3 client login preview">
+        <div>
+          <span>CLIENT ACCESS</span>
+          <strong>Login</strong>
+          <small>Access your dashboard.</small>
+          <i>Email</i><i>Password</i><b>LOGIN</b>
+        </div>
+        <em>Ready to build?</em>
+      </div>
+    );
+  }
+
+  return (
+    <div className="store-product-screen store-product-screen--dashboard" role="img" aria-label="AJT3 project dashboard preview">
+      <div>
+        <span>TODAY</span>
+        <strong>Work queue</strong>
+        <small>0 REQUESTS</small>
+        <i>STATUS&nbsp;&nbsp;&nbsp; Active</i>
+        <i>SEARCH&nbsp;&nbsp;&nbsp; Owner, page, or request</i>
+      </div>
+      <div><span>PROJECT BRIEF REVIEW</span><strong>Review submitted briefs</strong></div>
+    </div>
+  );
 }
 
 export default function AppStore() {
+  const { installedApps = [], installProgress = {}, installApp, openExternalApp } = useContext(DeviceSettingsContext) || {};
   const [section, setSection] = useState('discover');
-  const [query, setQuery] = useState('');
   const [category, setCategory] = useState('All');
   const [selected, setSelected] = useState(null);
-  const [library, setLibrary] = useState(readLibrary);
-  const [notice, setNotice] = useState('');
   const scrollRef = useRef(null);
   const detailTitleRef = useRef(null);
   const openerRef = useRef(null);
@@ -72,20 +119,15 @@ export default function AppStore() {
   function changeSection(next) {
     setSection(next);
     setCategory('All');
-    setQuery('');
     setSelected(null);
   }
 
-  function toggleLibrary(app) {
-    const removing = library.includes(app.id);
-    const next = removing ? library.filter((id) => id !== app.id) : [...library, app.id];
-    setLibrary(next);
-    try {
-      window.localStorage.setItem(storageKey, JSON.stringify(next));
-      setNotice(`${app.name} ${removing ? 'removed from' : 'added to'} your library.`);
-    } catch {
-      setNotice(`${app.name} ${removing ? 'removed' : 'added'} for this visit. Browser storage is unavailable.`);
+  function handleAppAction(event, app) {
+    if (installedApps.includes(app.id)) {
+      openExternalApp?.(app.id, event);
+      return;
     }
+    installApp?.(app.id);
   }
 
   function openDetails(app, event) {
@@ -103,27 +145,39 @@ export default function AppStore() {
   }
 
   const filtered = catalog.filter((app) => {
-    const matchesSection = section === 'library' ? library.includes(app.id) : section === 'games' ? app.category === 'Games' : section === 'apps' ? app.category !== 'Games' : true;
-    return matchesSection && (category === 'All' || category === app.category)
-      && `${app.name} ${app.subtitle} ${app.category}`.toLowerCase().includes(query.trim().toLowerCase());
+    const matchesSection = section === 'library' ? installedApps.includes(app.id) : true;
+    return matchesSection && (category === 'All' || category === app.category);
   });
-  const showFeatures = section === 'discover' && !query.trim() && category === 'All';
+  const showFeatures = section === 'discover' && category === 'All';
   const heading = sections.find((item) => item.id === section).label;
+  const isDownloading = (app) => Object.prototype.hasOwnProperty.call(installProgress, app.id);
+  const actionLabel = (app) => installedApps.includes(app.id) ? 'Open' : isDownloading(app) ? `${installProgress[app.id]}%` : 'Get';
+
+  function AppAction({ app, className = '' }) {
+    const downloading = isDownloading(app);
+    return (
+      <button
+        type="button"
+        className={`store-get${installedApps.includes(app.id) ? ' store-get--added' : ''}${downloading ? ' store-get--downloading' : ''}${className ? ` ${className}` : ''}`}
+        aria-label={downloading ? `Downloading ${app.name}, ${installProgress[app.id]}%` : `${actionLabel(app)} ${app.name}`}
+        disabled={downloading}
+        onClick={(event) => handleAppAction(event, app)}
+      >
+        {downloading ? <svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15.5" pathLength="100" style={{ '--download-progress': installProgress[app.id] }} /><rect x="14" y="14" width="8" height="8" rx="1.5" /></svg> : actionLabel(app)}
+      </button>
+    );
+  }
 
   return (
     <main className="store-page app-view" aria-label="App Store">
       <div className="store-layout">
         <aside className="store-sidebar">
           <div className="store-brand"><StoreIcon name="apps" /><span>App Store</span></div>
-          <label className="store-search">
-            <StoreIcon name="search" />
-            <input type="search" placeholder="Search" aria-label="Search apps" value={query} onChange={(event) => { setQuery(event.target.value); setSelected(null); }} />
-          </label>
           <nav className="store-nav" aria-label="App Store sections">
             {sections.map((item) => (
               <button type="button" key={item.id} aria-current={section === item.id ? 'page' : undefined} onClick={() => changeSection(item.id)}>
                 <StoreIcon name={item.icon} /><span>{item.label}</span>
-                {item.id === 'library' && library.length > 0 && <small>{library.length}</small>}
+                {item.id === 'library' && installedApps.length > 0 && <small>{installedApps.length}</small>}
               </button>
             ))}
           </nav>
@@ -137,47 +191,50 @@ export default function AppStore() {
               <ProductIcon app={selected} />
               <div>
                 <h1 ref={detailTitleRef} tabIndex={-1}>{selected.name}</h1><p>{selected.subtitle}</p>
-                <button type="button" className="store-get" onClick={() => toggleLibrary(selected)}>{library.includes(selected.id) ? 'Remove from library' : 'Get'}</button>
+                <AppAction app={selected} />
               </div>
             </div>
             <dl className="store-stats">
-              <div><dt>{selected.reviews} sample ratings</dt><dd>{selected.rating} <span aria-hidden="true">&#9733;</span></dd></div>
+              <div><dt>Ratings</dt><dd>{selected.rating} <span aria-hidden="true">&#9733;</span></dd></div>
               <div><dt>Category</dt><dd>{selected.category}</dd></div>
-              <div><dt>Price</dt><dd>Free demo</dd></div>
+              <div><dt>Price</dt><dd>Free</dd></div>
             </dl>
             <h2 className="store-section-title">A closer look</h2>
             <div className="store-previews">
-              {selected.features.map((feature, index) => (
-                <div className={`store-preview store-preview--${selected.color}`} key={feature}><span>0{index + 1}</span><h3>{feature}</h3><ProductIcon app={selected} /></div>
-              ))}
+              {selected.features.map((feature, index) => {
+                const preview = typeof feature === 'string' ? { title: feature } : feature;
+                return (
+                  <div className={`store-preview store-preview--${selected.color}${preview.image ? ' store-preview--photo' : ''}${preview.view ? ' store-preview--product' : ''}`} key={preview.title}>
+                    {preview.image && <img className="store-preview__image" src={preview.image} alt={preview.alt} loading="lazy" />}
+                    {preview.view && <BuildPreviewArtwork view={preview.view} />}
+                    <span>0{index + 1}</span>
+                    <h3>{preview.title}</h3>
+                    {!preview.image && !preview.view && <ProductIcon app={selected} />}
+                  </div>
+                );
+              })}
             </div>
             <section className="store-about"><h2>About {selected.name}</h2><p>{selected.description}</p></section>
           </> : <>
             <header className="store-heading">
-              <div><p>FIND YOUR NEXT FAVORITE</p><h1 ref={detailTitleRef} tabIndex={-1}>{query.trim() ? 'Search results' : heading}</h1></div>
+              <div><p>FIND YOUR NEXT FAVORITE</p><h1 ref={detailTitleRef} tabIndex={-1}>{heading}</h1></div>
               <span className="store-edition">THE A/3 EDIT</span>
             </header>
             {showFeatures && <div className="store-editorial">
-              <button type="button" className="store-feature store-feature--hero" data-app-id="orbit" onClick={(event) => openDetails(catalog[0], event)}>
-                <span className="store-feature-copy"><span className="store-eyebrow">APP OF THE DAY</span><strong>A little focus.<br />A world of possibility.</strong><span>Find your flow with Orbit.</span></span>
-                <span className="store-orbit-art" aria-hidden="true"><i /><i /><i /><b /></span>
-                <span className="store-feature-footer"><ProductIcon app={catalog[0]} /><span><b>Orbit</b><small>Make space for what matters.</small></span><span className="store-feature-arrow" aria-hidden="true">&nearr;</span></span>
+              <button type="button" className="store-feature store-feature--hero" data-app-id="newtrinity" onClick={(event) => openDetails(catalog[1], event)}>
+                <span className="store-feature-copy"><span className="store-eyebrow">FEATURED</span><strong>A place to belong.</strong><span>Faith, family, and fellowship in Clayton.</span></span>
+                <span className="store-feature-image" aria-hidden="true">
+                  <img src="/images/app-store/new-trinity-worship.webp" alt="" />
+                </span>
+                <span className="store-feature-footer"><ProductIcon app={catalog[1]} /><span><b>New Trinity</b><small>Community</small></span><span className="store-feature-cta">View</span></span>
               </button>
-              <div className="store-stories">
-                <button type="button" className="store-feature store-feature--create" data-app-id="form" onClick={(event) => openDetails(catalog[1], event)}>
-                  <span className="store-eyebrow">LET YOUR IDEAS PLAY</span><strong>Your next blank<br />canvas awaits.</strong><ProductIcon app={catalog[1]} /><span className="store-story-link">Meet Form <span aria-hidden="true">&nearr;</span></span>
-                </button>
-                <button type="button" className="store-feature store-feature--play" data-app-id="drift" onClick={(event) => openDetails(catalog[6], event)}>
-                  <span className="store-eyebrow">TAKE A LITTLE BREAK</span><strong>Less rush.<br />More adventure.</strong><ProductIcon app={catalog[6]} /><span className="store-story-link">Explore Drift <span aria-hidden="true">&nearr;</span></span>
-                </button>
-              </div>
             </div>}
 
             {(section === 'apps' || section === 'discover') && <nav className="store-categories" aria-label="App categories">
               {categories.map((item) => <button type="button" key={item} aria-pressed={category === item} onClick={() => setCategory(item)}>{item}</button>)}
             </nav>}
             <div className="store-list-heading">
-              <h2>{query.trim() ? `Results for "${query.trim()}"` : section === 'library' ? 'Your apps' : section === 'games' ? 'Find your next adventure' : category !== 'All' ? category : 'Apps we love'}</h2>
+              <h2>{section === 'library' ? 'Your apps' : category !== 'All' ? category : 'Apps we built'}</h2>
               <span>{filtered.length} {filtered.length === 1 ? 'app' : 'apps'}</span>
             </div>
             {filtered.length > 0 ? <ul className="store-app-list">
@@ -185,19 +242,17 @@ export default function AppStore() {
                 <button type="button" className="store-app-summary" data-app-id={app.id} onClick={(event) => openDetails(app, event)}>
                   <ProductIcon app={app} /><span><strong>{app.name}</strong><span>{app.subtitle}</span><small><span aria-hidden="true">&#9733;</span> {app.rating} <span className="store-app-category">&middot; {app.category}</span></small></span>
                 </button>
-                <button type="button" className={`store-get${library.includes(app.id) ? ' store-get--added' : ''}`} data-app-id={app.id} aria-label={library.includes(app.id) ? `Added ${app.name}. View app details` : `Get ${app.name}`} onClick={(event) => library.includes(app.id) ? openDetails(app, event) : toggleLibrary(app)}>{library.includes(app.id) ? 'Added' : 'Get'}</button>
+                <AppAction app={app} />
               </li>)}
             </ul> : <div className="store-empty">
               <StoreIcon name={section === 'library' ? 'library' : 'search'} />
-              <h3>{section === 'library' && !query.trim() ? 'Your next favorite is out there.' : 'No apps found.'}</h3>
-              <p>{section === 'library' && !query.trim() ? 'Tap Get on an app to add it to your collection.' : 'Try another name or explore a different category.'}</p>
+              <h3>{section === 'library' ? 'Your next favorite is out there.' : 'No apps found.'}</h3>
+              <p>{section === 'library' ? 'Tap Get on an app to add it to your collection.' : 'Explore a different category.'}</p>
               <button type="button" className="store-get" onClick={() => changeSection('discover')}>Explore apps</button>
             </div>}
           </>}
-          <footer className="store-footnote">Sample catalog. Get saves apps to this browser; no software is downloaded. Ratings and previews are illustrative.</footer>
         </div>
       </div>
-      <div className="store-notice" role="status">{notice}</div>
     </main>
   );
 }

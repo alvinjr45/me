@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { normalizeUploadFile } from '../lib/adminPostEditor';
+import { normalizeUploadFile, validateTotalUploadSize, validateUploadFile } from '../lib/adminPostEditor';
 import { notifyPhotoLibraryChanged, requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 
 export default function AdminPhotoUpload({ secret, library, onChange, onBusy, onClose }) {
@@ -18,6 +18,16 @@ export default function AdminPhotoUpload({ secret, library, onChange, onBusy, on
   function chooseFiles(event) {
     const files = Array.from(event.target.files);
     event.target.value = '';
+    try {
+      files.forEach(validateUploadFile);
+      validateTotalUploadSize([
+        ...queue.filter((item) => item.status !== 'saved').map((item) => item.file).filter(Boolean),
+        ...files
+      ]);
+    } catch (error) {
+      setMessage(error.message);
+      return;
+    }
     setQueue((current) => [...current, ...files.map((file) => ({
       id: crypto.randomUUID(), file, name: file.name,
       title: file.name.replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').trim().slice(0, 160),
@@ -92,7 +102,7 @@ export default function AdminPhotoUpload({ secret, library, onChange, onBusy, on
           <label>Upload to album<select required value={albumId} onChange={(event) => setAlbumId(event.target.value)}><option value="" disabled>Choose an album</option>{library.albums.map((album) => <option key={album.id} value={album.id}>{album.title}</option>)}</select></label>
           <label>Choose photos<input type="file" multiple accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif" onChange={chooseFiles} /></label>
         </div>
-        <p className="admin-page__hint">Select several photos at once. Up to 20 MB each, including HEIC. Review titles before uploading.</p>
+        <p className="admin-page__hint">Select several photos at once. Up to 20 MB each and 40 MB per batch, including HEIC. Review titles before uploading.</p>
         <label className="admin-page__toggle"><input type="checkbox" checked={published} onChange={(event) => setPublished(event.target.checked)} />Publish uploaded photos</label>
         <ul className="admin-photos__queue">
           {queue.map((item) => <li key={item.id}>

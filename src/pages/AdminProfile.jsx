@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import PhotoImage from '../components/PhotoImage';
 import { normalizeUploadFile } from '../lib/adminPostEditor';
 import { requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 
@@ -73,7 +74,7 @@ export default function AdminProfile({ secret, imageUrl, onChange, onBusy }) {
           disabled={working}
           onClick={() => inputRef.current?.click()}
         >
-          {preview || imageUrl ? <img src={preview || imageUrl} alt="" /> : <span aria-hidden="true">A/3</span>}
+          {preview || imageUrl ? <PhotoImage src={preview || imageUrl} size={320} initiallyVisible alt="" /> : <span aria-hidden="true">A/3</span>}
         </button>
         <div className="mission-control__profile-label"><strong>Profile photo</strong><span>Administrator</span></div>
         <input ref={inputRef} type="file" hidden aria-label="Choose admin profile photo" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif" disabled={working} onChange={choosePhoto} />

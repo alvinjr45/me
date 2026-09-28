@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useRef } from 'react';
 
 export const wallpaperChoices = [
+  { key: 'random', label: 'Random', description: 'A different wallpaper each visit' },
   { key: 'aurora', label: 'Aurora', description: 'Drifting polar light' },
   { key: 'nebula', label: 'Nebula', description: 'Deep-space color clouds' },
   { key: 'tide', label: 'Tide', description: 'Calm ocean currents' },
@@ -65,6 +66,7 @@ export const wallpaperSpeedChoices = [
 ];
 
 export const backgroundChoices = [
+  { key: 'random', label: 'Random', description: 'A different scene each visit' },
   { key: 'alpine', label: 'Alpine Lake', description: 'A modern panoramic window' },
   { key: 'coast', label: 'Coastal Retreat', description: 'A rounded brass coastal lookout' },
   { key: 'desert', label: 'Desert Sunset', description: 'An open adobe arch' },

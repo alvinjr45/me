@@ -222,4 +222,17 @@ describe('preview image memory use', () => {
     fireEvent.keyDown(screen.getByRole('region', { name: 'Photo viewer' }), { key: 'Escape' });
     expect(screen.getByRole('button', { name: `Open ${firstTitle}` })).toHaveFocus();
   });
+
+  test('releases the full viewer image when its window is hidden', async () => {
+    render(<Photos />);
+    fireEvent.click(await screen.findByRole('button', { name: 'Open New memory' }));
+    const viewerImage = within(screen.getByRole('region', { name: 'Photo viewer' })).getAllByAltText('')[0];
+    const observer = observers.find((item) => item.observe.mock.calls.some(([target]) => target === viewerImage));
+
+    expect(viewerImage).toHaveAttribute('src', photo.src);
+    act(() => observer.callback([{ isIntersecting: false }]));
+    expect(viewerImage).not.toHaveAttribute('src');
+    act(() => observer.callback([{ isIntersecting: true }]));
+    expect(viewerImage).toHaveAttribute('src', photo.src);
+  });
 });

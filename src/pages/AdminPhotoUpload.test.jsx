@@ -1,10 +1,14 @@
 import React from 'react';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import AdminPhotoUpload from './AdminPhotoUpload';
-import { normalizeUploadFile } from '../lib/adminPostEditor';
+import { normalizeUploadFile, validateTotalUploadSize, validateUploadFile } from '../lib/adminPostEditor';
 import { notifyPhotoLibraryChanged, requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 
-jest.mock('../lib/adminPostEditor', () => ({ normalizeUploadFile: jest.fn() }));
+jest.mock('../lib/adminPostEditor', () => ({
+  normalizeUploadFile: jest.fn(),
+  validateTotalUploadSize: jest.fn(),
+  validateUploadFile: jest.fn()
+}));
 jest.mock('../lib/adminPhotoLibrary', () => ({ requestPhotoLibrary: jest.fn(), notifyPhotoLibraryChanged: jest.fn() }));
 
 const originalCrypto = global.crypto;
@@ -16,6 +20,8 @@ beforeEach(() => {
   global.crypto = { randomUUID: jest.fn(() => `photo-${++sequence}`) };
   window.confirm = jest.fn(() => true);
   normalizeUploadFile.mockReset().mockImplementation(async (file) => file);
+  validateTotalUploadSize.mockReset();
+  validateUploadFile.mockReset();
   requestPhotoLibrary.mockReset().mockImplementation(async (_, body) => ({ photo: { ...Object.fromEntries(body), image_url: '/images/saved.jpg' } }));
   notifyPhotoLibraryChanged.mockClear();
 });
@@ -132,6 +138,20 @@ test('requires photo titles and allows removing or discarding queued files', () 
   expect(props.onClose).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
   expect(props.onClose).toHaveBeenCalledTimes(1);
+});
+
+test('rejects a selection that exceeds the batch upload limit', () => {
+  openUpload();
+  validateTotalUploadSize.mockImplementationOnce(() => {
+    throw new Error('Selected uploads total 41.0 MB. Keep each save under 40.0 MB.');
+  });
+
+  choosePhotos();
+
+  expect(screen.getByRole('status')).toHaveTextContent('Keep each save under 40.0 MB');
+  expect(screen.queryByLabelText('Title for first-photo.jpg')).not.toBeInTheDocument();
+  expect(validateUploadFile).toHaveBeenCalledTimes(2);
+  expect(requestPhotoLibrary).not.toHaveBeenCalled();
 });
 
 test('uploads photos without alt text fields or metadata', async () => {

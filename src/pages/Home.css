@@ -43,6 +43,7 @@
 }
 
 .desktop-home__app {
+  position: relative;
   width: clamp(76px, 7vw, 92px);
   min-width: 0;
   display: flex;
@@ -54,6 +55,29 @@
   border-radius: 10px;
   text-align: center;
   transition: background 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
+.desktop-home__app--installing .device-app-icon { filter: brightness(0.45); }
+.desktop-home__app--queued .device-app-icon { filter: brightness(0.58) saturate(0.6); }
+
+.desktop-home__install-progress {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 42%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: conic-gradient(#fff var(--install-progress), rgba(255, 255, 255, 0.28) 0);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.45);
+  transform: translate(-50%, calc(-50% - 0.65rem));
+}
+
+.desktop-home__install-progress::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border-radius: inherit;
+  background: rgba(13, 24, 36, 0.88);
 }
 
 .desktop-home__page { display: contents; }

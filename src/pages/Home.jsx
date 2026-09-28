@@ -5,13 +5,20 @@ import { DeviceSettingsContext } from '../components/deviceSettings';
 import './Home.css';
 
 function Home() {
-  const { isPhone = false, openBuild } = useContext(DeviceSettingsContext) || {};
+  const { isPhone = false, openExternalApp, installedApps = [], installProgress = {}, pendingInstall } = useContext(DeviceSettingsContext) || {};
   const appsRef = useRef(null);
-  const [pageSize, setPageSize] = useState(desktopApps.length);
+  const builtInApps = desktopApps.filter((app) => !app.downloadable);
+  const downloadedKeys = [...installedApps, ...Object.keys(installProgress), pendingInstall?.key]
+    .filter((key, index, keys) => key && keys.indexOf(key) === index);
+  const downloadedApps = downloadedKeys
+    .map((key) => desktopApps.find((app) => app.key === key && app.downloadable))
+    .filter(Boolean);
+  const homeApps = [...builtInApps, ...downloadedApps];
+  const [pageSize, setPageSize] = useState(homeApps.length);
   const [activePage, setActivePage] = useState(0);
-  const appsPerPage = isPhone ? pageSize : desktopApps.length;
-  const pages = Array.from({ length: Math.ceil(desktopApps.length / appsPerPage) }, (_, index) => (
-    desktopApps.slice(index * appsPerPage, (index + 1) * appsPerPage)
+  const appsPerPage = isPhone ? pageSize : homeApps.length;
+  const pages = Array.from({ length: Math.ceil(homeApps.length / appsPerPage) }, (_, index) => (
+    homeApps.slice(index * appsPerPage, (index + 1) * appsPerPage)
   ));
 
   useLayoutEffect(() => {
@@ -39,6 +46,13 @@ function Home() {
     appsRef.current.scrollLeft = 0;
     setActivePage(0);
   }, [isPhone, pageSize]);
+
+  useLayoutEffect(() => {
+    if (!isPhone || pendingInstall?.phase !== 'paging' || !appsRef.current) return;
+    const lastPage = pages.length - 1;
+    appsRef.current.scrollTo({ left: lastPage * appsRef.current.clientWidth, behavior: 'smooth' });
+    setActivePage(lastPage);
+  }, [isPhone, pageSize, pages.length, pendingInstall?.phase]);
 
   const showPage = (index) => {
     const container = appsRef.current;
@@ -71,8 +85,19 @@ function Home() {
       >
         {pages.map((apps, index) => (
           <div className="desktop-home__page" key={index} role={isPhone ? 'group' : undefined} aria-label={isPhone ? `App page ${index + 1} of ${pages.length}` : undefined}>
-            {apps.map((app) => (
-              <Link key={app.key} to={app.path} onClick={app.key === 'tech' ? openBuild : undefined} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`desktop-home__app desktop-home__app--${app.key}`}>
+            {apps.map((app) => Object.prototype.hasOwnProperty.call(installProgress, app.key) ? (
+              <div key={app.key} className={`desktop-home__app desktop-home__app--${app.key} desktop-home__app--installing`} role="status" aria-label={`${app.label} downloading, ${installProgress[app.key]}%`}>
+                <AppIcon name={app.key} />
+                <span className="desktop-home__install-progress" style={{ '--install-progress': `${installProgress[app.key] * 3.6}deg` }} aria-hidden="true" />
+                <span className="desktop-home__app-label">Loading...</span>
+              </div>
+            ) : pendingInstall?.key === app.key ? (
+              <div key={app.key} className={`desktop-home__app desktop-home__app--${app.key} desktop-home__app--queued`} role="status" aria-label={`${app.label} waiting to download`}>
+                <AppIcon name={app.key} />
+                <span className="desktop-home__app-label">Waiting...</span>
+              </div>
+            ) : (
+              <Link key={app.key} to={app.path} onClick={app.external ? (event) => openExternalApp?.(app.key, event) : undefined} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`desktop-home__app desktop-home__app--${app.key}`}>
                 <AppIcon name={app.key} />
                 <span className="desktop-home__app-label">{app.label}</span>
               </Link>

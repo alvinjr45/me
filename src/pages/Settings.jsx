@@ -20,8 +20,8 @@ import './Settings.css';
 const settingsCategories = [
   { key: 'system', label: 'General', keywords: 'clock time format account logout restart shutdown power', icon: SettingsRounded },
   { key: 'appearance', label: 'Appearance', keywords: 'theme light dark auto accent color motion animation speed brightness intensity', icon: ContrastRounded },
-  { key: 'wallpaper', label: 'Wallpaper', keywords: `desktop ${wallpaperChoices.map((choice) => `${choice.label} ${choice.description}`).join(' ')}`, icon: WallpaperRounded },
-  { key: 'background', label: 'Background', keywords: 'scene alpine lake coastal retreat desert forest cabin city winter snowbound northern lights garden', icon: LandscapeRounded }
+  { key: 'background', label: 'Background', keywords: 'scene alpine lake coastal retreat desert forest cabin city winter snowbound northern lights garden', icon: LandscapeRounded },
+  { key: 'wallpaper', label: 'Wallpaper', keywords: `desktop ${wallpaperChoices.map((choice) => `${choice.label} ${choice.description}`).join(' ')}`, icon: WallpaperRounded }
 ];
 
 function SettingsIcon({ category }) {
@@ -44,8 +44,10 @@ function Settings() {
 
   const {
     wallpaper,
+    resolvedWallpaper,
     setWallpaper,
     background,
+    resolvedBackground,
     setBackground,
     appearance,
     setAppearance,
@@ -165,22 +167,25 @@ function Settings() {
           <p className="settings-page__background-note">Each page load starts with a random scene. Choose a different background for this visit, on desktop or mobile.</p>
         </div>
         <div className="settings-page__wallpapers" aria-label="Background choices">
-          {backgroundChoices.map((choice) => (
-            <button
-              key={choice.key}
-              type="button"
-              className="settings-page__wallpaper"
-              aria-pressed={background === choice.key}
-              onClick={() => setBackground(choice.key)}
-            >
-              <span className={`settings-page__background-preview scene-theme scene-theme--${choice.key}`} aria-hidden="true">
-                <SceneWindow background={choice.key} />
-                {background === choice.key && <span className="settings-page__background-selected">Selected</span>}
-              </span>
-              <strong>{choice.label}</strong>
-              <small>{choice.description}</small>
-            </button>
-          ))}
+          {backgroundChoices.map((choice) => {
+            const previewBackground = choice.key === 'random' ? resolvedBackground : choice.key;
+            return (
+              <button
+                key={choice.key}
+                type="button"
+                className="settings-page__wallpaper"
+                aria-pressed={background === choice.key}
+                onClick={() => setBackground(choice.key)}
+              >
+                <span className={`settings-page__background-preview scene-theme scene-theme--${previewBackground}`} aria-hidden="true">
+                  <SceneWindow background={previewBackground} />
+                  {background === choice.key && <span className="settings-page__background-selected">Selected</span>}
+                </span>
+                <strong>{choice.label}</strong>
+                <small>{choice.description}</small>
+              </button>
+            );
+          })}
         </div>
       </section>
 
@@ -190,19 +195,22 @@ function Settings() {
           <p className="settings-page__background-note">Give your desktop a new look.</p>
         </div>
         <div className="settings-page__wallpapers" aria-label="Wallpaper choices">
-          {wallpaperChoices.map((choice) => (
-            <button
-              key={choice.key}
-              type="button"
-              className={`settings-page__wallpaper settings-page__wallpaper--${choice.key}`}
-              aria-pressed={wallpaper === choice.key}
-              onClick={() => setWallpaper(choice.key)}
-            >
-              <span className="settings-page__wallpaper-preview" aria-hidden="true" />
-              <strong>{choice.label}</strong>
-              <small>{choice.description}</small>
-            </button>
-          ))}
+          {wallpaperChoices.map((choice) => {
+            const previewWallpaper = choice.key === 'random' ? resolvedWallpaper : choice.key;
+            return (
+              <button
+                key={choice.key}
+                type="button"
+                className={`settings-page__wallpaper settings-page__wallpaper--${previewWallpaper}`}
+                aria-pressed={wallpaper === choice.key}
+                onClick={() => setWallpaper(choice.key)}
+              >
+                <span className="settings-page__wallpaper-preview" aria-hidden="true" />
+                <strong>{choice.label}</strong>
+                <small>{choice.description}</small>
+              </button>
+            );
+          })}
         </div>
       </section>
 

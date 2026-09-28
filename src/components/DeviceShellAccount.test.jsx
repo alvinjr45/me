@@ -333,6 +333,35 @@ test('switches between mobile and desktop views from Settings and saves the choi
   expect(window.localStorage.getItem('ajt3-device-view')).toBe('desktop');
 });
 
+test('defaults wallpaper and background to random without persisting either choice', () => {
+  window.localStorage.setItem('ajt3-wallpaper', 'ember');
+  window.localStorage.setItem('ajt3-background', 'city');
+  const random = jest.spyOn(Math, 'random').mockReturnValue(0);
+
+  try {
+    const { container } = openDesktop('/settings');
+    expect(container.querySelector('.device-screen')).toHaveAttribute('data-wallpaper', 'aurora');
+    expect(window.localStorage.getItem('ajt3-wallpaper')).toBeNull();
+    expect(window.localStorage.getItem('ajt3-background')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Wallpaper' }));
+    const wallpaperChoices = screen.getByLabelText('Wallpaper choices');
+    expect(within(wallpaperChoices).getByRole('button', { name: /Random/ })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(within(wallpaperChoices).getByRole('button', { name: /Ember/ }));
+    expect(container.querySelector('.device-screen')).toHaveAttribute('data-wallpaper', 'ember');
+    expect(window.localStorage.getItem('ajt3-wallpaper')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Background' }));
+    const backgroundChoices = screen.getByLabelText('Background choices');
+    expect(within(backgroundChoices).getByRole('button', { name: /Random/ })).toHaveAttribute('aria-pressed', 'true');
+    fireEvent.click(within(backgroundChoices).getByRole('button', { name: /City After Dark/ }));
+    expect(within(backgroundChoices).getByRole('button', { name: /City After Dark/ })).toHaveAttribute('aria-pressed', 'true');
+    expect(window.localStorage.getItem('ajt3-background')).toBeNull();
+  } finally {
+    random.mockRestore();
+  }
+});
+
 test('hides the device view setting and enforces mobile on a mobile viewport', () => {
   window.localStorage.setItem('ajt3-device-view', 'desktop');
   window.matchMedia.mockImplementation((query) => ({

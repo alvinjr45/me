@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { DeviceSettingsContext, usePhoneBack } from '../components/deviceSettings';
+import PhotoImage from '../components/PhotoImage';
 import { getPhotoLibrary } from '../data/photos';
-import { getPhotoImageUrl } from '../lib/photoImages';
 import { notifyPhotoLibraryChanged, requestPhotoLibrary } from '../lib/adminPhotoLibrary';
 import './Photos.css';
 
@@ -16,23 +16,6 @@ function PhotoIcon({ name }) {
     info: <><circle cx="12" cy="12" r="9" /><path d="M12 11v6M12 7h.01" /></>
   };
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
-}
-
-function PhotoPreview({ src, width, height, size = 320 }) {
-  const imageRef = useRef(null);
-  const [visible, setVisible] = useState(() => typeof IntersectionObserver === 'undefined');
-
-  useEffect(() => {
-    if (typeof IntersectionObserver === 'undefined') return undefined;
-    const observer = new IntersectionObserver(([entry]) => {
-      setVisible(entry.isIntersecting);
-    });
-    observer.observe(imageRef.current);
-    return () => observer.disconnect();
-  }, []);
-
-  // Native lazy loading alone retains sources after previews leave the viewport.
-  return <img ref={imageRef} src={visible ? getPhotoImageUrl(src, size) : undefined} alt="" width={width} height={height} loading="lazy" decoding="async" />;
 }
 
 function Photos() {
@@ -206,7 +189,7 @@ function Photos() {
               if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) movePhoto(dx < 0 ? 1 : -1);
             }}
           >
-            <img key={selectedPhoto.id} src={getPhotoImageUrl(selectedPhoto.src, isPhone ? 1600 : 2400)} alt="" decoding="async" />
+            <PhotoImage key={selectedPhoto.id} src={selectedPhoto.src} size={isPhone ? 1600 : 2400} initiallyVisible alt="" />
             <button type="button" className="photos-viewer__previous photos-app__icon-button" aria-label="Previous photo" disabled={selectedIndex === 0} onClick={() => movePhoto(-1)}><PhotoIcon name="back" /></button>
             <button type="button" className="photos-viewer__next photos-app__icon-button" aria-label="Next photo" disabled={selectedIndex === viewerIds.length - 1} onClick={() => movePhoto(1)}><PhotoIcon name="next" /></button>
           </div>
@@ -215,7 +198,7 @@ function Photos() {
           <div className="photos-viewer__filmstrip" aria-label="Browse photos">
             {viewerIds.map((id) => {
               const photo = photos.find((item) => item.id === id);
-              return <button type="button" key={id} aria-label={`View ${photo.title}`} aria-pressed={id === selectedId} onClick={() => setSelectedId(id)}><PhotoPreview src={photo.src} size={96} /></button>;
+              return <button type="button" key={id} aria-label={`View ${photo.title}`} aria-pressed={id === selectedId} onClick={() => setSelectedId(id)}><PhotoImage src={photo.src} size={96} alt="" /></button>;
             })}
           </div>
           <footer className="photos-viewer__footer">
@@ -257,11 +240,11 @@ function Photos() {
                 <div className="photos-app__empty"><PhotoIcon name={collection === 'favorites' && !search ? 'heart' : 'search'} /><h2>{search ? 'No photos found' : collection === 'favorites' ? 'No favorites yet' : 'No photos yet'}</h2><p>{search ? 'Try a different name or collection.' : collection === 'favorites' ? (adminSecret ? 'Open a photo and tap the heart to add it here.' : 'AJ has not added any favorites yet.') : 'New moments will appear here when they are published.'}</p><button type="button" onClick={() => chooseCollection('library')}>View all photos</button></div>
               ) : albumsView ? (
                 <div className="photos-app__albums">{albumCollections.map((item) => {
-                  return item.photos.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => chooseCollection(item.id)}><span className="photos-app__album-cover"><PhotoPreview src={item.photos[0].src} size={640} /></span><strong>{item.title}</strong><span>{item.photos.length} {item.photos.length === 1 ? 'photo' : 'photos'}</span></button> : null;
+                  return item.photos.length ? <button type="button" className="photos-app__album" key={item.id} onClick={() => chooseCollection(item.id)}><span className="photos-app__album-cover"><PhotoImage src={item.photos[0].src} size={640} alt="" /></span><strong>{item.title}</strong><span>{item.photos.length} {item.photos.length === 1 ? 'photo' : 'photos'}</span></button> : null;
                 })}</div>
               ) : (
                 <div className={`photos-app__grid photos-app__grid--${size}`}>
-                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${photo.isFavorite ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><PhotoPreview src={photo.src} width={photo.width} height={photo.height} />{photo.isFavorite && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
+                  {visiblePhotos.map((photo) => <button type="button" className="photos-app__tile" key={photo.id} ref={(element) => { photoButtons.current[photo.id] = element; }} aria-label={`Open ${photo.title}${photo.isFavorite ? ', favorite' : ''}`} onClick={() => openPhoto(photo)}><PhotoImage src={photo.src} width={photo.width} height={photo.height} alt="" />{photo.isFavorite && <span className="photos-app__tile-heart"><PhotoIcon name="heart" /></span>}</button>)}
                 </div>
               )}
               <footer className="photos-app__count" aria-live="polite">{visiblePhotos.length} {visiblePhotos.length === 1 ? 'photo' : 'photos'}<span>{collection === 'favorites' ? 'Selected by AJ Thompson' : 'A collection by AJ Thompson'}</span></footer>

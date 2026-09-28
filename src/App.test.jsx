@@ -81,6 +81,9 @@ test.each([
   try {
     ({ unmount } = render(<App />));
     if (isPhone) fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
+    fireEvent.click(screen.getByRole('link', { name: 'App Store' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Get Build' }));
+    act(() => jest.advanceTimersByTime(6000));
     fireEvent.click(screen.getByRole('link', { name: linkName }));
     const redirect = screen.getByRole('region', { name: 'Redirecting to ajt3.website...' });
     expect(redirect).toHaveClass('device-system-screen--redirect');
@@ -97,6 +100,92 @@ test.each([
     fireEvent(window, restoredPage);
     expect(screen.queryByRole('region', { name: 'Redirecting to ajt3.website...' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Build' })).toBeInTheDocument();
+  } finally {
+    unmount?.();
+    Object.defineProperty(window, 'location', savedLocation);
+    jest.useRealTimers();
+  }
+});
+
+test('downloads Build from the App Store and adds it to the home screen', () => {
+  jest.useFakeTimers();
+  window.matchMedia.mockImplementation((query) => ({
+    matches: query.includes('max-width'),
+    addEventListener: jest.fn(), removeEventListener: jest.fn()
+  }));
+  let unmount;
+  try {
+    ({ unmount } = render(<App />));
+    fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
+    expect(screen.queryByRole('link', { name: 'Build' })).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('link', { name: 'App Store' }));
+    expect(screen.getByText('FEATURED')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /FEATURED A place to belong/ })).toBeInTheDocument();
+    fireEvent.click(screen.getByText('Build', { selector: 'strong' }).closest('button'));
+    expect(screen.getByRole('img', { name: 'AJT3 marketing homepage preview' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'AJT3 client login preview' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'AJT3 project dashboard preview' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Back to Discover' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Get Build' }));
+    expect(screen.getByTestId('device-scene').querySelector('.device-screen')).toHaveClass('device-screen--install-home');
+    expect(screen.queryByRole('status', { name: 'Build downloading, 0%' })).not.toBeInTheDocument();
+
+    act(() => jest.advanceTimersByTime(360));
+    expect(screen.getByRole('status', { name: 'Build waiting to download' })).toBeInTheDocument();
+    const homeScreen = screen.getByRole('navigation', { name: 'Open a site app' });
+    expect(homeScreen.querySelector('.desktop-home__page:last-child > :last-child')).toHaveClass('desktop-home__app--tech');
+    expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
+
+    act(() => jest.advanceTimersByTime(419));
+    expect(screen.queryByRole('status', { name: 'Build downloading, 0%' })).not.toBeInTheDocument();
+    act(() => jest.advanceTimersByTime(1));
+    expect(screen.getByRole('status', { name: 'Build downloading, 0%' })).toBeInTheDocument();
+
+    act(() => jest.advanceTimersByTime(5000));
+    expect(screen.getByRole('link', { name: 'Build' })).toBeInTheDocument();
+
+    unmount();
+    render(<App />);
+    expect(screen.queryByRole('link', { name: 'Build' })).not.toBeInTheDocument();
+  } finally {
+    jest.useRealTimers();
+  }
+});
+
+test('lists and launches the additional portfolio apps', () => {
+  jest.useFakeTimers();
+  const savedLocation = Object.getOwnPropertyDescriptor(window, 'location');
+  const assign = jest.fn();
+  Object.defineProperty(window, 'location', {
+    configurable: true,
+    value: { href: window.location.href, origin: window.location.origin, pathname: '/', search: '', hash: '', assign }
+  });
+  let unmount;
+  try {
+    ({ unmount } = render(<App />));
+    fireEvent.click(screen.getByRole('link', { name: 'App Store' }));
+    expect(screen.getByRole('button', { name: 'Get New Trinity Missionary Baptist Church' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Get Lattaco Welding' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Get Jazzed To Be Jones' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('New Trinity Missionary Baptist Church', { selector: 'strong' }).closest('button'));
+    expect(screen.getByAltText('New Trinity worship service')).toHaveAttribute('src', '/images/app-store/new-trinity-worship.webp');
+    fireEvent.click(screen.getByRole('button', { name: 'Back to Discover' }));
+
+    fireEvent.click(screen.getByText('Jazzed To Be Jones', { selector: 'strong' }).closest('button'));
+    expect(screen.getByAltText('Jazmine and Tyler holding hands beneath a conservatory ceiling')).toHaveAttribute('src', '/images/app-store/jazzed-home.jpg');
+    fireEvent.click(screen.getByRole('button', { name: 'Back to Discover' }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Get Lattaco Welding' }));
+    act(() => jest.advanceTimersByTime(6000));
+    expect(assign).not.toHaveBeenCalled();
+    expect(screen.queryByRole('region', { name: 'Redirecting to lattacowelding.com...' })).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole('link', { name: 'Lattaco Welding' }));
+
+    expect(screen.getByRole('region', { name: 'Redirecting to lattacowelding.com...' })).toBeInTheDocument();
+    act(() => jest.advanceTimersByTime(2000));
+    expect(assign).toHaveBeenCalledWith('https://lattacowelding.com');
   } finally {
     unmount?.();
     Object.defineProperty(window, 'location', savedLocation);

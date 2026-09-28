@@ -9,6 +9,7 @@ export const terminalPages = [
   { name: 'music', path: '/music', description: 'Browse the playlist collection' },
   { name: 'dogs', path: '/dogs', description: 'Meet Drake and Josh' },
   { name: 'blog', path: '/blog', description: 'Read notes from the build' },
+  { name: 'resume', path: '/resume', description: 'View AJ Thompson\'s professional profile and selected work' },
   { name: 'photos', path: '/photos', description: 'Explore photos and albums' },
   { name: 'calendar', path: '/calendar', description: 'Browse published events' },
   { name: 'guestbook', path: '/guestbook', description: 'Read conversations and leave a note' },
@@ -20,7 +21,7 @@ export const terminalPages = [
   { name: 'privacy', path: '/privacy', description: 'Privacy policy' }
 ];
 
-export const terminalAliases = { store: 'app-store', apps: 'app-store', blogs: 'blog', about: 'whoami' };
+export const terminalAliases = { store: 'app-store', apps: 'app-store', blogs: 'blog', linkedin: 'resume', about: 'whoami' };
 
 export const terminalSettings = [
   { name: 'theme', key: 'appearance', setter: 'setAppearance', choices: appearanceChoices },

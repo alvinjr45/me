@@ -118,7 +118,7 @@ function LinkedIn() {
                   <span><strong>AJT3.website</strong><small>Projects, prototypes, and experiments.</small></span>
                 </a>
                 <Link to="/blog">
-                  <span className="linkedin-projects__visual linkedin-projects__visual--notes" aria-hidden="true">//</span>
+                  <span className="linkedin-projects__visual linkedin-projects__visual--notes" aria-hidden="true">{'//'}</span>
                   <span><strong>Build notes</strong><small>A running log of decisions and ideas.</small></span>
                 </Link>
               </div>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { getPhotoImageUrl } from '../lib/photoImages';
 
-export default function PhotoImage({ src, size = 320, initiallyVisible = false, loading = 'lazy', decoding = 'async', ...props }) {
+export default function PhotoImage({ src, size = 320, initiallyVisible = false, loading = 'lazy', decoding = 'async', alt = '', ...props }) {
   const imageRef = useRef(null);
   const [visible, setVisible] = useState(() => initiallyVisible || typeof IntersectionObserver === 'undefined');
 
@@ -19,6 +19,7 @@ export default function PhotoImage({ src, size = 320, initiallyVisible = false, 
       {...props}
       ref={imageRef}
       src={visible && src ? getPhotoImageUrl(src, size) : undefined}
+      alt={alt}
       loading={loading}
       decoding={decoding}
     />

@@ -81,6 +81,39 @@
 }
 
 .desktop-home__page { display: contents; }
+.desktop-home__page[hidden] { display: none; }
+
+.desktop-home__pagination {
+  position: absolute;
+  z-index: 2;
+  right: clamp(1rem, 2.5vw, 2.5rem);
+  bottom: 74px;
+  display: flex;
+  justify-content: center;
+  width: clamp(332px, 38vw, 430px);
+}
+
+.desktop-home__pagination button {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+}
+
+.desktop-home__pagination button::after {
+  content: '';
+  display: block;
+  width: 7px;
+  height: 7px;
+  margin: auto;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+.desktop-home__pagination button[aria-current='page']::after { background: #fff; }
 
 .desktop-home__app:hover,
 .desktop-home__app:focus-visible {

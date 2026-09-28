@@ -18,7 +18,7 @@ function Home() {
   const homeApps = [...builtInApps, ...downloadedApps];
   const [pageSize, setPageSize] = useState(homeApps.length);
   const [activePage, setActivePage] = useState(0);
-  const appsPerPage = isPhone ? Math.min(pageSize, MAX_APPS_PER_PAGE) : homeApps.length;
+  const appsPerPage = isPhone ? Math.min(pageSize, MAX_APPS_PER_PAGE) : MAX_APPS_PER_PAGE;
   const pages = Array.from({ length: Math.ceil(homeApps.length / appsPerPage) }, (_, index) => (
     homeApps.slice(index * appsPerPage, (index + 1) * appsPerPage)
   ));
@@ -50,16 +50,22 @@ function Home() {
   }, [isPhone, pageSize]);
 
   useLayoutEffect(() => {
-    if (!isPhone || pendingInstall?.phase !== 'paging' || !appsRef.current) return;
+    if (isPhone || downloadedApps.length === 0) return;
+    setActivePage(pages.length - 1);
+  }, [downloadedApps.length, isPhone, pages.length]);
+
+  useLayoutEffect(() => {
+    if (!pendingInstall || !appsRef.current || (isPhone && pendingInstall.phase !== 'paging')) return;
     const lastPage = pages.length - 1;
-    appsRef.current.scrollTo({ left: lastPage * appsRef.current.clientWidth, behavior: 'smooth' });
     setActivePage(lastPage);
+    if (isPhone) appsRef.current.scrollTo({ left: lastPage * appsRef.current.clientWidth, behavior: 'smooth' });
   }, [isPhone, pageSize, pages.length, pendingInstall?.phase]);
 
   const showPage = (index) => {
     const container = appsRef.current;
     const page = Math.max(0, Math.min(index, pages.length - 1));
-    container.scrollTo({ left: page * container.clientWidth });
+    setActivePage(page);
+    if (isPhone) container.scrollTo({ left: page * container.clientWidth });
   };
 
   return (
@@ -78,15 +84,15 @@ function Home() {
           }
         }}
         onKeyDown={(event) => {
-          if (!isPhone || !['ArrowLeft', 'ArrowRight'].includes(event.key)) return;
+          if (!['ArrowLeft', 'ArrowRight'].includes(event.key) || pages.length < 2) return;
           event.preventDefault();
           const page = Math.max(0, Math.min(activePage + (event.key === 'ArrowRight' ? 1 : -1), pages.length - 1));
           showPage(page);
-          appsRef.current.children[page]?.querySelector('a')?.focus({ preventScroll: true });
+          if (isPhone) appsRef.current.children[page]?.querySelector('a')?.focus({ preventScroll: true });
         }}
       >
         {pages.map((apps, index) => (
-          <div className="desktop-home__page" key={index} role={isPhone ? 'group' : undefined} aria-label={isPhone ? `App page ${index + 1} of ${pages.length}` : undefined}>
+          <div className="desktop-home__page" key={index} role="group" aria-label={`App page ${index + 1} of ${pages.length}`} hidden={!isPhone && activePage !== index}>
             {apps.map((app) => Object.prototype.hasOwnProperty.call(installProgress, app.key) ? (
               <div key={app.key} className={`desktop-home__app desktop-home__app--${app.key} desktop-home__app--installing`} role="status" aria-label={`${app.label} downloading, ${installProgress[app.key]}%`}>
                 <AppIcon name={app.key} />
@@ -107,7 +113,7 @@ function Home() {
           </div>
         ))}
       </nav>
-      {isPhone && pages.length > 1 && (
+      {pages.length > 1 && (
         <nav className="desktop-home__pagination" aria-label="Home screen pages">
           {pages.map((_, index) => (
             <button key={index} type="button" aria-label={`Show app page ${index + 1}`} aria-current={activePage === index ? 'page' : undefined} onClick={() => showPage(index)} />

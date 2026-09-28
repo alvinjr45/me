@@ -84,6 +84,13 @@ test.each([
     fireEvent.click(screen.getByRole('link', { name: 'App Store' }));
     fireEvent.click(screen.getByRole('button', { name: 'Get Build' }));
     act(() => jest.advanceTimersByTime(6000));
+    if (!isPhone) {
+      const homeScreen = screen.getByRole('navigation', { name: 'Open a site app' });
+      homeScreen.querySelectorAll('.desktop-home__page').forEach((page) => {
+        expect(page.childElementCount).toBeLessThanOrEqual(12);
+      });
+      expect(screen.getByRole('button', { name: 'Show app page 2' })).toHaveAttribute('aria-current', 'page');
+    }
     fireEvent.click(screen.getByRole('link', { name: linkName }));
     const redirect = screen.getByRole('region', { name: 'Redirecting to ajt3.website...' });
     expect(redirect).toHaveClass('device-system-screen--redirect');

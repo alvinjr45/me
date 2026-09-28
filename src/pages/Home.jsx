@@ -15,6 +15,7 @@ function Home() {
   const downloadedApps = downloadedKeys
     .map((key) => desktopApps.find((app) => app.key === key && app.downloadable))
     .filter(Boolean);
+  const pendingInstallPhase = pendingInstall?.phase;
   const homeApps = [...builtInApps, ...downloadedApps];
   const [pageSize, setPageSize] = useState(homeApps.length);
   const [activePage, setActivePage] = useState(0);
@@ -55,11 +56,11 @@ function Home() {
   }, [downloadedApps.length, isPhone, pages.length]);
 
   useLayoutEffect(() => {
-    if (!pendingInstall || !appsRef.current || (isPhone && pendingInstall.phase !== 'paging')) return;
+    if (!pendingInstallPhase || !appsRef.current || (isPhone && pendingInstallPhase !== 'paging')) return;
     const lastPage = pages.length - 1;
     setActivePage(lastPage);
     if (isPhone) appsRef.current.scrollTo({ left: lastPage * appsRef.current.clientWidth, behavior: 'smooth' });
-  }, [isPhone, pageSize, pages.length, pendingInstall?.phase]);
+  }, [isPhone, pageSize, pages.length, pendingInstallPhase]);
 
   const showPage = (index) => {
     const container = appsRef.current;

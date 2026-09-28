@@ -134,6 +134,9 @@ test('downloads Build from the App Store and adds it to the home screen', () => 
     act(() => jest.advanceTimersByTime(360));
     expect(screen.getByRole('status', { name: 'Build waiting to download' })).toBeInTheDocument();
     const homeScreen = screen.getByRole('navigation', { name: 'Open a site app' });
+    homeScreen.querySelectorAll('.desktop-home__page').forEach((page) => {
+      expect(page.childElementCount).toBeLessThanOrEqual(12);
+    });
     expect(homeScreen.querySelector('.desktop-home__page:last-child > :last-child')).toHaveClass('desktop-home__app--tech');
     expect(HTMLElement.prototype.scrollTo).toHaveBeenCalledWith(expect.objectContaining({ behavior: 'smooth' }));
 

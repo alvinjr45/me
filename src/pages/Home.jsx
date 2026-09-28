@@ -4,6 +4,8 @@ import { AppIcon, desktopApps } from '../components/DeviceShell';
 import { DeviceSettingsContext } from '../components/deviceSettings';
 import './Home.css';
 
+const MAX_APPS_PER_PAGE = 12;
+
 function Home() {
   const { isPhone = false, openExternalApp, installedApps = [], installProgress = {}, pendingInstall } = useContext(DeviceSettingsContext) || {};
   const appsRef = useRef(null);
@@ -16,7 +18,7 @@ function Home() {
   const homeApps = [...builtInApps, ...downloadedApps];
   const [pageSize, setPageSize] = useState(homeApps.length);
   const [activePage, setActivePage] = useState(0);
-  const appsPerPage = isPhone ? pageSize : homeApps.length;
+  const appsPerPage = isPhone ? Math.min(pageSize, MAX_APPS_PER_PAGE) : homeApps.length;
   const pages = Array.from({ length: Math.ceil(homeApps.length / appsPerPage) }, (_, index) => (
     homeApps.slice(index * appsPerPage, (index + 1) * appsPerPage)
   ));

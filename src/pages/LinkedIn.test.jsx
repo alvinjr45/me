@@ -4,17 +4,28 @@ import { render, screen } from '@testing-library/react';
 import { DeviceSettingsContext } from '../components/deviceSettings';
 import LinkedIn from './LinkedIn';
 
-test('renders a portfolio resume without invented employment details', () => {
+test('renders professional experience and selected web apps', () => {
   render(<MemoryRouter><LinkedIn /></MemoryRouter>);
 
   expect(screen.getByRole('heading', { name: /AJ Thompson/i, level: 1 })).toBeInTheDocument();
+  expect(screen.getByText('North Carolina State University')).toBeInTheDocument();
+  expect(screen.getByText('B.S. in Computer Science · College of Engineering')).toBeInTheDocument();
+  expect(screen.getByText('Class of 2021')).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: 'Experience' })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: 'Product engineering', level: 3 })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: 'Creative systems', level: 3 })).toBeInTheDocument();
-  expect(screen.getByRole('heading', { name: 'Continuous experiments', level: 3 })).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: /View portfolio/i })).toHaveAttribute('href', 'https://ajt3.website');
-  expect(screen.getByRole('link', { name: /Read build notes/i })).toHaveAttribute('href', '/blog');
-  expect(screen.queryByText(/musician|dog person/i)).not.toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'API Connect End-to-End Automation', level: 3 })).toBeInTheDocument();
+  expect(screen.getByText('Software · 2021–Present')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Process Automation', level: 3 })).toBeInTheDocument();
+  expect(screen.getByText('Fidelity Investments')).toBeInTheDocument();
+  expect(screen.getByText('2019–2021')).toBeInTheDocument();
+  expect(screen.getByText(/700–1,000 tests nightly through Jenkins/i)).toBeInTheDocument();
+  expect(screen.getByText(/Ruby and SQL data-access tool/i)).toBeInTheDocument();
+  expect(screen.getByText('SQL · JavaScript · Java · Ruby')).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Projects' })).toBeInTheDocument();
+  expect(screen.getByText('New Trinity')).toBeInTheDocument();
+  expect(screen.getByText('Lattaco Welding')).toBeInTheDocument();
+  expect(screen.getByText('Jazzed To Be Jones')).toBeInTheDocument();
+  expect(screen.getByRole('link', { name: /^Portfolio$/i })).toHaveAttribute('href', 'https://ajt3.website');
+  expect(screen.getAllByRole('link', { name: 'Projects' }).some((link) => link.getAttribute('href') === '/app-store')).toBe(true);
 });
 
 test('uses the device account image for the profile photo', () => {

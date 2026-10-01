@@ -105,11 +105,10 @@ test.each([false, true])('blocks a direct admin editor link on phone=%s', (phone
   expect(global.fetch).not.toHaveBeenCalled();
 });
 
-test('phone keeps four dock shortcuts and paginates every app to fit the available space', () => {
+test('phone keeps four dock shortcuts and all 12 built-in apps on one page at every height', () => {
   window.matchMedia.mockImplementation((query) => ({ matches: query.includes('max-width'), addEventListener: jest.fn(), removeEventListener: jest.fn() }));
   let availableHeight = 224;
   const height = jest.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(() => availableHeight);
-  const width = jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(280);
   try {
     render(
       <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
@@ -118,29 +117,21 @@ test('phone keeps four dock shortcuts and paginates every app to fit the availab
     );
     fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
     const dock = screen.getByRole('navigation', { name: 'App dock' });
-    expect(within(dock).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(['https://ajt3.website', '/music', '/dogs', '/blog']);
+    expect(within(dock).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(desktopApps.slice(0, 4).map((app) => app.path));
     const apps = screen.getByRole('navigation', { name: 'Open a site app' });
-    expect(within(apps).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(desktopApps.map((app) => app.path));
-    expect(within(apps).getAllByRole('group')).toHaveLength(Math.ceil(desktopApps.length / 8));
-    expect(within(within(apps).getAllByRole('group')[0]).getAllByRole('link')).toHaveLength(8);
+    const builtInApps = desktopApps.filter((app) => !app.downloadable);
+    expect(within(apps).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(builtInApps.map((app) => app.path));
+    expect(within(apps).getAllByRole('group')).toHaveLength(1);
+    expect(within(within(apps).getByRole('group')).getAllByRole('link')).toHaveLength(12);
+    expect(screen.queryByRole('navigation', { name: 'Home screen pages' })).not.toBeInTheDocument();
 
-    apps.scrollTo = jest.fn();
-    fireEvent.click(screen.getByRole('button', { name: 'Show app page 2' }));
-    expect(apps.scrollTo).toHaveBeenLastCalledWith({ left: 280 });
-    fireEvent.scroll(apps, { target: { scrollLeft: 280 } });
-    expect(screen.getByRole('button', { name: 'Show app page 2' })).toHaveAttribute('aria-current', 'page');
-    fireEvent.keyDown(apps, { key: 'ArrowLeft' });
-    expect(apps.scrollTo).toHaveBeenLastCalledWith({ left: 0 });
-    expect(within(apps).getAllByRole('link')[0]).toHaveFocus();
-
-    availableHeight = 600;
+    availableHeight = 160;
     fireEvent(window, new Event('resize'));
     expect(within(apps).getAllByRole('group')).toHaveLength(1);
+    expect(within(within(apps).getByRole('group')).getAllByRole('link')).toHaveLength(12);
     expect(screen.queryByRole('navigation', { name: 'Home screen pages' })).not.toBeInTheDocument();
-    expect(apps.scrollLeft).toBe(0);
   } finally {
     height.mockRestore();
-    width.mockRestore();
   }
 });
 
@@ -347,8 +338,8 @@ test('defaults wallpaper and background to random without persisting either choi
     fireEvent.click(screen.getByRole('button', { name: 'Wallpaper' }));
     const wallpaperChoices = screen.getByLabelText('Wallpaper choices');
     expect(within(wallpaperChoices).getByRole('button', { name: /Random/ })).toHaveAttribute('aria-pressed', 'true');
-    fireEvent.click(within(wallpaperChoices).getByRole('button', { name: /Ember/ }));
-    expect(container.querySelector('.device-screen')).toHaveAttribute('data-wallpaper', 'ember');
+    fireEvent.click(within(wallpaperChoices).getByRole('button', { name: /Tide/ }));
+    expect(container.querySelector('.device-screen')).toHaveAttribute('data-wallpaper', 'tide');
     expect(window.localStorage.getItem('ajt3-wallpaper')).toBeNull();
 
     fireEvent.click(screen.getByRole('button', { name: 'Background' }));

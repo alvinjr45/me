@@ -12,6 +12,7 @@ export const terminalPages = [
   { name: 'resume', path: '/resume', description: 'View AJ Thompson\'s professional profile and selected work' },
   { name: 'photos', path: '/photos', description: 'Explore photos and albums' },
   { name: 'calendar', path: '/calendar', description: 'Browse published events' },
+  { name: 'mail', path: '/mail', description: 'Send AJ a prefilled connect email' },
   { name: 'guestbook', path: '/guestbook', description: 'Read conversations and leave a note' },
   { name: 'app-store', path: '/app-store', description: 'Explore the demo catalog and manage your library' },
   { name: 'instagram', path: 'https://www.instagram.com/_ajt3_/', description: 'Visit Instagram (new tab)' },

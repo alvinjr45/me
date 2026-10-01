@@ -5,37 +5,47 @@ import './LinkedIn.css';
 
 const experience = [
   {
-    marker: 'PE',
-    title: 'Product engineering',
-    meta: 'Current focus',
-    copy: 'Turning ambiguous ideas into useful, resilient software with a sharp eye on the people using it.'
+    marker: 'IBM',
+    title: 'API Connect End-to-End Automation',
+    meta: 'Software · 2021–Present',
+    current: true,
+    highlights: [
+      'Python automation for installs, upgrades, and end-to-end API Connect flows, running 700–1,000 tests nightly through Jenkins.',
+      'Build AI-assisted workflows with IBM Bob, including Jira and TestRail MCP servers for issue and test management.'
+    ],
+    platforms: ['Kubernetes', 'OpenShift', 'VMware', 'Cloud Pak for Integration', 'AWS SaaS']
   },
   {
-    marker: 'CS',
-    title: 'Creative systems',
-    meta: 'Ongoing practice',
-    copy: 'Exploring the overlap between code, design, automation, and the tools that make an idea feel inevitable.'
-  },
-  {
-    marker: 'CX',
-    title: 'Continuous experiments',
-    meta: 'Always in progress',
-    copy: 'Prototypes, hardware, AI, and whatever else is interesting enough to deserve a late-night build.'
+    marker: 'Fidelity Investments',
+    title: 'Process Automation',
+    meta: '2019–2021',
+    highlights: [
+      'Built a Ruby and SQL data-access tool that let internal teams retrieve the IBM Db2 records they needed for daily work.',
+      'Built a Java and JavaScript operations dashboard that consolidated server health, CPU usage, and networking into one high-level view.'
+    ],
+    technologies: ['SQL', 'JavaScript', 'Java', 'Ruby']
   }
 ];
 
-const skills = ['React', 'JavaScript', 'Product engineering', 'UI systems', 'Prototyping', 'Automation', 'AI', 'Creative technology'];
+const projects = [
+  { marker: '</>', name: 'Build', type: 'Developer tools', copy: 'Centralizes client access, project briefs, update requests, and delivery workflows.' },
+  { marker: 'NT', name: 'New Trinity', type: 'Community', copy: 'Helps members find worship details, church resources, ministry news, and ways to connect.' },
+  { marker: 'LW', name: 'Lattaco Welding', type: 'Business', copy: 'Showcases welding services, decades of experience, and custom metalwork across the Triangle.' },
+  { marker: 'J&J', name: 'Jazzed To Be Jones', type: 'Lifestyle', copy: 'Brings wedding details, the couple’s story, and the guest experience into one private destination.' }
+];
+
+const skillGroups = [
+  { title: 'Automation & AI', skills: ['Jenkins', 'CI/CD', 'MCP', 'IBM Bob'] },
+  { title: 'Cloud & infrastructure', skills: ['Kubernetes', 'OpenShift', 'VMware', 'AWS'] },
+  { title: 'API Platforms', skills: ['API Connect', 'Cloud Pak', 'IBM Db2'] },
+  { title: 'Languages', skills: ['Python', 'React', 'JavaScript', 'Java', 'Ruby', 'SQL'] }
+];
 
 function ProfileIcon({ name }) {
   const paths = {
-    search: <><circle cx="10" cy="10" r="6" /><path d="m15 15 5 5" /></>,
-    home: <><path d="m3 11 9-8 9 8" /><path d="M5 10v10h14V10M9 20v-6h6v6" /></>,
     network: <><circle cx="8" cy="7" r="3" /><circle cx="17" cy="6" r="2" /><path d="M2 20c0-5 2-8 6-8s6 3 6 8M14 12c4 0 6 3 6 7" /></>,
-    work: <><rect x="3" y="7" width="18" height="13" rx="2" /><path d="M8 7V4h8v3m-13 5h18M10 12v2h4v-2" /></>,
-    message: <path d="M4 4h16v12H9l-5 4Z" />,
     external: <><path d="M14 4h6v6M20 4l-9 9" /><path d="M18 13v6H5V6h6" /></>,
-    pin: <><path d="M12 21s7-6 7-12a7 7 0 1 0-14 0c0 6 7 12 7 12Z" /><circle cx="12" cy="9" r="2" /></>,
-    link: <><path d="m9 15 6-6" /><path d="M7 17H5a4 4 0 0 1 0-8h3M17 7h2a4 4 0 0 1 0 8h-3" /></>
+    education: <><path d="m2.5 8.5 9.5-5 9.5 5-9.5 5Z" /><path d="M6.5 11.5v4.25c1.45 1.55 3.3 2.25 5.5 2.25s4.05-.7 5.5-2.25V11.5" /><path d="M21.5 8.5v6" /><circle cx="21.5" cy="16.25" r="1" /></>
   };
 
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" focusable="false">{paths[name]}</svg>;
@@ -47,26 +57,16 @@ function LinkedIn() {
 
   return (
     <main className="linkedin-page app-view" aria-label="AJ Thompson professional profile">
-      <header className="linkedin-bar">
-        <Link to="/" className="linkedin-bar__mark" aria-label="Return to desktop">in</Link>
-        <label className="linkedin-search">
-          <ProfileIcon name="search" />
-          <input type="search" aria-label="Search profile" placeholder="Search AJ's profile" />
-        </label>
-        <nav className="linkedin-nav" aria-label="Profile navigation">
-          <a href="#profile-top"><ProfileIcon name="home" /><span>Profile</span></a>
-          <a href="#experience"><ProfileIcon name="work" /><span>Experience</span></a>
-          <a href="#projects"><ProfileIcon name="network" /><span>Projects</span></a>
-        </nav>
-        <span className="linkedin-bar__avatar" aria-label="AJ Thompson">AJ</span>
-      </header>
-
       <div className="linkedin-scroll app-scroll" id="profile-top">
         <div className="linkedin-layout">
           <div className="linkedin-primary">
-            <section className="linkedin-card linkedin-profile" aria-labelledby="linkedin-name">
-              <div className="linkedin-profile__cover" aria-hidden="true"><span>A/3</span><i /></div>
-              <div className="linkedin-profile__body">
+            <section className="linkedin-hero" aria-labelledby="linkedin-name">
+              <div className="linkedin-hero__art" aria-hidden="true">
+                <span className="linkedin-hero__monogram">AJ</span>
+                <span className="linkedin-hero__orbit" />
+                <span className="linkedin-hero__signal"><i /><i /><i /><i /></span>
+              </div>
+              <div className="linkedin-hero__body">
                 <div className="linkedin-profile__photo">
                   <img
                     className={profileImage ? 'linkedin-profile__photo-image--account' : undefined}
@@ -74,86 +74,88 @@ function LinkedIn() {
                     alt="AJ Thompson"
                   />
                 </div>
-                <p className="linkedin-profile__status"><i aria-hidden="true" /> Open to professional conversations</p>
-                <h1 id="linkedin-name">AJ Thompson <span aria-label="Profile verified">&#10003;</span></h1>
-                <p className="linkedin-profile__headline">Product engineer building useful systems at the intersection of code, design, and automation.</p>
-                <p className="linkedin-profile__meta"><ProfileIcon name="pin" /> Product engineering · Creative systems · Automation</p>
+                <div className="linkedin-hero__identity">
+                  <p className="linkedin-hero__role"><i aria-hidden="true" /> Software Engineer · IBM</p>
+                  <h1 id="linkedin-name">AJ Thompson <span aria-label="Profile verified">&#10003;</span></h1>
+                  <p className="linkedin-profile__headline">Test automation, developer tools, and React experiences.</p>
+                  <div className="linkedin-hero__education">
+                    <span className="linkedin-hero__education-mark"><ProfileIcon name="education" /></span>
+                    <div><strong>North Carolina State University</strong><small>B.S. in Computer Science · College of Engineering</small><em>Class of 2021</em></div>
+                  </div>
+                </div>
                 <div className="linkedin-profile__actions">
-                  <a className="linkedin-button linkedin-button--primary" href="https://ajt3.website" target="_blank" rel="noreferrer">View portfolio <ProfileIcon name="external" /></a>
-                  <Link className="linkedin-button" to="/blog"><ProfileIcon name="work" /> Read build notes</Link>
+                  <a className="linkedin-button linkedin-button--primary" href="https://ajt3.website" target="_blank" rel="noreferrer">Portfolio <ProfileIcon name="external" /></a>
+                  <Link className="linkedin-button" to="/app-store"><ProfileIcon name="network" /> Projects</Link>
                 </div>
               </div>
             </section>
 
-            <section className="linkedin-card linkedin-section" aria-labelledby="linkedin-about">
-              <h2 id="linkedin-about">About</h2>
-              <p>I build digital products that balance practical engineering with a strong point of view. My work lives where software, design, automation, and experimentation overlap—and where a thoughtful detail can turn a working idea into something people want to use.</p>
-              <p>This profile brings together selected work, core capabilities, and a record of the product-building process.</p>
-            </section>
-
-            <section className="linkedin-card linkedin-section" id="experience" aria-labelledby="linkedin-experience">
-              <h2 id="linkedin-experience">Experience</h2>
-              <div className="linkedin-experience">
+            <section className="linkedin-section linkedin-section--experience" id="experience" aria-labelledby="linkedin-experience">
+              <header className="linkedin-section__intro">
+                <div><p>CAREER</p><h2 id="linkedin-experience">Experience</h2></div>
+              </header>
+              <div className="linkedin-timeline">
                 {experience.map((item) => (
                   <article key={item.marker}>
-                    <span className="linkedin-experience__mark" aria-hidden="true">{item.marker}</span>
-                    <div>
-                      <h3>{item.title}</h3>
-                      <p className="linkedin-experience__meta">Independent practice · {item.meta}</p>
-                      <p>{item.copy}</p>
+                    <span className="linkedin-timeline__node" aria-hidden="true" />
+                    <div className="linkedin-timeline__role-content">
+                      <div className="linkedin-timeline__header">
+                        <div>
+                          <span className="linkedin-timeline__company">
+                            {item.marker}
+                            {item.current && <em><i aria-hidden="true" /> Current role</em>}
+                          </span>
+                          <h3>{item.title}</h3>
+                          <p>{item.meta}</p>
+                        </div>
+                      </div>
+                      <ul className="linkedin-timeline__highlights">
+                        {item.highlights.map((highlight) => <li key={highlight}>{highlight}</li>)}
+                      </ul>
+                      {item.platforms && <p className="linkedin-timeline__platforms">{item.platforms.join(' · ')}</p>}
+                      {item.technologies && <p className="linkedin-timeline__platforms">{item.technologies.join(' · ')}</p>}
                     </div>
                   </article>
                 ))}
               </div>
             </section>
 
-            <section className="linkedin-card linkedin-section" id="projects" aria-labelledby="linkedin-projects">
-              <div className="linkedin-section__heading">
-                <div><p>SELECTED WORK</p><h2 id="linkedin-projects">Featured projects</h2></div>
-                <a href="https://ajt3.website" target="_blank" rel="noreferrer">See all <ProfileIcon name="external" /></a>
+            <section className="linkedin-section linkedin-section--projects" id="projects" aria-labelledby="linkedin-projects">
+              <div className="linkedin-section__heading linkedin-section__intro">
+                <div><p>SELECTED WORK</p><h2 id="linkedin-projects">Projects</h2></div>
+                <Link to="/app-store">View app store <ProfileIcon name="external" /></Link>
               </div>
               <div className="linkedin-projects">
-                <a href="https://ajt3.website" target="_blank" rel="noreferrer">
-                  <span className="linkedin-projects__visual linkedin-projects__visual--build" aria-hidden="true">&lt;/&gt;</span>
-                  <span><strong>AJT3.website</strong><small>Projects, prototypes, and experiments.</small></span>
-                </a>
-                <Link to="/blog">
-                  <span className="linkedin-projects__visual linkedin-projects__visual--notes" aria-hidden="true">{'//'}</span>
-                  <span><strong>Build notes</strong><small>A running log of decisions and ideas.</small></span>
-                </Link>
+                {projects.map((project, index) => (
+                  <Link to="/app-store" key={project.name}>
+                    <span className="linkedin-projects__number" aria-hidden="true">0{index + 1}</span>
+                    <span className="linkedin-projects__glyph" aria-hidden="true">{project.marker}</span>
+                    <span className="linkedin-projects__copy"><small>React / {project.type}</small><strong>{project.name}</strong><span>{project.copy}</span></span>
+                    <span className="linkedin-projects__arrow" aria-hidden="true">&#8599;</span>
+                  </Link>
+                ))}
               </div>
             </section>
 
-            <section className="linkedin-card linkedin-section" aria-labelledby="linkedin-skills">
-              <h2 id="linkedin-skills">Skills</h2>
-              <div className="linkedin-skills">
-                {skills.map((skill) => <span key={skill}>{skill}</span>)}
+            <section className="linkedin-section linkedin-section--skills" id="skills" aria-labelledby="linkedin-skills">
+              <header className="linkedin-section__intro">
+                <div><p>TOOLBOX</p><h2 id="linkedin-skills">Core skills</h2></div>
+              </header>
+              <div className="linkedin-skill-index">
+                <div className="linkedin-skill-index__rows">
+                  {skillGroups.map((group, index) => (
+                    <article key={group.title}>
+                      <span aria-hidden="true">0{index + 1}</span>
+                      <h3>{group.title}</h3>
+                      <p>{group.skills.join(' / ')}</p>
+                    </article>
+                  ))}
+                </div>
               </div>
             </section>
           </div>
-
-          <aside className="linkedin-secondary" aria-label="Profile details">
-            <section className="linkedin-card linkedin-snapshot">
-              <p>PROFILE SNAPSHOT</p>
-              <dl>
-                <div><dt>Focus</dt><dd>Product engineering</dd></div>
-                <div><dt>Mode</dt><dd>Always building</dd></div>
-                <div><dt>Based on</dt><dd>Curiosity + iteration</dd></div>
-              </dl>
-            </section>
-            <section className="linkedin-card linkedin-contact">
-              <h2>Professional links</h2>
-              <a href="https://ajt3.website" target="_blank" rel="noreferrer"><ProfileIcon name="link" /><span><strong>Portfolio</strong><small>ajt3.website</small></span></a>
-              <Link to="/blog"><ProfileIcon name="work" /><span><strong>Build notes</strong><small>Process, decisions, and ideas</small></span></Link>
-            </section>
-            <section className="linkedin-card linkedin-open-to">
-              <span aria-hidden="true">OPEN TO</span>
-              <h2>Interesting problems and thoughtful collaborations.</h2>
-              <a href="https://ajt3.website" target="_blank" rel="noreferrer">View professional work <span aria-hidden="true">&nearr;</span></a>
-            </section>
-          </aside>
         </div>
-        <footer className="linkedin-footer">A LinkedIn-inspired resume · Built inside AJ's personal system.</footer>
+        <footer className="linkedin-footer"><span>AJT / 2026</span> Designed and built by AJ Thompson.</footer>
       </div>
     </main>
   );

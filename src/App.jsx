@@ -16,6 +16,7 @@ import Terminal from './pages/Terminal';
 import Settings from './pages/Settings';
 import AppStore from './pages/AppStore';
 import LinkedIn from './pages/LinkedIn';
+import Mail from './pages/Mail';
 import NotFound from './pages/NotFound';
 import DeviceShell from './components/DeviceShell';
 import './App.css';
@@ -84,6 +85,7 @@ function AppShell() {
       <Route path="/settings" element={<Settings />} />
       <Route path="/app-store" element={<AppStore />} />
       <Route path="/resume" element={<LinkedIn />} />
+      <Route path="/mail" element={<Mail />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

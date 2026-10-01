@@ -11,6 +11,7 @@ import Terminal from '../pages/Terminal';
 import Settings from '../pages/Settings';
 import AppStore from '../pages/AppStore';
 import LinkedIn from '../pages/LinkedIn';
+import Mail from '../pages/Mail';
 import MissionControl from '../pages/MissionControl';
 import SceneBackground from './SceneBackground';
 import PhoneBackGesture from './PhoneBackGesture';
@@ -31,25 +32,26 @@ import './DeviceShell.css';
 import './AppWorkspace.css';
 
 export const desktopApps = [
-  { key: 'guestbook', label: 'Guestbook', path: '/guestbook', description: 'Leave a little note' },
   { key: 'photos', label: 'Photos', path: '/photos', description: 'A little of my world' },
   { key: 'blog', label: 'Blog', path: '/blog', description: 'Notes from the build' },
-  { key: 'resume', label: 'Resume', path: '/resume', description: 'Professional profile & selected work' },
+  { key: 'guestbook', label: 'Guestbook', path: '/guestbook', description: 'Leave a little note' },
   { key: 'calendar', label: 'Calendar', path: '/calendar', description: 'Make time for what matters', utility: true },
+  { key: 'mail', label: 'Mail', path: '/mail', description: 'Start a conversation', utility: true },
   { key: 'music', label: 'Music', path: '/music', description: 'The current rotation' },
-  { key: 'store', label: 'App Store', path: '/app-store', description: 'Find your next favorite', utility: true },
   { key: 'dogs', label: 'Dogs', path: '/dogs', description: 'Drake & Josh' },
-  { key: 'instagram', label: 'Instagram', path: 'https://www.instagram.com/_ajt3_/', description: 'Follow me on Instagram', external: true },
+  { key: 'store', label: 'App Store', path: '/app-store', description: 'Find your next favorite', utility: true },
+  { key: 'resume', label: 'Resume', path: '/resume', description: 'Professional profile & selected work' },
   { key: 'terminal', label: 'Terminal', path: '/terminal', description: 'Command center', utility: true },
   { key: 'admin', label: 'Mission Control', path: '/admin', description: 'Behind the scenes', utility: true },
+  { key: 'settings', label: 'Settings', path: '/settings', description: 'Make it yours', utility: true },
+  { key: 'instagram', label: 'Instagram', path: 'https://www.instagram.com/_ajt3_/', description: 'Follow me on Instagram', external: true },
   { key: 'tech', label: 'Build', path: 'https://ajt3.website', description: 'Projects & experiments', external: true, downloadable: true },
   { key: 'newtrinity', label: 'New Trinity Missionary Baptist Church', path: 'https://www.newtrinity.org', description: 'Faith, community & connection', external: true, downloadable: true },
   { key: 'lattaco', label: 'Lattaco Welding', path: 'https://lattacowelding.com', description: 'Precision metalwork', external: true, downloadable: true },
-  { key: 'jazzed', label: 'Jazzed To Be Jones', path: 'https://www.jazzedtobejones.com', description: 'Jazmine & Tyler', external: true, downloadable: true },
-  { key: 'settings', label: 'Settings', path: '/settings', description: 'Make it yours', utility: true }
+  { key: 'jazzed', label: 'Jazzed To Be Jones', path: 'https://www.jazzedtobejones.com', description: 'Jazmine & Tyler', external: true, downloadable: true }
 ];
 
-const appPages = { tech: Tech, music: Music, dogs: Dogs, blog: Blog, resume: LinkedIn, photos: Photos, calendar: Calendar, guestbook: Guestbook, store: AppStore, admin: MissionControl, terminal: Terminal, settings: Settings };
+const appPages = { tech: Tech, music: Music, dogs: Dogs, blog: Blog, resume: LinkedIn, photos: Photos, calendar: Calendar, mail: Mail, guestbook: Guestbook, store: AppStore, admin: MissionControl, terminal: Terminal, settings: Settings };
 const phoneMediaQuery = '(max-width: 1024px), (max-height: 500px)';
 const phoneDockApps = desktopApps.slice(0, 4);
 
@@ -135,6 +137,11 @@ export function AppIcon({ name }) {
       <path d="M0 13C0 6 6 0 13 0h38c7 0 13 6 13 13v8H0Z" fill="#ee654b" />
       <text x="32" y="15" textAnchor="middle" fill="#fff" fontSize="10" fontWeight="600">{new Date().toLocaleDateString('en-US', { month: 'short' }).toUpperCase()}</text>
       <text x="32" y="54" textAnchor="middle" fill="#242b33" fontSize="35" fontWeight="300">{new Date().getDate()}</text>
+    </>,
+    mail: <>
+      <path d="M9 17h46v32H9z" fill="#fff" />
+      <path d="m10 18 22 19 22-19" fill="none" stroke="#2795f5" strokeWidth="3" />
+      <path d="m10 48 16-15m28 15L38 33" stroke="#d9efff" strokeWidth="2" />
     </>,
     store: <path d="m24 13 23 39M39 13 17 51M12 40h28M46 40h7" stroke="#fff" strokeWidth="5" />,
     instagram: <>
@@ -353,7 +360,10 @@ function GuestAccessDialog({ onDismiss, onLogout }) {
       >
         <span className="device-access-dialog__icon" aria-hidden="true">!</span>
         <h2 id="device-access-title">Administrator access required</h2>
-        <p id="device-access-message">You are signed in as Guest. To open Mission Control, you must log out and log in as AJ Thompson, the administrator.</p>
+        <div id="device-access-message" className="device-access-dialog__message">
+          <p>You are currently signed in as <strong>Guest</strong>.</p>
+          <p>To open <strong>Mission Control</strong>, you must log out and log in as <strong>AJ Thompson</strong>, the administrator.</p>
+        </div>
         <div className="device-access-dialog__actions">
           <button type="button" onClick={onDismiss}>OK</button>
           <button type="button" onClick={onLogout}>Log out</button>
@@ -1283,7 +1293,7 @@ function DeviceShell({ children, home }) {
               <Link className={`device-screen__dock-home${isHome ? ' device-screen__dock-home--active' : ''}`} to="/" aria-label="Show desktop" onClick={showDesktop}>A/3</Link>
               <span className="device-screen__dock-divider" aria-hidden="true" />
               </>}
-              {(isPhone ? phoneDockApps : desktopApps.filter((app) => !app.downloadable || installedApps.includes(app.key))).map((app) => (
+              {(isPhone ? phoneDockApps : desktopApps.filter((app) => !app.downloadable)).map((app) => (
                 <Link key={app.key} to={app.path} onClick={app.external ? (event) => openExternalApp(app.key, event) : undefined} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`device-screen__dock-app${app.utility ? ' device-screen__dock-app--utility' : ''}${windows.some((item) => item.key === app.key) || activeApp?.key === app.key ? ' device-screen__dock-app--active' : ''}`} aria-label={`Open ${app.label}`} title={app.label}>
                   <AppIcon name={app.key} />
                   <span className="device-screen__dock-label">{app.label}</span>

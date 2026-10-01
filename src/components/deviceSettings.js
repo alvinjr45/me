@@ -5,7 +5,6 @@ export const wallpaperChoices = [
   { key: 'aurora', label: 'Aurora', description: 'Drifting polar light' },
   { key: 'nebula', label: 'Nebula', description: 'Deep-space color clouds' },
   { key: 'tide', label: 'Tide', description: 'Calm ocean currents' },
-  { key: 'ember', label: 'Ember', description: 'Warm floating glow' },
   { key: 'sunset', label: 'Sunset', description: 'Soft evening gradients' },
   { key: 'cobalt', label: 'Cobalt', description: 'Flowing electric blue' },
   { key: 'jade', label: 'Jade', description: 'Layered emerald silk' },

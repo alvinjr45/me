@@ -1,0 +1,142 @@
+.device-window__content:has(> .mail-app) {
+  overflow: hidden;
+  background: #f2f2f7;
+}
+
+.mail-app {
+  --mail-blue: #0a84ff;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f2f2f7;
+  color: #111114;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  color-scheme: light;
+}
+
+.mail-compose__toolbar {
+  position: relative;
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: minmax(64px, 1fr) auto minmax(64px, 1fr);
+  align-items: center;
+  flex: none;
+  padding: 6px 12px;
+  border-bottom: 0.5px solid #c6c6c8;
+  background: rgba(249, 249, 249, 0.94);
+}
+
+.device-window__content .mail-compose__toolbar h1 {
+  margin: 0;
+  color: #111114;
+  font-size: 17px;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.mail-compose__done {
+  justify-self: start;
+  color: var(--mail-blue);
+  font-size: 16px;
+}
+
+.mail-compose__send {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  justify-self: end;
+  border-radius: 50%;
+  background: var(--mail-blue);
+  color: #fff;
+}
+
+.mail-compose__send:hover { background: #0073df; }
+.mail-compose__send:focus-visible { outline: 3px solid rgba(10, 132, 255, 0.35); outline-offset: 2px; }
+.mail-compose__send svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 2.25; stroke-linecap: round; stroke-linejoin: round; }
+
+.mail-compose {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding-left: clamp(14px, 3cqw, 28px);
+  overflow: hidden;
+  background: #fff;
+}
+
+.mail-compose__field {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  flex: none;
+  gap: 8px;
+  padding-right: clamp(14px, 3cqw, 28px);
+  border-bottom: 0.5px solid #d1d1d6;
+  font-size: 16px;
+}
+
+.mail-compose__field label,
+.mail-compose__field--muted { color: #74747a; }
+
+.mail-compose__field input {
+  min-width: 0;
+  flex: 1;
+  padding: 8px 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #111114;
+  font: inherit;
+}
+
+.mail-compose__field input:focus-visible { box-shadow: inset 0 -2px var(--mail-blue); }
+.mail-compose__field input[readonly] { color: #111114; }
+
+.mail-compose__add {
+  width: 25px;
+  height: 25px;
+  display: grid;
+  place-items: center;
+  flex: none;
+  border-radius: 50%;
+  background: var(--mail-blue);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.mail-compose textarea {
+  width: 100%;
+  min-height: 150px;
+  flex: 1;
+  resize: none;
+  padding: 15px clamp(14px, 3cqw, 28px) 20px 0;
+  border: 0;
+  outline: 0;
+  background: #fff;
+  color: #111114;
+  font: 17px/1.45 -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+}
+
+.mail-compose textarea:focus-visible { box-shadow: inset 3px 0 var(--mail-blue); }
+
+.device-scene--phone .device-screen--app .mail-compose__toolbar {
+  padding-top: calc(6px + var(--phone-safe-top));
+}
+
+.device-scene--phone .device-screen--app .mail-compose textarea {
+  padding-bottom: calc(20px + var(--phone-safe-bottom));
+}
+
+@container (max-width: 440px) {
+  .mail-compose__toolbar { grid-template-columns: 56px 1fr 56px; padding-inline: 10px; }
+  .mail-compose__field { min-height: 43px; font-size: 15px; }
+  .mail-compose textarea { font-size: 16px; }
+}

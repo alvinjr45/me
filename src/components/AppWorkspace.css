@@ -80,6 +80,8 @@
   overflow: auto;
   overscroll-behavior: contain;
   scrollbar-gutter: stable;
+  touch-action: pan-y pinch-zoom;
+  -webkit-overflow-scrolling: touch;
 }
 
 .app-empty { margin: 0; padding: 1.5rem; color: var(--color-muted-strong); line-height: 1.6; }
@@ -97,7 +99,7 @@
   text-align: center;
 }
 
-.device-scene--phone .device-screen--app :is(.music-page, .settings-page, .terminal-page, .dogs-app, .blog-page, .calendar-app, .store-page, .linkedin-page, .mission-control, .guestbook-messages:not(.guestbook-messages--welcome)) {
+.device-scene--phone .device-screen--app :is(.music-page, .settings-page, .terminal-page, .dogs-app, .blog-page, .calendar-app, .mail-app, .store-page, .linkedin-page, .mission-control, .guestbook-messages:not(.guestbook-messages--welcome)) {
     --app-safe-top: 0px;
     --app-safe-bottom: 0px;
   }

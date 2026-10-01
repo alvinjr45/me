@@ -63,8 +63,7 @@ function expectHomeUrl(historyLength) {
 
 test.each([
   [true, 'Build'],
-  [false, 'Build'],
-  [false, 'Open Build']
+  [false, 'Build']
 ])('Build shows a full emulator redirect screen before leaving the site (phone: %s, link: %s)', (isPhone, linkName) => {
   jest.useFakeTimers();
   const savedLocation = Object.getOwnPropertyDescriptor(window, 'location');
@@ -89,18 +88,34 @@ test.each([
       homeScreen.querySelectorAll('.desktop-home__page').forEach((page) => {
         expect(page.childElementCount).toBeLessThanOrEqual(12);
       });
+      expect(within(screen.getByRole('navigation', { name: 'App dock' })).queryByRole('link', { name: 'Open Build' })).not.toBeInTheDocument();
       expect(screen.getByRole('button', { name: 'Show app page 2' })).toHaveAttribute('aria-current', 'page');
       if (linkName === 'Build') {
-        homeScreen.setPointerCapture = jest.fn();
-        const swipe = (from, to) => {
-          fireEvent(homeScreen, Object.assign(new Event('pointerdown', { bubbles: true }), { pointerId: 1, button: 0, clientX: from, clientY: 100 }));
-          fireEvent(homeScreen, Object.assign(new Event('pointermove', { bubbles: true }), { pointerId: 1, button: 0, clientX: to, clientY: 102 }));
-          fireEvent(homeScreen, Object.assign(new Event('pointerup', { bubbles: true }), { pointerId: 1, button: 0, clientX: to, clientY: 102 }));
+        const homeSurface = homeScreen.closest('.desktop-home');
+        homeSurface.setPointerCapture = jest.fn();
+        Object.defineProperty(homeScreen, 'clientWidth', { configurable: true, value: 400 });
+        const swipe = (from, to, startScrollLeft, draggedScrollLeft) => {
+          homeScreen.scrollLeft = startScrollLeft;
+          fireEvent(homeSurface, Object.assign(new Event('pointerdown', { bubbles: true }), { pointerId: 1, button: 0, clientX: from, clientY: 100 }));
+          fireEvent(homeSurface, Object.assign(new Event('pointermove', { bubbles: true }), { pointerId: 1, button: 0, clientX: to, clientY: 102 }));
+          expect(homeScreen.scrollLeft).toBe(draggedScrollLeft);
+          fireEvent(homeSurface, Object.assign(new Event('pointerup', { bubbles: true }), { pointerId: 1, button: 0, clientX: to, clientY: 102 }));
         };
-        swipe(120, 220);
+        swipe(120, 220, 400, 300);
         expect(screen.getByRole('button', { name: 'Show app page 1' })).toHaveAttribute('aria-current', 'page');
-        swipe(220, 120);
+        swipe(220, 120, 0, 100);
         expect(screen.getByRole('button', { name: 'Show app page 2' })).toHaveAttribute('aria-current', 'page');
+
+        homeScreen.scrollLeft = 0;
+        fireEvent(homeScreen, new Event('scroll', { bubbles: true }));
+        expect(screen.getByRole('button', { name: 'Show app page 1' })).toHaveAttribute('aria-current', 'page');
+        fireEvent(homeSurface, Object.assign(new Event('pointerdown', { bubbles: true }), { pointerId: 2, pointerType: 'touch', button: 0, clientX: 220, clientY: 100 }));
+        fireEvent(homeSurface, Object.assign(new Event('pointermove', { bubbles: true }), { pointerId: 2, pointerType: 'touch', button: 0, clientX: 120, clientY: 102 }));
+        expect(homeScreen.scrollLeft).toBe(0);
+        homeScreen.scrollLeft = 400;
+        fireEvent(homeScreen, new Event('scroll', { bubbles: true }));
+        expect(screen.getByRole('button', { name: 'Show app page 2' })).toHaveAttribute('aria-current', 'page');
+        fireEvent(homeSurface, Object.assign(new Event('pointerup', { bubbles: true }), { pointerId: 2, pointerType: 'touch', button: 0, clientX: 120, clientY: 102 }));
         act(() => jest.advanceTimersByTime(0));
       }
     }

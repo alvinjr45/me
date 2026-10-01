@@ -161,26 +161,6 @@
   animation: wallpaper-turn-reverse 31s linear infinite;
 }
 
-.device-screen[data-wallpaper='ember'] .device-screen__wallpaper {
-  background: linear-gradient(145deg, #120704, #351106 56%, #080506);
-}
-
-.device-screen[data-wallpaper='ember'] .device-screen__wallpaper-layer--one {
-  background:
-    radial-gradient(circle at 30% 70%, rgba(255, 139, 51, 0.75), transparent 17%),
-    radial-gradient(circle at 72% 36%, rgba(210, 55, 22, 0.52), transparent 25%);
-  filter: blur(20px);
-  animation: wallpaper-ember 13s ease-in-out infinite alternate;
-}
-
-.device-screen[data-wallpaper='ember'] .device-screen__wallpaper-layer--two {
-  inset: 0;
-  opacity: 0.55;
-  background-image: radial-gradient(circle, rgba(255, 190, 109, 0.85) 0 1px, transparent 1.8px);
-  background-size: 67px 67px;
-  animation: wallpaper-rise 16s linear infinite;
-}
-
 .device-screen[data-wallpaper='sunset'] .device-screen__wallpaper {
   background: linear-gradient(145deg, #182d5a, #936484 52%, #e8956c 77%, #3b4466);
 }
@@ -432,13 +412,6 @@
 @keyframes wallpaper-turn { to { transform: rotate(360deg); } }
 @keyframes wallpaper-turn-reverse { to { transform: rotate(-360deg); } }
 
-@keyframes wallpaper-ember {
-  from { transform: translate3d(-6%, 6%, 0) scale(0.92); }
-  to { transform: translate3d(7%, -7%, 0) scale(1.13); }
-}
-
-@keyframes wallpaper-rise { to { background-position: 18px -134px; } }
-
 @keyframes wallpaper-rain { to { background-position: -83px 274px; } }
 @keyframes wallpaper-rain-distant { to { background-position: -127px 382px; } }
 
@@ -586,6 +559,7 @@
 .device-app-icon--blog { background: linear-gradient(#ffe477, #ffd33e 33%, #fffef9 33%, #f4f1e9); }
 .device-app-icon--photos { background: linear-gradient(#fff, #fafafa); }
 .device-app-icon--calendar { background: #f8f8f5; }
+.device-app-icon--mail { background: linear-gradient(#5fc8ff, #087cf0); }
 .device-app-icon--instagram { background: radial-gradient(circle at 25% 100%, #ffd776, #f77737 25%, #e1306c 50%, #833ab4 80%, #405de6); }
 .device-app-icon--resume { background: linear-gradient(#1686d9, #075c9e); }
 .device-app-icon--guestbook { background: linear-gradient(#65dc68, #20b942); }
@@ -990,7 +964,7 @@
 .device-system-screen__site-title {
   max-width: 100%;
   margin: clamp(24px, 8cqw, 36px) 0 0;
-  color: #f9f9f9;
+  color: #ffab73;
   font-size: clamp(1.2rem, 6cqw, 1.75rem);
   font-weight: 750;
   line-height: 1.2;
@@ -1107,7 +1081,10 @@
   font: 700 1.5rem var(--font-mono);
 }
 .device-access-dialog h2 { margin: 1rem 0 0.6rem; font-size: 1.1rem; }
-.device-access-dialog p { margin: 0; color: #c4cfdb; font-size: 0.9rem; line-height: 1.6; }
+.device-access-dialog__message { color: #c4cfdb; font-size: 0.9rem; line-height: 1.6; }
+.device-access-dialog__message p { margin: 0; }
+.device-access-dialog__message p + p { margin-top: 0.65rem; }
+.device-access-dialog__message strong { color: #f9f9f9; }
 .device-access-dialog__actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.75rem; margin-top: 1.5rem; }
 .device-access-dialog__actions button {
   min-width: 80px;
@@ -1119,6 +1096,50 @@
   color: #fff;
 }
 .device-access-dialog__actions button:last-child { background: #fb7f33; border-color: #fb7f33; color: #16110d; }
+
+.device-scene--phone .device-access-overlay {
+  padding: calc(var(--phone-safe-top) + 10px) 10px calc(var(--phone-safe-bottom) + 10px);
+}
+
+.device-scene--phone .device-access-dialog {
+  width: min(300px, 100%);
+  display: grid;
+  grid-template-columns: 40px minmax(0, 1fr);
+  column-gap: 12px;
+  padding: 1.1rem;
+}
+
+.device-scene--phone .device-access-dialog h2 {
+  align-self: center;
+  margin: 0;
+  font-size: clamp(0.95rem, 6cqw, 1.08rem);
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.device-scene--phone .device-access-dialog__message,
+.device-scene--phone .device-access-dialog__actions {
+  grid-column: 1 / -1;
+}
+
+.device-scene--phone .device-access-dialog__message {
+  margin-top: 1rem;
+  font-size: clamp(0.78rem, 4.4cqw, 0.88rem);
+  line-height: 1.5;
+}
+
+.device-scene--phone .device-access-dialog__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 1.1rem;
+}
+
+.device-scene--phone .device-access-dialog__actions button {
+  min-width: 72px;
+  width: auto;
+  padding-inline: 0.75rem;
+}
 
 .device-system-screen__avatar,
 .device-system-screen__logo {

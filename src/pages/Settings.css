@@ -142,7 +142,6 @@
 .settings-page__wallpaper--aurora .settings-page__wallpaper-preview { background-image: radial-gradient(ellipse at 70% 70%, #27baa9, transparent 48%), radial-gradient(ellipse at 28% 30%, #426fd1, transparent 48%), linear-gradient(135deg, #05111d, #16384b); }
 .settings-page__wallpaper--nebula .settings-page__wallpaper-preview { background-image: radial-gradient(circle at 32% 40%, #8d43ba, transparent 28%), radial-gradient(circle at 70% 65%, #126fc0, transparent 34%), linear-gradient(145deg, #09051d, #06152b); }
 .settings-page__wallpaper--tide .settings-page__wallpaper-preview { background-image: radial-gradient(ellipse at 30% 70%, #19a8ad, transparent 40%), radial-gradient(ellipse at 75% 30%, #1465a1, transparent 40%), linear-gradient(145deg, #031923, #063853); }
-.settings-page__wallpaper--ember .settings-page__wallpaper-preview { background-image: radial-gradient(circle at 30% 70%, #ef7d2e, transparent 27%), radial-gradient(circle at 75% 35%, #a82819, transparent 33%), linear-gradient(145deg, #160804, #080506); }
 .settings-page__wallpaper--sunset .settings-page__wallpaper-preview { background-image: radial-gradient(circle at 72% 34%, #ffe1aa, transparent 14%), linear-gradient(145deg, #1d3769, #a86b8b 55%, #ed976d); }
 
 .settings-page__wallpaper--cobalt .settings-page__wallpaper-preview { background-image: linear-gradient(125deg, transparent 36%, rgba(66, 162, 255, 0.4) 49%, transparent 59%), radial-gradient(ellipse at 32% 65%, #1757c2, transparent 40%), linear-gradient(140deg, #020919, #08265e 55%, #041229); }

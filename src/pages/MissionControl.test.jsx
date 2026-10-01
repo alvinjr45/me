@@ -12,7 +12,15 @@ const savedFetch = global.fetch;
 const savedUrl = process.env.REACT_APP_SUPABASE_URL;
 const savedCreateObjectURL = URL.createObjectURL;
 const savedRevokeObjectURL = URL.revokeObjectURL;
-const post = { slug: 'first-post', title: 'First post', is_published: true, sections: [], media: [] };
+const post = {
+  slug: 'first-post',
+  title: 'First post',
+  eyebrow: 'Drake and Josh',
+  tags: ['dogs'],
+  is_published: true,
+  sections: [],
+  media: [{ type: 'image', src: 'https://example.test/existing.jpg', alt: 'Existing photo', caption: '' }]
+};
 const photo = { id: 'drake', title: 'Drake', image_url: '/images/dogs/drake.jpg', album_id: 'dogs', alt_text: 'Portrait of Drake', caption: '', sort_order: 0, width: 3024, height: 4032, is_published: true };
 const album = { id: 'dogs', title: 'Drake & Josh', description: '', sort_order: 0 };
 const response = (status, data) => ({ status, ok: status >= 200 && status < 300, text: async () => JSON.stringify(data) });
@@ -138,6 +146,25 @@ test('preserves the verified editor session and a draft while switching apps', a
   expect(global.fetch).toHaveBeenCalledTimes(2);
   fireEvent.click(screen.getByRole('button', { name: 'Back to dashboard' }));
   expect(await screen.findByRole('heading', { name: 'Posts' })).toBeInTheDocument();
+});
+
+test('limits blog media editing to adding or removing files', async () => {
+  openApp('/admin/new?slug=first-post');
+  await signIn();
+  await screen.findByDisplayValue('First post');
+
+  expect(screen.getByLabelText('Category')).toHaveValue('Dogs');
+  expect(screen.queryByLabelText('Eyebrow')).not.toBeInTheDocument();
+  expect(screen.queryByLabelText('Tags')).not.toBeInTheDocument();
+  expect(screen.queryByRole('heading', { name: 'Media URLs' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: 'Add URL' })).not.toBeInTheDocument();
+  fireEvent.click(screen.getByRole('button', { name: 'Remove Existing photo' }));
+  expect(screen.queryByRole('button', { name: 'Remove Existing photo' })).not.toBeInTheDocument();
+
+  const upload = new File(['photo'], 'new-photo.heic', { type: 'image/heic' });
+  fireEvent.change(screen.getByLabelText('Upload photos or videos'), { target: { files: [upload] } });
+  fireEvent.click(screen.getByRole('button', { name: 'Remove new-photo.heic' }));
+  expect(screen.queryByText('new-photo.heic')).not.toBeInTheDocument();
 });
 
 test('keeps access locked on network errors and malformed successful responses', async () => {

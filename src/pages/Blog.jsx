@@ -51,9 +51,10 @@ function Blog() {
     };
   }, []);
 
-  const folders = [...new Set(posts.flatMap((post) => post.tags))].sort();
+  const blogPosts = posts.filter((post) => !post.tags.includes('dogs'));
+  const folders = [...new Set(blogPosts.flatMap((post) => post.tags))].sort();
   const activeFolder = folders.includes(folder) ? folder : '';
-  const matchingPosts = posts.filter((post) =>
+  const matchingPosts = blogPosts.filter((post) =>
     (!activeFolder || post.tags.includes(activeFolder)) &&
     [post.title, post.excerpt, ...post.tags].join(' ').toLowerCase().includes(query.trim().toLowerCase())
   );
@@ -96,12 +97,12 @@ function Blog() {
           <p className="blog-page__account">On AJT3</p>
           <button type="button" className={`blog-page__folder${!activeFolder ? ' is-selected' : ''}`}
             aria-pressed={!activeFolder} onClick={() => selectFolder('')}>
-            <NoteIcon /><span>All blogs</span><small>{posts.length}</small>
+            <NoteIcon /><span>All blogs</span><small>{blogPosts.length}</small>
           </button>
           {folders.map((tag) => (
             <button type="button" key={tag} className={`blog-page__folder${activeFolder === tag ? ' is-selected' : ''}`}
               aria-pressed={activeFolder === tag} onClick={() => selectFolder(tag)}>
-              <NoteIcon folder /><span>{tag}</span><small>{posts.filter((post) => post.tags.includes(tag)).length}</small>
+              <NoteIcon folder /><span>{tag}</span><small>{blogPosts.filter((post) => post.tags.includes(tag)).length}</small>
             </button>
           ))}
           <p className="blog-page__signature">{'// blogs from the build'}</p>

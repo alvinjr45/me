@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import AdminLogin from '../components/AdminLogin';
 import {
   createEmptyPostForm,
-  emptyMediaUrl,
   emptySection,
   formatBackendError,
   getSupabaseFunctionHeaders,
+  HEIC_ACCEPT,
   normalizeUploadFile,
   readResponsePayload,
-  slugify,
   toInputDate,
   toLines,
   toTextList,
@@ -23,7 +22,7 @@ function NewPost({ slug = null, access, onBusy }) {
   const [form, setForm] = useState(() => createEmptyPostForm(today));
   const [coverFile, setCoverFile] = useState(null);
   const [sections, setSections] = useState([{ ...emptySection }]);
-  const [mediaUrls, setMediaUrls] = useState([{ ...emptyMediaUrl }]);
+  const [existingMedia, setExistingMedia] = useState([]);
   const [mediaFiles, setMediaFiles] = useState([]);
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
@@ -45,21 +44,11 @@ function NewPost({ slug = null, access, onBusy }) {
     );
   }
 
-  function updateMediaUrl(index, name, value) {
-    setMediaUrls((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, [name]: value } : item)));
-  }
-
-  function updateMediaFile(index, name, value) {
-    setMediaFiles((current) => current.map((item, itemIndex) => (itemIndex === index ? { ...item, [name]: value } : item)));
-  }
-
   function handleMediaFiles(files) {
     setMediaFiles(
       Array.from(files).map((file) => ({
         file,
-        type: file.type.startsWith('video/') ? 'video' : 'image',
-        alt: '',
-        caption: ''
+        type: file.type.startsWith('video/') ? 'video' : 'image'
       }))
     );
   }
@@ -68,7 +57,7 @@ function NewPost({ slug = null, access, onBusy }) {
     setForm(createEmptyPostForm(today));
     setCoverFile(null);
     setSections([{ ...emptySection }]);
-    setMediaUrls([{ ...emptyMediaUrl }]);
+    setExistingMedia([]);
     setMediaFiles([]);
     setStatus('idle');
     setMessage('');
@@ -76,13 +65,15 @@ function NewPost({ slug = null, access, onBusy }) {
   }
 
   function handleEditPost(post) {
+    const primaryCategory = Array.isArray(post.tags) && post.tags.length ? post.tags[0] : post.eyebrow;
     setForm({
       title: post.title || '',
       originalSlug: post.slug || '',
-      eyebrow: post.eyebrow || 'Journal',
+      category: primaryCategory
+        ? `${primaryCategory.charAt(0).toUpperCase()}${primaryCategory.slice(1)}`
+        : 'Journal',
       excerpt: post.excerpt || '',
       publishedAt: toInputDate(post.published_at, today),
-      tags: Array.isArray(post.tags) ? post.tags.join(', ') : '',
       coverImageUrl: post.cover_image_url || '',
       coverImageAlt: post.cover_image_alt || '',
       isPublished: Boolean(post.is_published)
@@ -97,17 +88,7 @@ function NewPost({ slug = null, access, onBusy }) {
           }))
         : [{ ...emptySection }]
     );
-    setMediaUrls(
-      post.media?.length
-        ? post.media.map((item) => ({
-            type: item.type || 'image',
-            src: item.src || '',
-            alt: item.alt || '',
-            caption: item.caption || '',
-            poster: item.poster || ''
-          }))
-        : [{ ...emptyMediaUrl }]
-    );
+    setExistingMedia(Array.isArray(post.media) ? post.media : []);
     setMediaFiles([]);
     setStatus('idle');
     setMessage(`Editing /blog/${post.slug}`);
@@ -139,10 +120,12 @@ function NewPost({ slug = null, access, onBusy }) {
       body.append('adminSecret', access.session.secret);
       body.append('originalSlug', form.originalSlug);
       body.append('title', form.title);
-      body.append('eyebrow', form.eyebrow);
+      const category = form.category.trim() || 'Journal';
+      body.append('category', category);
+      body.append('eyebrow', category);
       body.append('excerpt', form.excerpt);
       body.append('publishedAt', form.publishedAt);
-      body.append('tags', JSON.stringify(toLines(form.tags.replaceAll(',', '\n'))));
+      body.append('tags', JSON.stringify([category.toLowerCase()]));
       body.append('coverImageUrl', form.coverImageUrl);
       body.append('coverImageAlt', form.coverImageAlt);
       body.append('isPublished', String(form.isPublished));
@@ -158,10 +141,10 @@ function NewPost({ slug = null, access, onBusy }) {
             .filter((section) => section.heading || section.paragraphs.length || section.bullets.length)
         )
       );
-      body.append('mediaUrls', JSON.stringify(mediaUrls.filter((item) => item.src.trim())));
+      body.append('mediaUrls', JSON.stringify(existingMedia.filter((item) => item.src?.trim())));
       body.append(
         'uploadedMediaMeta',
-        JSON.stringify(mediaFiles.map(({ type, alt, caption }) => ({ type, alt, caption })))
+        JSON.stringify(mediaFiles.map(({ type }) => ({ type })))
       );
 
       validateTotalUploadSize([coverFile, ...mediaFiles.map(({ file }) => file)].filter(Boolean));
@@ -188,7 +171,7 @@ function NewPost({ slug = null, access, onBusy }) {
         console.error('Post save failed', { status: response.status, payload: payload.raw });
         const fallback =
           response.status === 546
-            ? 'Publish failed (546): Supabase Edge Function hit a resource limit. Resize uploads or use media URLs for larger videos.'
+            ? 'Publish failed (546): Supabase Edge Function hit a resource limit. Resize large uploads and try again.'
             : `Publish failed (${response.status}): ${result.error || payload.raw || 'Unable to publish post.'}`;
 
         throw new Error(formatBackendError(result, fallback));
@@ -237,11 +220,15 @@ function NewPost({ slug = null, access, onBusy }) {
               Title
               <input required value={form.title} onChange={(event) => updateField('title', event.target.value)} />
             </label>
-            {form.title ? <p className="admin-page__url-preview">URL: /blog/{slugify(form.title)}</p> : null}
             <div className="admin-page__row">
               <label>
-                Eyebrow
-                <input value={form.eyebrow} onChange={(event) => updateField('eyebrow', event.target.value)} />
+                Category
+                <input
+                  required
+                  placeholder="Dogs"
+                  value={form.category}
+                  onChange={(event) => updateField('category', event.target.value)}
+                />
               </label>
               <label>
                 Publish date
@@ -256,14 +243,6 @@ function NewPost({ slug = null, access, onBusy }) {
               Excerpt
               <textarea required value={form.excerpt} onChange={(event) => updateField('excerpt', event.target.value)} />
             </label>
-            <label>
-              Tags
-              <input
-                placeholder="dogs, music, site"
-                value={form.tags}
-                onChange={(event) => updateField('tags', event.target.value)}
-              />
-            </label>
           </section>
 
           <section className="admin-page__panel">
@@ -272,11 +251,11 @@ function NewPost({ slug = null, access, onBusy }) {
               Upload cover
               <input
                 type="file"
-                accept="image/*,.heic,.heif"
+                accept={`image/*,${HEIC_ACCEPT}`}
                 onChange={(event) => setCoverFile(event.target.files[0] || null)}
               />
             </label>
-            <p className="admin-page__hint">Covers display at 16:9. Upload 1600 x 900 or larger for the cleanest crop.</p>
+            <p className="admin-page__hint">JPG, PNG, WebP, GIF, or HEIC. HEIC files are converted to JPG when saved. Covers display at 16:9; upload 1600 x 900 or larger for the cleanest crop.</p>
             <label>
               Or cover URL
               <input value={form.coverImageUrl} onChange={(event) => updateField('coverImageUrl', event.target.value)} />
@@ -321,66 +300,53 @@ function NewPost({ slug = null, access, onBusy }) {
               Upload photos or videos
               <input
                 type="file"
-                accept="image/*,video/*,.heic,.heif"
+                accept={`image/*,video/*,${HEIC_ACCEPT}`}
                 multiple
                 onChange={(event) => handleMediaFiles(event.target.files)}
               />
             </label>
-            {mediaFiles.map((item, index) => (
-              <fieldset key={item.file.name}>
-                <legend>{item.file.name}</legend>
-                <div className="admin-page__row">
-                  <label>
-                    Alt text
-                    <input value={item.alt} onChange={(event) => updateMediaFile(index, 'alt', event.target.value)} />
-                  </label>
-                  <label>
-                    Caption
-                    <input value={item.caption} onChange={(event) => updateMediaFile(index, 'caption', event.target.value)} />
-                  </label>
-                </div>
-              </fieldset>
-            ))}
+            <p className="admin-page__hint">HEIC photos are converted to JPG when the post is saved.</p>
+            {mediaFiles.length ? (
+              <ul className="admin-page__media-list" aria-label="New media">
+                {mediaFiles.map((item, index) => (
+                  <li key={`${item.file.name}-${item.file.lastModified}-${index}`}>
+                    <span>{item.file.name}</span>
+                    <button
+                      type="button"
+                      disabled={status === 'saving'}
+                      aria-label={`Remove ${item.file.name}`}
+                      onClick={() => setMediaFiles((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                    >
+                      Remove
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            ) : null}
 
-            <div className="admin-page__panel-title">
-              <h3>Media URLs</h3>
-              <button type="button" onClick={() => setMediaUrls((current) => [...current, { ...emptyMediaUrl }])}>
-                Add URL
-              </button>
-            </div>
-            {mediaUrls.map((item, index) => (
-              <fieldset key={index}>
-                <div className="admin-page__row">
-                  <label>
-                    Type
-                    <select value={item.type} onChange={(event) => updateMediaUrl(index, 'type', event.target.value)}>
-                      <option value="image">Image</option>
-                      <option value="video">Video</option>
-                    </select>
-                  </label>
-                  <label>
-                    URL
-                    <input value={item.src} onChange={(event) => updateMediaUrl(index, 'src', event.target.value)} />
-                  </label>
-                </div>
-                <div className="admin-page__row">
-                  <label>
-                    Alt text
-                    <input value={item.alt} onChange={(event) => updateMediaUrl(index, 'alt', event.target.value)} />
-                  </label>
-                  <label>
-                    Caption
-                    <input value={item.caption} onChange={(event) => updateMediaUrl(index, 'caption', event.target.value)} />
-                  </label>
-                </div>
-                {item.type === 'video' ? (
-                  <label>
-                    Poster URL
-                    <input value={item.poster} onChange={(event) => updateMediaUrl(index, 'poster', event.target.value)} />
-                  </label>
-                ) : null}
-              </fieldset>
-            ))}
+            {existingMedia.length ? (
+              <>
+                <h3>Existing media</h3>
+                <ul className="admin-page__media-list">
+                  {existingMedia.map((item, index) => {
+                    const label = item.caption || item.alt || `${item.type === 'video' ? 'Video' : 'Photo'} ${index + 1}`;
+                    return (
+                      <li key={`${item.src}-${index}`}>
+                        <span>{label}</span>
+                        <button
+                          type="button"
+                          disabled={status === 'saving'}
+                          aria-label={`Remove ${label}`}
+                          onClick={() => setExistingMedia((current) => current.filter((_, itemIndex) => itemIndex !== index))}
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </>
+            ) : null}
           </section>
 
           <div className="admin-page__actions">

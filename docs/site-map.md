@@ -60,8 +60,8 @@ This site is a single-page React app with route-based views. The router is defin
 
 - Starts behind a secret gate.
 - Loads existing posts from the edge function after successful unlock.
-- Supports editing title, excerpt, eyebrow, publish date, tags, cover image, sections, and media.
-- Can upload cover images plus image or video media, or accept remote URLs.
+- Supports editing title, excerpt, category, publish date, cover image, sections, and media.
+- Can upload cover images plus image or video media.
 
 ### 404
 

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded';
 
 const TAU = Math.PI * 2;
 const ECCENTRICITY = 0.035;
@@ -109,7 +110,7 @@ function positionLabels(points, widths, viewport, previous, selectedIndex) {
   return result;
 }
 
-function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
+function MusicSolarSystem({ playlists, selectedKey, onSelect, profileUrl }) {
   const orbits = createOrbits(playlists.length);
   const stageRef = useRef(null);
   const planetRefs = useRef([]);
@@ -223,6 +224,10 @@ function MusicSolarSystem({ playlists, selectedKey, onSelect }) {
     <section className="music-system" aria-label="Orbiting playlist library">
       <header className="music-system__header">
         <span>{playlists.length} playlists</span>
+        <a className="music-profile-link" href={profileUrl} target="_blank" rel="noopener noreferrer"
+          aria-label="View AJT3 on Apple Music (opens in a new tab)">
+          View AJT3 on Apple Music <OpenInNewRounded aria-hidden="true" />
+        </a>
       </header>
 
       <div className="music-system__stage" ref={stageRef}>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import ArrowBackRounded from '@mui/icons-material/ArrowBackRounded';
 import FastRewindRounded from '@mui/icons-material/FastRewindRounded';
+import OpenInNewRounded from '@mui/icons-material/OpenInNewRounded';
 import PlayArrowRounded from '@mui/icons-material/PlayArrowRounded';
 import SkipNextRounded from '@mui/icons-material/SkipNextRounded';
 import MusicSolarSystem from '../components/MusicSolarSystem';
@@ -8,6 +9,7 @@ import { usePhoneBack } from '../components/deviceSettings';
 import musicPlaylists from '../data/musicPlaylists';
 import './Music.css';
 
+const APPLE_MUSIC_PROFILE_URL = 'https://music.apple.com/profile/_ajt3_';
 const mobileMusicPlaylists = [...musicPlaylists];
 
 function swapMobilePlaylists(firstKey, secondKey) {
@@ -89,7 +91,11 @@ function Music() {
           <header className="music-mobile__header">
             <p className="music-mobile__eyebrow">THE COLLECTION / {musicPlaylists.length} PLAYLISTS</p>
             <h1>Your next listen.</h1>
-            <p>Pick a playlist. Find your mood.</p>
+            <p className="music-mobile__intro">Pick a playlist. Find your mood.</p>
+            <a className="music-profile-link" href={APPLE_MUSIC_PROFILE_URL} target="_blank"
+              rel="noopener noreferrer" aria-label="View AJT3 on Apple Music (opens in a new tab)">
+              View AJT3 on Apple Music <OpenInNewRounded aria-hidden="true" />
+            </a>
           </header>
           <ul className="music-mobile__grid">
             {mobileMusicPlaylists.map((playlist) => (
@@ -127,7 +133,8 @@ function Music() {
         )}
       </section>
       <section className="music-experience" aria-label="Music library">
-        <MusicSolarSystem playlists={musicPlaylists} selectedKey={selectedKey} onSelect={setSelectedKey} />
+        <MusicSolarSystem playlists={musicPlaylists} selectedKey={selectedKey} onSelect={setSelectedKey}
+          profileUrl={APPLE_MUSIC_PROFILE_URL} />
         <MusicPlaylistPlayer id="music-playlist-player" playlist={current} />
       </section>
     </main>

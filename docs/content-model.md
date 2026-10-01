@@ -114,13 +114,12 @@ Important behavior:
 
 ## Tagging Rules
 
-- Tags are stored as a string array in Supabase.
-- The admin UI accepts comma-separated tags and converts them to an array.
+- Categories are stored as a single normalized entry in the existing Supabase tags array.
+- The admin UI uses one Category field for both the post eyebrow and category placement.
 - The blog index hides posts tagged `dogs`.
 - The dogs page only shows posts tagged `dogs`.
 
 ## Slug Rules
 
 - Slugs are derived from the title by lowercasing, trimming, and replacing non-alphanumeric groups with hyphens.
-- The admin panel previews the resulting URL while editing.
 - If a title change would collide with an existing slug, the edge function rejects the save.

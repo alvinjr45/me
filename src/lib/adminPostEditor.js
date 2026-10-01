@@ -6,26 +6,18 @@ export const emptySection = {
   bullets: ''
 };
 
-export const emptyMediaUrl = {
-  type: 'image',
-  src: '',
-  alt: '',
-  caption: '',
-  poster: ''
-};
-
 export const MAX_UPLOAD_BYTES = 20 * 1024 * 1024;
 export const MAX_TOTAL_UPLOAD_BYTES = 40 * 1024 * 1024;
+export const HEIC_ACCEPT = 'image/heic,image/heif,image/heic-sequence,image/heif-sequence,.heic,.heif';
 
 export function createEmptyPostForm(today) {
   return {
     adminSecret: '',
     title: '',
     originalSlug: '',
-    eyebrow: 'Journal',
+    category: 'Journal',
     excerpt: '',
     publishedAt: today,
-    tags: '',
     coverImageUrl: '',
     coverImageAlt: '',
     isPublished: true
@@ -46,14 +38,6 @@ export function getSupabaseFunctionHeaders({ json = false } = {}) {
   }
 
   return headers;
-}
-
-export function slugify(value) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 }
 
 export function toTextList(value) {
@@ -141,7 +125,10 @@ export function validateTotalUploadSize(files) {
 
 export function isHeicFile(file) {
   const fileName = file.name.toLowerCase();
-  return file.type === 'image/heic' || file.type === 'image/heif' || fileName.endsWith('.heic') || fileName.endsWith('.heif');
+  const fileType = file.type.toLowerCase();
+  return ['image/heic', 'image/heif', 'image/heic-sequence', 'image/heif-sequence'].includes(fileType)
+    || fileName.endsWith('.heic')
+    || fileName.endsWith('.heif');
 }
 
 export async function normalizeUploadFile(file) {

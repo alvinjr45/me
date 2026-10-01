@@ -356,15 +356,16 @@ Deno.serve(async (request) => {
       });
     }
 
+    const category = String(saveFormData.get('category') || '').trim();
     const post = {
       slug,
       title,
-      eyebrow: String(saveFormData.get('eyebrow') || 'Journal').trim(),
+      eyebrow: category || String(saveFormData.get('eyebrow') || 'Journal').trim(),
       excerpt: String(saveFormData.get('excerpt') || '').trim(),
       published_at: normalizePublishedAt(saveFormData.get('publishedAt')),
       cover_image_url: coverImageUrl,
       cover_image_alt: String(saveFormData.get('coverImageAlt') || title).trim(),
-      tags: parseJsonArray(saveFormData.get('tags')),
+      tags: category ? [category.toLowerCase()] : parseJsonArray(saveFormData.get('tags')),
       sections: parseJsonArray(saveFormData.get('sections')),
       media: [...mediaUrls, ...uploadedMedia],
       is_published: String(saveFormData.get('isPublished') || 'true') === 'true'

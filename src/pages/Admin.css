@@ -203,23 +203,36 @@
   background: rgba(255, 107, 107, 0.18);
 }
 
-.admin-page__url-preview {
-  margin: 0;
-  padding: 0.8rem 0.9rem;
-  border: 1px solid rgba(249, 249, 249, 0.08);
-  border-radius: 10px;
-  background: rgba(2, 6, 18, 0.42);
-  color: rgba(249, 249, 249, 0.72);
-  font-family: 'Source Code Pro', Menlo, Monaco, Consolas, 'Courier New', monospace;
-  font-size: 0.88rem;
-  overflow-wrap: anywhere;
-}
-
 .admin-page__hint {
   margin: -0.2rem 0 0;
   color: rgba(249, 249, 249, 0.62);
   font-size: 0.92rem;
   line-height: 1.5;
+}
+
+.admin-page__media-list {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-page__media-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  padding: 0.75rem;
+  border: 1px solid rgba(249, 249, 249, 0.08);
+  border-radius: 8px;
+  background: rgba(2, 6, 18, 0.32);
+}
+
+.admin-page__media-list span {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .admin-page label {

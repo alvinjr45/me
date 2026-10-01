@@ -8,6 +8,22 @@ import { usePhoneBack } from '../components/deviceSettings';
 import musicPlaylists from '../data/musicPlaylists';
 import './Music.css';
 
+const mobileMusicPlaylists = [...musicPlaylists];
+
+function swapMobilePlaylists(firstKey, secondKey) {
+  const firstIndex = mobileMusicPlaylists.findIndex((playlist) => playlist.key === firstKey);
+  const secondIndex = mobileMusicPlaylists.findIndex((playlist) => playlist.key === secondKey);
+
+  if (firstIndex !== -1 && secondIndex !== -1) {
+    [mobileMusicPlaylists[firstIndex], mobileMusicPlaylists[secondIndex]] =
+      [mobileMusicPlaylists[secondIndex], mobileMusicPlaylists[firstIndex]];
+  }
+}
+
+swapMobilePlaylists('thug', 'hm');
+swapMobilePlaylists('funk', 'jermaine');
+swapMobilePlaylists('baby', 'workout');
+
 function MusicPlaylistPlayer({ playlist, id, titleId, titleRef, showMore = false }) {
   const playlistUrl = playlist.src.replace('embed.music.apple.com', 'music.apple.com');
 
@@ -76,7 +92,7 @@ function Music() {
             <p>Pick a playlist. Find your mood.</p>
           </header>
           <ul className="music-mobile__grid">
-            {musicPlaylists.map((playlist) => (
+            {mobileMusicPlaylists.map((playlist) => (
               <li key={playlist.key}>
                 <button type="button" className="music-mobile__playlist"
                   aria-label={`Browse ${playlist.title} playlist`}

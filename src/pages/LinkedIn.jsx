@@ -13,15 +13,15 @@ const experience = [
       'Python automation for installs, upgrades, and end-to-end API Connect flows, running 700–1,000 tests nightly through Jenkins.',
       'Build AI-assisted workflows with IBM Bob, including Jira and TestRail MCP servers for issue and test management.'
     ],
-    platforms: ['Kubernetes', 'OpenShift', 'VMware', 'Cloud Pak for Integration', 'AWS SaaS']
+    platforms: ['Kubernetes', 'OpenShift', 'VMware', 'Cloud Pak for Integration', 'AWS']
   },
   {
     marker: 'Fidelity Investments',
     title: 'Process Automation',
     meta: '2019–2021',
     highlights: [
-      'Built a Ruby and SQL data-access tool that let internal teams retrieve the IBM Db2 records they needed for daily work.',
-      'Built a Java and JavaScript operations dashboard that consolidated server health, CPU usage, and networking into one high-level view.'
+      'Built a data-access tool that let internal teams retrieve the IBM Db2 records they needed for daily work.',
+      'Built an operations dashboard that consolidated server health, CPU usage, and networking into one high-level view.'
     ],
     technologies: ['SQL', 'JavaScript', 'Java', 'Ruby']
   }
@@ -37,7 +37,6 @@ const projects = [
 const skillGroups = [
   { title: 'Automation & AI', skills: ['Jenkins', 'CI/CD', 'MCP', 'IBM Bob'] },
   { title: 'Cloud & infrastructure', skills: ['Kubernetes', 'OpenShift', 'VMware', 'AWS'] },
-  { title: 'API Platforms', skills: ['API Connect', 'Cloud Pak', 'IBM Db2'] },
   { title: 'Languages', skills: ['Python', 'React', 'JavaScript', 'Java', 'Ruby', 'SQL'] }
 ];
 
@@ -45,6 +44,7 @@ function ProfileIcon({ name }) {
   const paths = {
     network: <><circle cx="8" cy="7" r="3" /><circle cx="17" cy="6" r="2" /><path d="M2 20c0-5 2-8 6-8s6 3 6 8M14 12c4 0 6 3 6 7" /></>,
     external: <><path d="M14 4h6v6M20 4l-9 9" /><path d="M18 13v6H5V6h6" /></>,
+    mail: <><rect x="3" y="5" width="18" height="14" rx="2" /><path d="m4 7 8 6 8-6" /></>,
     education: <><path d="m2.5 8.5 9.5-5 9.5 5-9.5 5Z" /><path d="M6.5 11.5v4.25c1.45 1.55 3.3 2.25 5.5 2.25s4.05-.7 5.5-2.25V11.5" /><path d="M21.5 8.5v6" /><circle cx="21.5" cy="16.25" r="1" /></>
   };
 
@@ -77,15 +77,15 @@ function LinkedIn() {
                 <div className="linkedin-hero__identity">
                   <p className="linkedin-hero__role"><i aria-hidden="true" /> Software Engineer · IBM</p>
                   <h1 id="linkedin-name">AJ Thompson <span aria-label="Profile verified">&#10003;</span></h1>
-                  <p className="linkedin-profile__headline">Test automation, developer tools, and React experiences.</p>
+                  <p className="linkedin-profile__headline">Automation, Dev Ops, and AI.</p>
                   <div className="linkedin-hero__education">
                     <span className="linkedin-hero__education-mark"><ProfileIcon name="education" /></span>
                     <div><strong>North Carolina State University</strong><small>B.S. in Computer Science · College of Engineering</small><em>Class of 2021</em></div>
                   </div>
                 </div>
                 <div className="linkedin-profile__actions">
-                  <a className="linkedin-button linkedin-button--primary" href="https://ajt3.website" target="_blank" rel="noreferrer">Portfolio <ProfileIcon name="external" /></a>
-                  <Link className="linkedin-button" to="/app-store"><ProfileIcon name="network" /> Projects</Link>
+                  <Link className="linkedin-button linkedin-button--primary" to="/app-store">Projects <ProfileIcon name="network" /></Link>
+                  <Link className="linkedin-button" to="/mail"><ProfileIcon name="mail" /> Contact</Link>
                 </div>
               </div>
             </section>

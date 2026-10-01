@@ -18,14 +18,14 @@ test('renders professional experience and selected web apps', () => {
   expect(screen.getByText('Fidelity Investments')).toBeInTheDocument();
   expect(screen.getByText('2019–2021')).toBeInTheDocument();
   expect(screen.getByText(/700–1,000 tests nightly through Jenkins/i)).toBeInTheDocument();
-  expect(screen.getByText(/Ruby and SQL data-access tool/i)).toBeInTheDocument();
+  expect(screen.getByText(/data-access tool that let internal teams retrieve/i)).toBeInTheDocument();
   expect(screen.getByText('SQL · JavaScript · Java · Ruby')).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: 'Projects' })).toBeInTheDocument();
   expect(screen.getByText('New Trinity')).toBeInTheDocument();
   expect(screen.getByText('Lattaco Welding')).toBeInTheDocument();
   expect(screen.getByText('Jazzed To Be Jones')).toBeInTheDocument();
-  expect(screen.getByRole('link', { name: /^Portfolio$/i })).toHaveAttribute('href', 'https://ajt3.website');
-  expect(screen.getAllByRole('link', { name: 'Projects' }).some((link) => link.getAttribute('href') === '/app-store')).toBe(true);
+  expect(screen.getByRole('link', { name: /^Projects$/i })).toHaveAttribute('href', '/app-store');
+  expect(screen.getByRole('link', { name: /^Contact$/i })).toHaveAttribute('href', '/mail');
 });
 
 test('uses the device account image for the profile photo', () => {

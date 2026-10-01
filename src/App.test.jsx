@@ -64,7 +64,7 @@ function expectHomeUrl(historyLength) {
 test.each([
   [true, 'Build'],
   [false, 'Build']
-])('Build shows a full emulator redirect screen before leaving the site (phone: %s, link: %s)', (isPhone, linkName) => {
+])('Build shows a full emulator redirect screen that can return home (phone: %s, link: %s)', (isPhone, linkName) => {
   jest.useFakeTimers();
   const savedLocation = Object.getOwnPropertyDescriptor(window, 'location');
   const assign = jest.fn();
@@ -76,6 +76,7 @@ test.each([
     matches: isPhone && query.includes('max-width'),
     addEventListener: jest.fn(), removeEventListener: jest.fn()
   }));
+  const historyLength = window.history.length;
   let unmount;
   try {
     ({ unmount } = render(<App />));
@@ -124,16 +125,13 @@ test.each([
     expect(redirect).toHaveClass('device-system-screen--redirect');
     expect(within(redirect).getByRole('heading')).toHaveFocus();
     expect(within(redirect).getByText("You're leaving AJ's Personal Site.")).toBeInTheDocument();
-    expect(within(redirect).getByRole('link', { name: 'Continue now' })).toHaveAttribute('href', 'https://ajt3.website');
+    const cancel = within(redirect).getByRole('button', { name: 'Cancel' });
     expect(screen.queryByRole('navigation', { name: 'Open a site app' })).not.toBeInTheDocument();
-    act(() => jest.advanceTimersByTime(1999));
-    expect(assign).not.toHaveBeenCalled();
-    act(() => jest.advanceTimersByTime(1));
-    expect(assign).toHaveBeenCalledWith('https://ajt3.website');
-    const restoredPage = new Event('pageshow');
-    Object.defineProperty(restoredPage, 'persisted', { value: true });
-    fireEvent(window, restoredPage);
+    fireEvent.click(cancel);
     expect(screen.queryByRole('region', { name: 'Redirecting to ajt3.website...' })).not.toBeInTheDocument();
+    expectHomeUrl(historyLength);
+    act(() => jest.advanceTimersByTime(2500));
+    expect(assign).not.toHaveBeenCalled();
     expect(screen.getByRole('link', { name: 'Build' })).toBeInTheDocument();
   } finally {
     unmount?.();

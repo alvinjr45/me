@@ -897,14 +897,25 @@
   line-height: 1.5;
 }
 
-.device-system-screen--redirect a {
-  padding: 12px;
-  color: #66c4ff;
-  text-underline-offset: 4px;
+.device-system-screen--redirect button {
+  min-width: 124px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 1px solid #ff625a;
+  border-radius: 8px;
+  background: rgba(255, 79, 70, 0.14);
+  color: #ff8d87;
+  font-weight: 800;
+  cursor: pointer;
 }
 
-.device-system-screen--redirect a:focus-visible {
-  outline: 2px solid #66c4ff;
+.device-system-screen--redirect button:hover {
+  background: #ff625a;
+  color: #170504;
+}
+
+.device-system-screen--redirect button:focus-visible {
+  outline: 2px solid #ff8d87;
   outline-offset: 2px;
 }
 

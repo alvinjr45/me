@@ -36,8 +36,8 @@ export const desktopApps = [
   { key: 'blog', label: 'Blog', path: '/blog', description: 'Notes from the build' },
   { key: 'guestbook', label: 'Guestbook', path: '/guestbook', description: 'Leave a little note' },
   { key: 'calendar', label: 'Calendar', path: '/calendar', description: 'Make time for what matters', utility: true },
-  { key: 'mail', label: 'Mail', path: '/mail', description: 'Start a conversation', utility: true },
   { key: 'music', label: 'Music', path: '/music', description: 'The current rotation' },
+  { key: 'mail', label: 'Mail', path: '/mail', description: 'Start a conversation', utility: true },
   { key: 'dogs', label: 'Dogs', path: '/dogs', description: 'Drake & Josh' },
   { key: 'store', label: 'App Store', path: '/app-store', description: 'Find your next favorite', utility: true },
   { key: 'resume', label: 'Resume', path: '/resume', description: 'Professional profile & selected work' },
@@ -46,7 +46,7 @@ export const desktopApps = [
   { key: 'settings', label: 'Settings', path: '/settings', description: 'Make it yours', utility: true },
   { key: 'instagram', label: 'Instagram', path: 'https://www.instagram.com/_ajt3_/', description: 'Follow me on Instagram', external: true },
   { key: 'tech', label: 'Build', path: 'https://ajt3.website', description: 'Projects & experiments', external: true, downloadable: true },
-  { key: 'newtrinity', label: 'New Trinity Missionary Baptist Church', path: 'https://www.newtrinity.org', description: 'Faith, community & connection', external: true, downloadable: true },
+  { key: 'newtrinity', label: 'New Trinity Missionary Baptist Church', homeLabel: 'NTMBC', path: 'https://www.newtrinity.org', description: 'Faith, community & connection', external: true, downloadable: true },
   { key: 'lattaco', label: 'Lattaco Welding', path: 'https://lattacowelding.com', description: 'Precision metalwork', external: true, downloadable: true },
   { key: 'jazzed', label: 'Jazzed To Be Jones', path: 'https://www.jazzedtobejones.com', description: 'Jazmine & Tyler', external: true, downloadable: true }
 ];
@@ -810,7 +810,7 @@ function DeviceShell({ children, home }) {
   useEffect(() => {
     if (!buildRedirect) return;
     redirectRef.current?.focus();
-    const timer = window.setTimeout(() => window.location.assign(buildRedirect), 2000);
+    const timer = window.setTimeout(() => window.location.assign(buildRedirect), 2500);
     const restore = (event) => {
       if (event.persisted) setBuildRedirect(null);
     };
@@ -1333,7 +1333,11 @@ function DeviceShell({ children, home }) {
                   Redirecting to <span>{new URL(buildRedirect).hostname}...</span>
                 </h1>
                 <p>You're leaving AJ's Personal Site.</p>
-                <a href={buildRedirect}>Continue now</a>
+                <button type="button" onClick={() => {
+                  setBuildRedirect(null);
+                  showDesktop();
+                  navigate('/', { replace: true });
+                }}>Cancel</button>
               </section>
             )}
           </div>

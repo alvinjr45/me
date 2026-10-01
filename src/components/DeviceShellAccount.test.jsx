@@ -105,7 +105,7 @@ test.each([false, true])('blocks a direct admin editor link on phone=%s', (phone
   expect(global.fetch).not.toHaveBeenCalled();
 });
 
-test('phone keeps four dock shortcuts and all 12 built-in apps on one page at every height', () => {
+test('phone keeps four dock shortcuts and 12 apps per page at every height', () => {
   window.matchMedia.mockImplementation((query) => ({ matches: query.includes('max-width'), addEventListener: jest.fn(), removeEventListener: jest.fn() }));
   let availableHeight = 224;
   const height = jest.spyOn(HTMLElement.prototype, 'clientHeight', 'get').mockImplementation(() => availableHeight);
@@ -121,15 +121,15 @@ test('phone keeps four dock shortcuts and all 12 built-in apps on one page at ev
     const apps = screen.getByRole('navigation', { name: 'Open a site app' });
     const builtInApps = desktopApps.filter((app) => !app.downloadable);
     expect(within(apps).getAllByRole('link').map((link) => link.getAttribute('href'))).toEqual(builtInApps.map((app) => app.path));
-    expect(within(apps).getAllByRole('group')).toHaveLength(1);
-    expect(within(within(apps).getByRole('group')).getAllByRole('link')).toHaveLength(12);
-    expect(screen.queryByRole('navigation', { name: 'Home screen pages' })).not.toBeInTheDocument();
+    expect(within(apps).getAllByRole('group')).toHaveLength(Math.ceil(builtInApps.length / 12));
+    expect(within(within(apps).getAllByRole('group')[0]).getAllByRole('link')).toHaveLength(12);
+    expect(screen.getByRole('navigation', { name: 'Home screen pages' })).toBeInTheDocument();
 
     availableHeight = 160;
     fireEvent(window, new Event('resize'));
-    expect(within(apps).getAllByRole('group')).toHaveLength(1);
-    expect(within(within(apps).getByRole('group')).getAllByRole('link')).toHaveLength(12);
-    expect(screen.queryByRole('navigation', { name: 'Home screen pages' })).not.toBeInTheDocument();
+    expect(within(apps).getAllByRole('group')).toHaveLength(Math.ceil(builtInApps.length / 12));
+    expect(within(within(apps).getAllByRole('group')[0]).getAllByRole('link')).toHaveLength(12);
+    expect(screen.getByRole('navigation', { name: 'Home screen pages' })).toBeInTheDocument();
   } finally {
     height.mockRestore();
   }

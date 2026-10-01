@@ -5,6 +5,7 @@ import { DeviceSettingsContext } from '../components/deviceSettings';
 import './Home.css';
 
 const MAX_APPS_PER_PAGE = 12;
+const getHomeAppLabel = (app) => app.homeLabel || app.label;
 
 function Home() {
   const { isPhone = false, motion = true, openExternalApp, installedApps = [], installProgress = {}, pendingInstall } = useContext(DeviceSettingsContext) || {};
@@ -150,21 +151,21 @@ function Home() {
               inert={!isPhone && activePage !== index ? '' : undefined}
             >
               {apps.map((app) => Object.prototype.hasOwnProperty.call(installProgress, app.key) ? (
-                <div key={app.key} className={`desktop-home__app desktop-home__app--${app.key} desktop-home__app--installing`} role="status" aria-label={`${app.label} downloading, ${installProgress[app.key]}%`}>
-                  <AppIcon name={app.key} />
-                  <span className="desktop-home__install-progress" style={{ '--install-progress': `${installProgress[app.key] * 3.6}deg` }} aria-hidden="true" />
-                  <span className="desktop-home__app-label">Loading...</span>
-                </div>
-              ) : pendingInstall?.key === app.key ? (
-                <div key={app.key} className={`desktop-home__app desktop-home__app--${app.key} desktop-home__app--queued`} role="status" aria-label={`${app.label} waiting to download`}>
-                  <AppIcon name={app.key} />
-                  <span className="desktop-home__app-label">Waiting...</span>
-                </div>
+              <div key={app.key} className={`desktop-home__app desktop-home__app--${app.key} desktop-home__app--installing`} role="status" aria-label={`${getHomeAppLabel(app)} downloading, ${installProgress[app.key]}%`}>
+                <AppIcon name={app.key} />
+                <span className="desktop-home__install-progress" style={{ '--install-progress': `${installProgress[app.key] * 3.6}deg` }} aria-hidden="true" />
+                <span className="desktop-home__app-label">Loading...</span>
+              </div>
+            ) : pendingInstall?.key === app.key ? (
+              <div key={app.key} className={`desktop-home__app desktop-home__app--${app.key} desktop-home__app--queued`} role="status" aria-label={`${getHomeAppLabel(app)} waiting to download`}>
+                <AppIcon name={app.key} />
+                <span className="desktop-home__app-label">Waiting...</span>
+              </div>
               ) : (
                 <Link key={app.key} to={app.path} onClick={app.external ? (event) => openExternalApp?.(app.key, event) : undefined} reloadDocument={app.external} target={app.external ? '_blank' : undefined} rel={app.external ? 'noopener noreferrer' : undefined} className={`desktop-home__app desktop-home__app--${app.key}`}>
-                  <AppIcon name={app.key} />
-                  <span className="desktop-home__app-label">{app.label}</span>
-                </Link>
+                <AppIcon name={app.key} />
+                <span className="desktop-home__app-label">{getHomeAppLabel(app)}</span>
+              </Link>
               ))}
             </div>
           ))}

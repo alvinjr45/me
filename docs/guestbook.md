@@ -139,6 +139,8 @@ frontend deployment does not deploy this Supabase function.
 The administrator author migration and v3 function update were applied through
 the Supabase dashboard on September 25, 2026. Frontend publishing remains
 user-owned. The administrator label and entry bypass need that frontend update.
+Mission Control editing and conversation deletion additionally require the
+October 1 cascade migration and a redeploy of the guestbook Edge Function.
 
 The session format was subsequently updated to carry its signed limiter identity
 instead of comparing it to each request's forwarded network address. An audit
@@ -194,6 +196,9 @@ New installations start with submissions **paused** until setup is verified.
    author flag and a service-role-only v3 publishing wrapper that preserves the
    v2 limits and atomically marks authenticated administrator posts. Apply it
    before deploying the updated function and frontend.
+   `supabase/migrations/20261001000000_guestbook_conversation_delete.sql` makes
+   deleting a non-primary conversation remove its messages in the same database
+   operation. Apply it before enabling conversation deletion in Mission Control.
    If the board is live, pause submissions during migration/deployment. The old
    RPC is retained but denies legacy posts lacking a conversation; deploy the
    updated function and frontend together before resuming. Do not reapply the

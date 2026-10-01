@@ -26,6 +26,11 @@
 .guestbook__entry time, .guestbook__entry small { color: #a8b8cc; font-size: 0.75rem; }
 .guestbook__entry p { margin: 10px 0; white-space: pre-wrap; }
 .guestbook__actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.admin-guestbook__edit { display: grid; gap: 10px; margin-top: 12px; }
+.admin-guestbook__edit label { display: grid; gap: 6px; color: #b6c4d4; font-size: 0.75rem; }
+.admin-guestbook__edit :is(input, textarea) { width: 100%; min-width: 0; padding: 10px 12px; border: 1px solid #546477; border-radius: 8px; background: #0a1421; color: #f3f5f9; font: inherit; }
+.admin-guestbook__edit textarea { resize: vertical; }
+.guestbook .admin-guestbook__delete { border-color: #8f4848; background: #3a2023; color: #ffb0aa; }
 @media (max-width: 480px) { .guestbook { padding: 16px 12px; } .guestbook__form { padding: 14px 10px; } .guestbook__submit { width: 100%; } }
 
 .device-window__content:has(> .guestbook-messages) { padding: 0; overflow: hidden; }

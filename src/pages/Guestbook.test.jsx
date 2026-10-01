@@ -399,6 +399,43 @@ test('admin can hide an entire conversation', async () => {
   expect(guestbookRequest).toHaveBeenCalledWith({ action: 'conversation_visibility', id: conversation.id, hidden: true }, 'test-admin', expect.any(AbortSignal));
 });
 
+test('admin can edit a published message inline', async () => {
+  guestbookRequest.mockImplementation(async (body) => {
+    if (body.action === 'list') return { entries: [entry], submissionsOpen: true };
+    if (body.action === 'update_message') return { ok: true, message: body.message };
+    return { ok: true };
+  });
+  render(<AdminGuestbook secret="test-admin" onBusy={() => {}} />);
+  await screen.findByText('Hello!');
+  fireEvent.click(screen.getByRole('button', { name: 'Edit message' }));
+  fireEvent.change(screen.getByLabelText('Message text'), { target: { value: 'Updated message' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+  expect(await screen.findByText('Updated message')).toBeInTheDocument();
+  expect(guestbookRequest).toHaveBeenCalledWith({ action: 'update_message', id: entry.id, message: 'Updated message' }, 'test-admin', expect.any(AbortSignal));
+});
+
+test('admin can rename and delete a conversation', async () => {
+  guestbookRequest.mockImplementation(async (body) => {
+    if (body.action === 'list') return { entries: [], submissionsOpen: true };
+    if (body.action === 'list_conversations') return { entries: [{ ...secondConversation, is_hidden: false }], submissionsOpen: true };
+    if (body.action === 'update_conversation') return { ok: true, title: body.title };
+    return { ok: true };
+  });
+  render(<AdminGuestbook secret="test-admin" onBusy={() => {}} />);
+  await screen.findByText('No messages on this page.');
+  fireEvent.click(screen.getByRole('button', { name: 'Conversations' }));
+  await screen.findByText('Weekend plans');
+  fireEvent.click(screen.getByRole('button', { name: 'Edit name' }));
+  fireEvent.change(screen.getByLabelText('Conversation name'), { target: { value: 'Project ideas' } });
+  fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+  expect(await screen.findByText('Project ideas')).toBeInTheDocument();
+  expect(guestbookRequest).toHaveBeenCalledWith({ action: 'update_conversation', id: secondConversation.id, title: 'Project ideas' }, 'test-admin', expect.any(AbortSignal));
+  fireEvent.click(screen.getByRole('button', { name: 'Delete conversation' }));
+  await waitFor(() => expect(screen.queryByText('Project ideas')).not.toBeInTheDocument());
+  expect(guestbookRequest).toHaveBeenCalledWith({ action: 'delete_conversation', id: secondConversation.id }, 'test-admin', expect.any(AbortSignal));
+  expect(window.confirm).toHaveBeenCalledWith('Permanently delete this conversation and all of its messages? This cannot be undone.');
+});
+
 test('admin can hide, restore, pause, and delete without an approval queue', async () => {
   guestbookRequest.mockImplementation(async (body) => {
     if (body.action === 'list') return { entries: [entry], submissionsOpen: true };

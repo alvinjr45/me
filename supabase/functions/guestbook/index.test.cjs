@@ -283,11 +283,34 @@ test('uses the final forwarded address, ignoring spoofed prefixes', async () => 
 
 test('admin actions require authentication before database access', async () => {
   const { send, state } = service();
-  for (const action of ['list', 'list_conversations', 'visibility', 'conversation_visibility', 'delete', 'pause']) assert.equal((await send({ action })).status, 401);
+  for (const action of ['list', 'list_conversations', 'visibility', 'conversation_visibility', 'delete', 'delete_conversation', 'update_message', 'update_conversation', 'pause']) assert.equal((await send({ action })).status, 401);
   assert.equal(state.clients, 0);
   assert.equal((await send({ action: 'list' }, { 'x-admin-secret': 'admin-test' })).status, 200);
   assert.equal((await send({ action: 'pause', open: false }, { 'x-admin-secret': 'admin-test' })).status, 200);
   assert.equal(state.mutations[0].value.submissions_open, false);
+});
+
+test('authenticated administrators can edit messages, rename conversations, and delete non-primary conversations', async () => {
+  const { send, state } = service();
+  const headers = { 'x-admin-secret': 'admin-test' };
+  const message = await send({ action: 'update_message', id: valid.conversationId, message: 'This is fucking nice' }, headers);
+  assert.equal(message.status, 200);
+  assert.equal((await message.json()).message, 'This is *** nice');
+  assert.equal(state.mutations[0].table, 'ajt3_guestbook');
+  assert.equal(state.mutations[0].value.message, 'This is *** nice');
+
+  const renamed = await send({ action: 'update_conversation', id: valid.conversationId, title: 'New board name' }, headers);
+  assert.equal(renamed.status, 200);
+  assert.equal((await renamed.json()).title, 'New board name');
+  assert.equal(state.mutations[1].table, 'ajt3_guestbook_conversations');
+  assert.equal(state.mutations[1].value.title, 'New board name');
+
+  const otherConversation = '00000000-0000-4000-8000-000000000002';
+  assert.equal((await send({ action: 'delete_conversation', id: otherConversation }, headers)).status, 200);
+  assert.equal(state.mutations[2].table, 'ajt3_guestbook_conversations');
+  assert.equal(state.mutations[2].deleted, true);
+  assert.equal((await send({ action: 'delete_conversation', id: valid.conversationId }, headers)).status, 400);
+  assert.equal((await send({ action: 'update_message', id: valid.conversationId, message: '' }, headers)).status, 400);
 });
 
 test('creates a conversation and its first message together with a scrubbed title', async () => {
@@ -319,6 +342,12 @@ test('conversation migration preserves messages and restricts hidden-board reads
   assert.match(sql, /upgrade_required/);
   assert.match(sql, /revoke all on function public\.ajt3_guestbook_submit_v2[\s\S]*from public, anon, authenticated/);
   assert.doesNotMatch(sql, /delete from public\.ajt3_guestbook\s/);
+});
+
+test('conversation deletion cascades to its messages', () => {
+  const sql = readFileSync(join(__dirname, '../../migrations/20261001000000_guestbook_conversation_delete.sql'), 'utf8');
+  assert.match(sql, /foreign key \(conversation_id\)/);
+  assert.match(sql, /on delete cascade/);
 });
 
 test('migration restricts public writes and RPC access, and serializes shared counters', () => {

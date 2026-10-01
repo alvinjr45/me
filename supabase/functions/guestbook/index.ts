@@ -102,12 +102,33 @@ Deno.serve(async (request: Request) => {
       if (result.error) throw new Error('Database unavailable');
       return respond({ submissionsOpen: result.data.submissions_open });
     }
-    if (action === 'visibility' || action === 'conversation_visibility' || action === 'delete') {
-      if (typeof body.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.id) || (action !== 'delete' && typeof body.hidden !== 'boolean')) return respond({ error: 'Invalid message selection.' }, 400);
-      const query = db.from(action === 'conversation_visibility' ? 'ajt3_guestbook_conversations' : 'ajt3_guestbook');
-      const result = await (action === 'delete' ? query.delete() : query.update({ is_hidden: body.hidden })).eq('id', body.id).select('id').single();
-      if (result.error) throw new Error('Message could not be changed');
-      return respond({ ok: true });
+    if (['visibility', 'conversation_visibility', 'delete', 'delete_conversation', 'update_message', 'update_conversation'].includes(action)) {
+      if (typeof body.id !== 'string' || !/^[0-9a-f-]{36}$/i.test(body.id)) return respond({ error: 'Invalid guestbook selection.' }, 400);
+      const isConversation = action === 'conversation_visibility' || action === 'delete_conversation' || action === 'update_conversation';
+      const query = db.from(isConversation ? 'ajt3_guestbook_conversations' : 'ajt3_guestbook');
+      let result;
+      let updated = {};
+      if (action === 'delete' || action === 'delete_conversation') {
+        if (action === 'delete_conversation' && body.id === '00000000-0000-4000-8000-000000000001') return respond({ error: 'The primary guestbook conversation cannot be deleted.' }, 400);
+        result = await query.delete().eq('id', body.id).select('id').single();
+      } else if (action === 'update_message' || action === 'update_conversation') {
+        try {
+          if (action === 'update_message') {
+            const message = scrubProfanity(cleanText(body.message, 500, 'Message'), Deno.env.get('GUESTBOOK_BLOCKED_WORDS') || '');
+            result = await query.update({ message }).eq('id', body.id).select('id').single();
+            updated = { message };
+          } else {
+            const title = scrubProfanity(cleanText(body.title, 80, 'Conversation title'), Deno.env.get('GUESTBOOK_BLOCKED_WORDS') || '');
+            result = await query.update({ title }).eq('id', body.id).select('id').single();
+            updated = { title };
+          }
+        } catch (error) { return respond({ error: (error as Error).message }, 400); }
+      } else {
+        if (typeof body.hidden !== 'boolean') return respond({ error: 'Invalid visibility setting.' }, 400);
+        result = await query.update({ is_hidden: body.hidden }).eq('id', body.id).select('id').single();
+      }
+      if (result.error) throw new Error('Guestbook content could not be changed');
+      return respond({ ok: true, ...updated });
     }
     if (action !== 'submit' && action !== 'verify') return respond({ error: 'Unknown action.' }, 400);
 

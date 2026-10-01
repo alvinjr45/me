@@ -40,6 +40,25 @@ test('preserves the draft and offers retry after a failed save', async () => {
   expect(notifyCalendarChanged).not.toHaveBeenCalled();
 });
 
+test('shows upcoming events by default and can reveal past events', async () => {
+  const now = Date.now();
+  const hour = 60 * 60 * 1000;
+  requestCalendar.mockResolvedValue({ events: [
+    { id: 'past', title: 'Past event', calendar: 'personal', all_day: false, start_at: new Date(now - 2 * hour).toISOString(), end_at: new Date(now - hour).toISOString(), location: '', is_published: true },
+    { id: 'ongoing', title: 'Ongoing event', calendar: 'work', all_day: false, start_at: new Date(now - hour).toISOString(), end_at: new Date(now + hour).toISOString(), location: '', is_published: true },
+    { id: 'future', title: 'Future draft', calendar: 'events', all_day: false, start_at: new Date(now + hour).toISOString(), end_at: new Date(now + 2 * hour).toISOString(), location: '', is_published: false }
+  ] });
+
+  openEditor();
+  expect(await screen.findByLabelText('Show events')).toHaveValue('upcoming');
+  expect(screen.getByRole('button', { name: /Ongoing event/ })).toBeInTheDocument();
+  expect(screen.getByRole('button', { name: /Future draft/ })).toBeInTheDocument();
+  expect(screen.queryByRole('button', { name: /Past event/ })).not.toBeInTheDocument();
+
+  fireEvent.change(screen.getByLabelText('Show events'), { target: { value: 'all' } });
+  expect(screen.getByRole('button', { name: /Past event/ })).toBeInTheDocument();
+});
+
 test('rejects reversed dates and converts timed events to timestamps', () => {
   const draft = { ...eventDraft(), title: 'Timed event', starts: '2028-02-29T09:00', ends: '2028-02-29T10:00' };
   expect(eventPayload(draft).start_at).toBe(new Date(draft.starts).toISOString());

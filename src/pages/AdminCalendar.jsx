@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { calendarGroups, eventDate, eventRange } from '../data/calendar';
+import { calendarGroups, dateKey, eventDate, eventRange } from '../data/calendar';
 import { eventDraft, eventPayload, notifyCalendarChanged, requestCalendar } from '../lib/adminCalendar';
 import './AdminCalendar.css';
 
@@ -10,7 +10,7 @@ function AdminCalendar({ secret, onBusy }) {
   const [draft, setDraft] = useState(null);
   const [dirty, setDirty] = useState(false);
   const [query, setQuery] = useState('');
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState('upcoming');
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState('');
   const [reload, setReload] = useState(0);
@@ -69,8 +69,12 @@ function AdminCalendar({ secret, onBusy }) {
     finally { setSaving(false); onBusy(false); }
   }
 
+  const today = new Date();
+  const todayKey = dateKey(today);
   const matching = events.filter((item) => `${item.title} ${item.location}`.toLowerCase().includes(query.toLowerCase()) &&
-    (filter === 'all' || (filter === 'published' ? item.is_published : !item.is_published)))
+    (filter === 'all' || (filter === 'upcoming'
+      ? (item.all_day ? item.end_date >= todayKey : new Date(item.end_at) > today)
+      : (filter === 'published' ? item.is_published : !item.is_published))))
     .sort((a, b) => eventDate(a) - eventDate(b) || a.title.localeCompare(b.title));
 
   return (
@@ -83,7 +87,7 @@ function AdminCalendar({ secret, onBusy }) {
       {!loading && !loadError && <div className="admin-calendar__layout">
         <section aria-label="Manage events" className="admin-calendar__collection">
           <label>Search events<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
-          <label>Event visibility<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All events</option><option value="published">Published</option><option value="draft">Drafts</option></select></label>
+          <label>Show events<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="upcoming">Upcoming</option><option value="all">All events</option><option value="published">Published</option><option value="draft">Drafts</option></select></label>
           <div className="admin-calendar__items">{matching.map((item) => <button key={item.id} type="button" disabled={saving} aria-pressed={draft?.id === item.id} onClick={() => selectEvent(item)}><strong>{item.title}</strong><small>{eventRange(item)}</small><small>{item.is_published ? 'Published' : 'Draft'} / {calendarGroups.find((group) => group.id === item.calendar)?.title}</small></button>)}</div>
           {!matching.length && <p className="admin-page__hint">{events.length ? 'No matching events.' : 'Your calendar starts with one event.'}</p>}
         </section>

@@ -138,7 +138,6 @@
 .linkedin-projects__copy small { color: rgba(255, 255, 255, 0.68); font: 7px var(--font-mono); letter-spacing: 0.08em; text-transform: uppercase; }
 .linkedin-projects__copy strong { max-width: 85%; color: #fff; font-size: 15px; letter-spacing: -0.02em; }
 .linkedin-projects__copy > span { color: rgba(255, 255, 255, 0.72); font-size: 9px; line-height: 1.4; }
-.linkedin-projects__arrow { position: absolute; right: 15px; bottom: 14px; color: rgba(255, 255, 255, 0.75); font-size: 15px; }
 
 .linkedin-skill-index { margin-top: 19px; overflow: hidden; border: 1px solid #304656; border-radius: 10px; background: #0c141c; }
 .linkedin-skill-index__rows article { min-width: 0; display: grid; grid-template-columns: 28px minmax(120px, 0.7fr) minmax(0, 1.5fr); align-items: center; gap: 10px; padding: 12px 13px; border-bottom: 1px solid #22323f; }
@@ -199,7 +198,6 @@
   .linkedin-projects__copy small { font-size: 6px; }
   .linkedin-projects__copy strong { max-width: 100%; font-size: 12px; line-height: 1.1; }
   .linkedin-projects__copy > span { font-size: 8px; }
-  .linkedin-projects__arrow { right: 10px; bottom: 9px; font-size: 12px; }
   .linkedin-skill-index { margin-top: 15px; }
   .linkedin-skill-index__rows article { grid-template-columns: 22px minmax(0, 1fr); gap: 5px 8px; padding: 10px; }
   .linkedin-skill-index__rows h3 { font-size: 11px; }

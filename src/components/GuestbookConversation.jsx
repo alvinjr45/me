@@ -30,6 +30,11 @@ export default function GuestbookConversation({ conversation, focusChat, draft, 
   useEffect(() => { if (focusChat) heading.current?.focus({ preventScroll: true }); }, [focusChat]);
   useEffect(() => { if (participationReady) composerInput.current?.focus({ preventScroll: true }); }, [participationReady]);
   useEffect(() => () => controller.current?.abort(), []);
+  useLayoutEffect(() => {
+    if (!focusChat || !feed.current) return;
+    followBottom.current = true;
+    feed.current.scrollTop = feed.current.scrollHeight;
+  }, [focusChat, conversationId]);
   useEffect(() => {
     if (!conversationId) return undefined;
     let mounted = true;

@@ -36,8 +36,8 @@ const projects = [
 
 const skillGroups = [
   { title: 'Automation & AI', skills: ['Jenkins', 'CI/CD', 'MCP', 'IBM Bob'] },
-  { title: 'Cloud & infrastructure', skills: ['Kubernetes', 'OpenShift', 'VMware', 'AWS'] },
-  { title: 'Languages', skills: ['Python', 'React', 'JavaScript', 'Java', 'Ruby', 'SQL'] }
+  { title: 'Cloud & infrastructure', skills: ['Kubernetes', 'OpenShift', 'AWS', 'Linux'] },
+  { title: 'Languages', skills: ['Python', 'React', 'JavaScript', 'Java', 'Ruby', 'SQL', 'C', 'C++'] }
 ];
 
 function ProfileIcon({ name }) {
@@ -131,7 +131,6 @@ function LinkedIn() {
                     <span className="linkedin-projects__number" aria-hidden="true">0{index + 1}</span>
                     <span className="linkedin-projects__glyph" aria-hidden="true">{project.marker}</span>
                     <span className="linkedin-projects__copy"><small>React / {project.type}</small><strong>{project.name}</strong><span>{project.copy}</span></span>
-                    <span className="linkedin-projects__arrow" aria-hidden="true">&#8599;</span>
                   </Link>
                 ))}
               </div>

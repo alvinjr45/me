@@ -230,6 +230,18 @@ test('switches boards without mixing replies and retains a separate draft per co
   expect(screen.getByLabelText('Message')).toHaveValue('First draft');
 });
 
+test('opens a conversation at its newest message', async () => {
+  renderGuestbook();
+  await screen.findByText('Hello!');
+  const feed = screen.getByRole('log', { name: 'Conversation messages' });
+  Object.defineProperty(feed, 'scrollHeight', { configurable: true, value: 640 });
+  feed.scrollTop = 0;
+
+  fireEvent.click(within(screen.getByRole('navigation', { name: 'Conversations' })).getByRole('button', { name: /The Guestbook/ }));
+
+  expect(feed.scrollTop).toBe(640);
+});
+
 test('creates a named conversation and opens its first message', async () => {
   const created = { ...entry, id: 'created-message', conversation_id: secondConversation.id, message: 'Hello there!' };
   guestbookRequest.mockResolvedValue({ entry: created, scrubbed: false });

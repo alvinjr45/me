@@ -230,6 +230,16 @@ test('switches boards without mixing replies and retains a separate draft per co
   expect(screen.getByLabelText('Message')).toHaveValue('First draft');
 });
 
+test('keeps The Guestbook first in the conversation list', async () => {
+  getConversations.mockResolvedValue([secondConversation, conversation]);
+  renderGuestbook();
+  await screen.findByText('Hello!');
+
+  const conversations = within(screen.getByRole('navigation', { name: 'Conversations' })).getAllByRole('button');
+  expect(conversations[0]).toHaveAccessibleName(/The Guestbook/);
+  expect(conversations[1]).toHaveAccessibleName(/Weekend plans/);
+});
+
 test('opens a conversation at its newest message', async () => {
   renderGuestbook();
   await screen.findByText('Hello!');

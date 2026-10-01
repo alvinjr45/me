@@ -6,6 +6,14 @@ import './Guestbook.css';
 import { DeviceSettingsContext, usePhoneBack } from '../components/deviceSettings';
 import GuestbookAuthor from '../components/GuestbookAuthor';
 
+const PRIMARY_CONVERSATION_ID = '00000000-0000-4000-8000-000000000001';
+
+function pinPrimaryConversation(conversations) {
+  const primaryIndex = conversations.findIndex((conversation) => conversation.id === PRIMARY_CONVERSATION_ID);
+  if (primaryIndex <= 0) return conversations;
+  return [conversations[primaryIndex], ...conversations.slice(0, primaryIndex), ...conversations.slice(primaryIndex + 1)];
+}
+
 function ConversationAvatar({ title }) {
   const initials = title.trim().split(/\s+/).slice(0, 2).map((word) => [...word][0]).join('').toUpperCase();
   const color = [...title].reduce((sum, character) => sum + character.codePointAt(0), 0) % 5;
@@ -56,8 +64,9 @@ export default function Guestbook() {
       try {
         const rows = await getConversations(0, search);
         if (!mounted || current !== request.current) return;
-        setConversations(rows); setHasMore(rows.length === 50); setError('');
-        setSelected((previous) => previous || rows[0] || null);
+        const orderedRows = pinPrimaryConversation(rows);
+        setConversations(orderedRows); setHasMore(rows.length === 50); setError('');
+        setSelected((previous) => previous || orderedRows[0] || null);
       } catch (failure) { if (mounted && current === request.current) { setConversations([]); setError(failure.message); } }
       finally {
         if (mounted && current === request.current) {
@@ -93,7 +102,7 @@ export default function Guestbook() {
     try {
       const rows = await getConversations(conversations.length, search);
       if (current === request.current) {
-        setConversations((previous) => [...previous, ...rows.filter((row) => !previous.some((item) => item.id === row.id))]);
+        setConversations((previous) => pinPrimaryConversation([...previous, ...rows.filter((row) => !previous.some((item) => item.id === row.id))]));
         setHasMore(rows.length === 50); setError('');
       }
     } catch (failure) { if (current === request.current) setError(failure.message); }

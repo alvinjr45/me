@@ -120,7 +120,7 @@ function Home() {
       }}
     >
       <h1 className={isPhone ? 'sr-only' : 'desktop-home__title'}>
-        <span>AJ's </span><span>Personal Site</span>
+        <span>Meet</span><span>AJ Thompson</span>
       </h1>
       <div className="desktop-home__apps-panel">
         <nav

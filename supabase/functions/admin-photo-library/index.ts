@@ -85,7 +85,7 @@ Deno.serve(async (request) => {
       return respond({ photos: photos.data, albums: albums.data });
     }
 
-    if (action === 'remove_from_album') {
+    if (action === 'delete_photo') {
       let id, albumId;
       try {
         id = text(value('id'), 100, true);
@@ -93,9 +93,9 @@ Deno.serve(async (request) => {
       } catch {
         return respond({ error: 'Choose a photo and album.' }, 400);
       }
-      const { data, error } = await client.from('ajt3_photos').update({ album_id: null })
+      const { data, error } = await client.from('ajt3_photos').delete()
         .eq('id', id).eq('album_id', albumId).select('*').maybeSingle();
-      if (error) return respond({ error: 'Unable to remove the photo from this album. Please retry.' }, 500);
+      if (error) return respond({ error: 'Unable to delete the photo. Please retry.' }, 500);
       if (!data) return respond({ error: 'This photo is no longer in this album. Refresh the library.' }, 409);
       return respond({ photo: data });
     }
@@ -129,7 +129,7 @@ Deno.serve(async (request) => {
         const visibility = value('is_published');
         if (![true, false, 'true', 'false'].includes(visibility)) throw new Error('Choose whether the photo is published.');
         record = {
-          id, title: text(value('title'), 160, true), album_id: text(value('album_id'), 100) || null,
+          id, title: text(value('title'), 160, true), album_id: text(value('album_id'), 100, true),
           caption: text(value('caption'), 2000),
           sort_order, is_published: visibility === true || visibility === 'true',
           width: integer(value('width'), null), height: integer(value('height'), null), image_url: ''
@@ -147,12 +147,10 @@ Deno.serve(async (request) => {
       return respond({ album: data });
     }
 
-    const photo = record as { id: string; album_id: string | null; image_url: string } & Record<string, unknown>;
-    if (photo.album_id) {
-      const { data: album, error: albumError } = await client.from('ajt3_photo_albums').select('id').eq('id', photo.album_id).maybeSingle();
-      if (albumError) return respond({ error: 'Unable to check the album. Please retry.' }, 500);
-      if (!album) return respond({ error: 'Choose an existing album.' }, 400);
-    }
+    const photo = record as { id: string; album_id: string; image_url: string } & Record<string, unknown>;
+    const { data: album, error: albumError } = await client.from('ajt3_photo_albums').select('id').eq('id', photo.album_id).maybeSingle();
+    if (albumError) return respond({ error: 'Unable to check the album. Please retry.' }, 500);
+    if (!album) return respond({ error: 'Choose an existing album.' }, 400);
 
     const file = form?.get('file');
     const bucket = Deno.env.get('BLOG_MEDIA_BUCKET') || 'blog-media';

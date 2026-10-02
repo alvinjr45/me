@@ -69,7 +69,7 @@ Used by Mission Control and the admin favorite control in Photos.
 - `list`
 - `save_photo`
 - `save_album`
-- `remove_from_album`
+- `delete_photo`
 - `set_favorite`
 - `save_profile`
 
@@ -146,6 +146,7 @@ Apply migrations in filename order:
 | `20260928000000_guestbook_admin_author.sql` | Trusted administrator marker and v3 publishing RPC |
 | `20260929000000_add_photo_favorites.sql` | Shared admin-selected photo favorites |
 | `20261001000000_guestbook_conversation_delete.sql` | Cascading message deletion with non-primary conversations |
+| `20261002000000_require_photo_albums.sql` | Remove legacy unassigned photos and require an album for every photo |
 
 The initial blog migration creates `public.set_updated_at()`, which later photo
 and calendar migrations reuse. Review the complete pending migration set before

@@ -100,15 +100,15 @@ empty/zero state.
 
 `ajt3_photos` contains:
 
-- `id`, nullable `album_id`, `title`, `caption`, and `alt_text`
+- `id`, required `album_id`, `title`, `caption`, and `alt_text`
 - `image_url`, optional `width` and `height`, and `sort_order`
 - `is_published` and `is_favorite`
 - `created_at` and `updated_at`
 
 Public photo rows normalize `image_url` to `src`, `album_id` to `album`, and the
 database boolean fields to camel-case UI fields. Public album policy only exposes
-albums that contain at least one published photo. Photos without an album remain
-valid and appear in the main Library.
+albums that contain at least one published photo. Every photo belongs to an album;
+deleting it from that album also removes it from the main Library.
 
 Favorites are a shared server value chosen by the admin, not per-visitor browser
 storage. Everyone can view Favorites; only a verified administrator can change

@@ -14,7 +14,7 @@ an administrator access dialog; backend functions still verify
 - `/admin/new`: create a post
 - `/admin/new?slug=...`: edit an existing post
 - `/admin/photos`: upload or reference photos, edit metadata/order/visibility,
-  manage albums, remove album assignments, and set shared favorites
+  manage albums, delete photos, and set shared favorites
 - `/admin/dogs`: publish the latest dog incident and increment the culprit's
   all-time incident count
 - `/admin/guestbook`: moderate messages and conversations and pause/resume public
@@ -62,9 +62,9 @@ public and reused on the AJ Thompson account card, Settings account panel, and
 Resume. Each upload receives a new storage path; old successful images are kept.
 
 Photo management supports individual URL/file saves and a multi-file upload
-queue. A photo may have no album. Removing a photo from an album saves
-immediately without hiding or deleting it. There is no permanent photo/album
-delete action in this release.
+queue. Every photo requires an album. Deleting a photo from an album also deletes
+its library row, so it disappears from All Photos after confirmation. The stored
+image file is retained.
 
 Hiding a photo removes it from public table reads and the Photos app, but the
 public storage URL remains reachable to anyone who already has it. Favorites are
@@ -106,7 +106,7 @@ Mission Control requires all database migrations and these functions:
 - `admin-calendar`
 - `guestbook`
 
-The photo library also depends on the admin-profile, nullable-album, and favorite
+The photo library also depends on the admin-profile, required-album, and favorite
 follow-up migrations. Guestbook conversation moderation depends on the
 conversation, admin-author, and cascade-delete follow-ups.
 

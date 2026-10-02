@@ -20,7 +20,7 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
   const [status, setStatus] = useState('idle');
   const [message, setMessage] = useState('');
   const [uploadOpen, setUploadOpen] = useState(false);
-  const working = status === 'saving' || status === 'preparing' || status === 'removing';
+  const working = status === 'saving' || status === 'preparing' || status === 'deleting';
 
   useEffect(() => {
     if (!file) { setPreview(''); return; }
@@ -126,17 +126,18 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
     }
   }
 
-  async function removeFromAlbum(item) {
-    setStatus('removing');
-    setMessage('Removing photo from album...');
+  async function deletePhoto(item) {
+    if (!window.confirm(`Permanently delete "${item.title}" from Photos? This cannot be undone.`)) return;
+    setStatus('deleting');
+    setMessage('Deleting photo...');
     onBusy(true);
     try {
-      const result = await requestPhotoLibrary(secret, { action: 'remove_from_album', id: item.id, album_id: album.id });
-      if (result.photo?.id !== item.id || result.photo.album_id !== null) throw new Error('The photo service did not confirm the removal. Please refresh before retrying.');
-      onChange('photos', result.photo);
-      setPhoto((current) => current?.id === item.id && current.album_id === album.id ? { ...current, album_id: '' } : current);
+      const result = await requestPhotoLibrary(secret, { action: 'delete_photo', id: item.id, album_id: album.id });
+      if (result.photo?.id !== item.id) throw new Error('The photo service did not confirm the deletion. Please refresh before retrying.');
+      onChange('photos', result.photo, true);
+      setPhoto((current) => current?.id === item.id ? null : current);
       setStatus('saved');
-      setMessage('Photo removed from this album. It is still in your photo library.');
+      setMessage('Photo deleted from Photos.');
       notifyPhotoLibraryChanged();
     } catch (error) {
       setStatus('error');
@@ -152,7 +153,7 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
 
   return (
     <main className="admin-page admin-page--mission-control admin-photos">
-      <header className="admin-photos__toolbar"><div><h1>Photo library</h1><p>Make room for the moments worth keeping.</p></div><div className="admin-page__button-group"><button className="admin-page__primary" type="button" disabled={working || uploadOpen || !library.albums.length} onClick={() => { setMode('photos'); setUploadOpen(true); }}>Upload photos</button><button type="button" disabled={working || uploadOpen} onClick={() => { setMode('photos'); selectPhoto(null); }}>Add photo</button><button type="button" disabled={working || uploadOpen} onClick={() => { setMode('albums'); selectAlbum(null); }}>New album</button></div></header>
+      <header className="admin-photos__toolbar"><div><h1>Photo library</h1><p>Make room for the moments worth keeping.</p></div><div className="admin-page__button-group"><button className="admin-page__primary" type="button" disabled={working || uploadOpen || !library.albums.length} onClick={() => { setMode('photos'); setUploadOpen(true); }}>Upload photos</button><button type="button" disabled={working || uploadOpen || !library.albums.length} onClick={() => { setMode('photos'); selectPhoto(null); }}>Add photo</button><button type="button" disabled={working || uploadOpen} onClick={() => { setMode('albums'); selectAlbum(null); }}>New album</button></div></header>
       {!library.albums.length && <p className="admin-page__hint">Create an album to start uploading photos.</p>}
       {uploadOpen && <AdminPhotoUpload secret={secret} library={library} onChange={onChange} onBusy={(busy) => { setStatus(busy ? 'saving' : 'idle'); onBusy(busy); }} onClose={() => setUploadOpen(false)} />}
       <div hidden={uploadOpen}>
@@ -165,7 +166,7 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
               <label>Search photos<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} /></label>
               <label>Visibility<select value={filter} onChange={(event) => setFilter(event.target.value)}><option value="all">All photos</option><option value="published">Published</option><option value="hidden">Hidden</option></select></label>
             </div>
-            <div className="admin-photos__items">{matching.map((item) => <button type="button" key={item.id} disabled={working} aria-pressed={photo?.id === item.id} onClick={() => selectPhoto(item)}><PhotoImage src={item.image_url} size={96} alt="" /><span><strong>{item.title}</strong><small>{item.is_published ? 'Published' : 'Hidden'} / {library.albums.find((entry) => entry.id === item.album_id)?.title || 'No album'}</small></span></button>)}</div>
+            <div className="admin-photos__items">{matching.map((item) => <button type="button" key={item.id} disabled={working} aria-pressed={photo?.id === item.id} onClick={() => selectPhoto(item)}><PhotoImage src={item.image_url} size={96} alt="" /><span><strong>{item.title}</strong><small>{item.is_published ? 'Published' : 'Hidden'} / {library.albums.find((entry) => entry.id === item.album_id)?.title || 'Missing album'}</small></span></button>)}</div>
             {!matching.length && <p className="admin-page__hint">{library.photos.length ? 'No matching photos.' : 'Start your library with a photo.'}</p>}
           </section>
           {photo ? (
@@ -179,7 +180,7 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
                 <p className="admin-page__hint">JPG, PNG, WebP, GIF, or HEIC. Up to 20 MB per photo.</p>
                 {file ? <div className="admin-photos__file"><span>{file.name}</span><button type="button" onClick={() => { setFile(null); updatePhoto('width', ''); updatePhoto('height', ''); }}>Cancel replacement</button></div> : <label>Image URL<input required value={photo.image_url} inputMode="url" placeholder="https://... or /images/..." maxLength={2048} onChange={(event) => { updatePhoto('image_url', event.target.value); updatePhoto('width', ''); updatePhoto('height', ''); }} /></label>}
                 <label>Photo title<input required maxLength={160} value={photo.title} onChange={(event) => updatePhoto('title', event.target.value)} /></label>
-                <label>Album<select value={photo.album_id} onChange={(event) => updatePhoto('album_id', event.target.value)}><option value="">No album</option>{library.albums.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
+                <label>Album<select required value={photo.album_id} onChange={(event) => updatePhoto('album_id', event.target.value)}><option value="" disabled>Choose an album</option>{library.albums.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}</select></label>
                 <label>Caption<textarea maxLength={2000} value={photo.caption} onChange={(event) => updatePhoto('caption', event.target.value)} /></label>
                 <details><summary>Display order and dimensions</summary><label>Display order<input type="number" min="0" max="1000000" step="1" required value={photo.sort_order} onChange={(event) => updatePhoto('sort_order', event.target.value)} /></label><p className="admin-page__hint">Lower numbers appear first.</p><div className="admin-page__row"><label>Width (px)<input type="number" min="1" max="1000000" step="1" value={photo.width} onChange={(event) => updatePhoto('width', event.target.value)} /></label><label>Height (px)<input type="number" min="1" max="1000000" step="1" value={photo.height} onChange={(event) => updatePhoto('height', event.target.value)} /></label></div></details>
                 <label className="admin-page__toggle"><input type="checkbox" checked={photo.is_published} onChange={(event) => updatePhoto('is_published', event.target.checked)} />Publish in Photos</label>
@@ -202,11 +203,11 @@ function AdminPhotos({ secret, library, onChange, onBusy }) {
               <button type="submit">{status === 'saving' ? 'Saving album...' : 'Save album'}</button>
               {album.id && <section className="admin-photos__album-photos" aria-label="Photos in this album">
                 <h2>Photos ({albumPhotos.length})</h2>
-                {!!albumPhotos.length && <p className="admin-page__hint">Removing a photo here keeps it in your library.</p>}
+                {!!albumPhotos.length && <p className="admin-page__hint">Deleting a photo here removes it from the album and Photos.</p>}
                 <ul>{albumPhotos.map((item) => <li key={item.id}>
                   <PhotoImage src={item.image_url} size={96} alt="" />
                   <div><strong>{item.title}</strong><span>{item.is_published ? 'Published' : 'Hidden'}</span></div>
-                  <button type="button" aria-label={`Remove ${item.title} from album`} onClick={() => removeFromAlbum(item)}>Remove</button>
+                  <button type="button" aria-label={`Delete ${item.title}`} onClick={() => deletePhoto(item)}>Delete</button>
                 </li>)}</ul>
                 {!albumPhotos.length && <p className="admin-page__hint">No photos in this album.</p>}
               </section>}

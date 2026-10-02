@@ -124,7 +124,7 @@ test.each([
     const redirect = screen.getByRole('region', { name: 'Redirecting to ajt3.website...' });
     expect(redirect).toHaveClass('device-system-screen--redirect');
     expect(within(redirect).getByRole('heading')).toHaveFocus();
-    expect(within(redirect).getByText("You're leaving AJ's Personal Site.")).toBeInTheDocument();
+    expect(within(redirect).getByText("You're leaving Meet AJ Thompson.")).toBeInTheDocument();
     const cancel = within(redirect).getByRole('button', { name: 'Cancel' });
     expect(screen.queryByRole('navigation', { name: 'Open a site app' })).not.toBeInTheDocument();
     fireEvent.click(cancel);

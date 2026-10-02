@@ -73,9 +73,12 @@ function MissionControl() {
     return () => controller.abort();
   }, [secret, photoReload]);
 
-  function updateLibrary(kind, row) {
-    setLibrary((current) => ({ ...current, [kind]: [...current[kind].filter((item) => item.id !== row.id), row]
-      .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id)) }));
+  function updateLibrary(kind, row, remove = false) {
+    setLibrary((current) => ({
+      ...current,
+      [kind]: (remove ? current[kind].filter((item) => item.id !== row.id) : [...current[kind].filter((item) => item.id !== row.id), row])
+        .sort((a, b) => a.sort_order - b.sort_order || a.id.localeCompare(b.id))
+    }));
   }
 
   if (!access.session) return null;

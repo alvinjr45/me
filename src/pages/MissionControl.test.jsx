@@ -52,10 +52,10 @@ beforeEach(() => {
     if (url.endsWith('admin-dog-incident')) return response(200, { incident: null });
     if (url.endsWith('admin-photo-library')) {
       const body = options.body instanceof FormData ? Object.fromEntries(options.body.entries()) : JSON.parse(options.body);
-      if (body.action === 'remove_from_album') {
-        const saved = { ...photoRows.find((item) => item.id === body.id), album_id: null };
-        photoRows = photoRows.map((item) => item.id === saved.id ? saved : item);
-        return response(200, { photo: saved });
+      if (body.action === 'delete_photo') {
+        const deleted = photoRows.find((item) => item.id === body.id && item.album_id === body.album_id);
+        photoRows = photoRows.filter((item) => item.id !== body.id);
+        return response(200, { photo: deleted });
       }
       if (body.action === 'save_photo') {
         const saved = { ...body, id: body.id || 'new-photo', is_published: body.is_published === 'true', sort_order: Number(body.sort_order), image_url: body.file ? 'https://example.test/upload.jpg' : body.image_url };
@@ -237,40 +237,48 @@ test('creates an album and makes it available in the photo editor without anothe
   expect(global.fetch.mock.calls.filter(([url]) => url.endsWith('admin-blog-post'))).toHaveLength(1);
 });
 
-test('removes album membership immediately while preserving library photos and unsaved drafts', async () => {
-  openApp('/admin/photos');
-  await signIn();
-  fireEvent.click(await screen.findByRole('button', { name: 'Drake Published / Drake & Josh' }));
-  fireEvent.change(screen.getByLabelText('Photo title'), { target: { value: 'Unsaved photo title' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Albums (1)' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Drake & Josh 1 photos' }));
-  fireEvent.change(screen.getByLabelText('Album title'), { target: { value: 'Unsaved album title' } });
-  fireEvent.click(screen.getByRole('button', { name: 'Remove Drake from album' }));
-  await screen.findByText('Photo removed from this album. It is still in your photo library.');
-  expect(screen.getByText('No photos in this album.')).toBeInTheDocument();
-  expect(screen.getByRole('button', { name: 'Drake & Josh 0 photos' })).toBeInTheDocument();
-  expect(screen.getByLabelText('Album title')).toHaveValue('Unsaved album title');
-  fireEvent.click(screen.getByRole('button', { name: 'Photos (1)' }));
-  expect(screen.getByRole('button', { name: 'Drake Published / No album' })).toBeInTheDocument();
-  expect(screen.getByLabelText('Photo title')).toHaveValue('Unsaved photo title');
-  expect(screen.getByLabelText('Album')).toHaveValue('');
-  fireEvent.click(screen.getByRole('button', { name: 'Save photo' }));
-  await screen.findByText('Photo saved and published to your camera roll.');
-  const [, request] = global.fetch.mock.calls.find(([, options]) => options.body instanceof FormData);
-  expect(request.body.get('album_id')).toBe('');
+test('deletes a photo from its album and the photo library while preserving the album draft', async () => {
+  const confirmDelete = jest.spyOn(window, 'confirm').mockReturnValue(true);
+  try {
+    openApp('/admin/photos');
+    await signIn();
+    fireEvent.click(await screen.findByRole('button', { name: 'Albums (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Drake & Josh 1 photos' }));
+    fireEvent.change(screen.getByLabelText('Album title'), { target: { value: 'Unsaved album title' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Drake' }));
+    expect(confirmDelete).toHaveBeenCalledWith('Permanently delete "Drake" from Photos? This cannot be undone.');
+    await screen.findByText('Photo deleted from Photos.');
+    expect(screen.getByText('No photos in this album.')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Drake & Josh 0 photos' })).toBeInTheDocument();
+    expect(screen.getByLabelText('Album title')).toHaveValue('Unsaved album title');
+    fireEvent.click(screen.getByRole('button', { name: 'Photos (0)' }));
+    expect(screen.queryByRole('button', { name: 'Drake Published / Drake & Josh' })).not.toBeInTheDocument();
+    const [, request] = global.fetch.mock.calls.find(([url, options]) => {
+      if (!url.endsWith('admin-photo-library') || options.body instanceof FormData) return false;
+      return JSON.parse(options.body).action === 'delete_photo';
+    });
+    expect(JSON.parse(request.body)).toMatchObject({ action: 'delete_photo', id: 'drake', album_id: 'dogs' });
+  } finally {
+    confirmDelete.mockRestore();
+  }
 });
 
-test('retains photos in the album after a failed removal and allows retry', async () => {
-  openApp('/admin/photos');
-  await signIn();
-  fireEvent.click(await screen.findByRole('button', { name: 'Albums (1)' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Drake & Josh 1 photos' }));
-  global.fetch.mockResolvedValueOnce(response(500, { error: 'Unable to remove the photo.' }));
-  fireEvent.click(screen.getByRole('button', { name: 'Remove Drake from album' }));
-  expect(await screen.findByRole('alert')).toHaveTextContent('Unable to remove the photo.');
-  expect(screen.getByRole('button', { name: 'Drake & Josh 1 photos' })).toBeInTheDocument();
-  fireEvent.click(screen.getByRole('button', { name: 'Remove Drake from album' }));
-  await screen.findByText('No photos in this album.');
+test('retains photos after a failed deletion and allows retry', async () => {
+  const confirmDelete = jest.spyOn(window, 'confirm').mockReturnValue(true);
+  try {
+    openApp('/admin/photos');
+    await signIn();
+    fireEvent.click(await screen.findByRole('button', { name: 'Albums (1)' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Drake & Josh 1 photos' }));
+    global.fetch.mockResolvedValueOnce(response(500, { error: 'Unable to delete the photo.' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Drake' }));
+    expect(await screen.findByRole('alert')).toHaveTextContent('Unable to delete the photo.');
+    expect(screen.getByRole('button', { name: 'Drake & Josh 1 photos' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Drake' }));
+    await screen.findByText('No photos in this album.');
+  } finally {
+    confirmDelete.mockRestore();
+  }
 });
 
 test('uploads a new image through the authenticated photo endpoint', async () => {

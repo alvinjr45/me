@@ -30,5 +30,7 @@ export async function getPhotoLibrary() {
     supabase.from('ajt3_photo_albums').select('*').order('sort_order').order('title').order('id')
   ]);
   if (photoResult.error || albumResult.error) throw new Error('The photo library is unavailable. Please try again.');
-  return { photos: (photoResult.data || []).map(normalizePhoto), albums: albumResult.data || [] };
+  const albums = albumResult.data || [];
+  const albumIds = new Set(albums.map((album) => album.id));
+  return { photos: (photoResult.data || []).filter((photo) => albumIds.has(photo.album_id)).map(normalizePhoto), albums };
 }

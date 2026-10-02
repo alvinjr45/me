@@ -1,135 +1,145 @@
 # Mission Control
 
-Mission Control is the central site dashboard inside the desktop shell. It uses
-the shell's verified admin session. Guests cannot open management views, and
-backend operations still require `ADMIN_POST_SECRET` independently of the UI.
+Mission Control is the protected site-management app inside the device shell. It
+uses the verified AJ Thompson session provided by `DeviceShell`. Guests receive
+an administrator access dialog; backend functions still verify
+`ADMIN_POST_SECRET` for every request.
 
 ## Sections
 
-- `/admin`: publishing totals, photo totals, recent posts, and management links.
-- `/admin/posts`: search and filter published posts and drafts; open the editor or permanently delete a post after confirmation.
-- `/admin/new?slug=...`: edit an existing post. Without a slug, create a new post.
-- `/admin/photos`: add or replace images, edit titles and captions,
-  assign albums, adjust display order, and publish or hide photos. Create and
-  rename albums and change their descriptions and order here too.
-- `/admin/dogs`: the existing dog incident editor.
-- `/admin/calendar`: create, edit, publish, and hide calendar events. See
-  [Calendar setup and verification](calendar.md) for the required migration and function.
-- `/admin/guestbook`: hide/show whole conversations, hide/show or delete their
-  auto-published messages, and pause/resume submissions. There is no approval queue;
-  see [Guestbook setup](guestbook.md) for
-  its separate Turnstile, rate-limit, and profanity-filter configuration.
+- `/admin`: profile photo, management shortcuts, recent posts, and photo-service
+  status
+- `/admin/posts`: post totals, published/draft filters, search, editing, and
+  confirmed permanent deletion
+- `/admin/new`: create a post
+- `/admin/new?slug=...`: edit an existing post
+- `/admin/photos`: upload or reference photos, edit metadata/order/visibility,
+  manage albums, remove album assignments, and set shared favorites
+- `/admin/dogs`: publish the latest dog incident and increment the culprit's
+  all-time incident count
+- `/admin/guestbook`: moderate messages and conversations and pause/resume public
+  submissions
+- `/admin/calendar`: create, edit, publish, or hide events
 
-The in-app routes also work as entry links. Browser navigation remains controlled
-by the desktop shell. Switching sections or minimizing retains an open post
-editor and photo draft. Selecting another post replaces that editor. Closing,
-signing out, or reloading discards unsaved changes. Save before doing any of those.
+Internal route buttons use `useNavigate`; direct section routes also work as the
+initial in-device destination.
 
-## Backend setup (run by the site owner)
+## Editor lifetime
 
-The existing Supabase project, `blog-media` bucket (or `BLOG_MEDIA_BUCKET`), admin
-password, and CORS configuration are reused. No new frontend secret is required.
-The new function reads `ADMIN_POST_SECRET`, `SUPABASE_URL`, and
-`SUPABASE_SERVICE_ROLE_KEY`, plus the existing optional bucket and CORS settings.
+Mission Control intentionally keeps selected editor components mounted:
 
-Apply `supabase/migrations/20260924000000_create_photo_library.sql` and deploy the
-new photo function before deploying this frontend. The migration creates two
-tables with public read policies, authenticated server-only writes, and seeds
-the five existing photos and three albums with their existing IDs. Public album
-queries return only albums with at least one published photo.
+- An open post editor survives section changes and desktop app switches.
+- The calendar editor is mounted after its first visit and survives section/app
+  switches.
+- Photo state is owned by Mission Control while its window remains mounted.
 
-For the correct linked Supabase project, review pending migrations first, then
-apply and deploy:
+Closing the Mission Control window, signing out, restarting/shutting down, or
+reloading unmounts the workspace and discards unsaved state. Selecting a different
+record can also replace a draft. Photo/album and calendar selection prompt before
+discarding dirty editors; the post editor does not provide a general unsaved-change
+guard. Save before leaving the session.
 
-```sh
-supabase db push --dry-run
-supabase db push
-supabase functions deploy admin-photo-library
-supabase functions deploy admin-blog-post
-npm run build
-```
+## Blog publishing
 
-`supabase/config.toml` sets `verify_jwt = false` for these functions because they
-use the existing server-checked admin password. Do not remove the password check
-from either handler. The blog function update prevents new posts from overwriting
-another post with the same title-derived URL.
+The post editor supports:
 
-These commands follow the official [Supabase migration workflow](https://supabase.com/docs/guides/local-development/cli-workflows)
-and [function deployment instructions](https://supabase.com/docs/guides/functions/deploy).
-Deploy the resulting frontend using the site's usual workflow.
+- title-derived slug, excerpt, category, publication date, and published state
+- cover URL or cover upload plus alternative text
+- ordered sections with heading, paragraphs, and bullets
+- existing media plus new image/video uploads, captions, alt text, and posters
 
-## Photo behavior
+Uploads are validated in the browser and server. HEIC/HEIF images are converted
+in the browser with the existing `heic2any` dependency. A save refreshes the
+admin post list and open public Blog/Dog HQ views.
 
-The overview profile photo opens the image chooser when clicked. Save and Cancel
-appear after a new photo is selected.
-The saved photo appears on the administrator sign-in tile and in Settings, and
-persists across browsers. Guest initials are unchanged. Before using this control,
-apply `supabase/migrations/20260925000000_create_admin_profile.sql` and redeploy
-`admin-photo-library`. The profile table exposes only the public image URL and its
-update time; writes use the existing server-verified admin password. Profile photos
-use the existing media bucket and do not appear in the photo library.
+Deletion is permanent at the row level and asks for confirmation. Uploaded media
+is not removed as part of post deletion.
 
-Photo uploads accept JPG, PNG, WebP and GIF up to 20 MB; the browser converts HEIC
-and HEIF with the existing converter. Each replacement gets a new storage path.
-Successful replacements retain old image files so existing external links keep
-working. A failed database save attempts to remove only its newly uploaded file.
+## Photo and profile behavior
 
-Hiding a photo removes its row from public reads and the camera roll. Storage is
-public, so hiding is not a way to make an image URL private. This release does not
-permanently delete photos, albums, or their files.
+The overview avatar opens a profile-image chooser. Saved profile photos are
+public and reused on the AJ Thompson account card, Settings account panel, and
+Resume. Each upload receives a new storage path; old successful images are kept.
 
-The album editor lists its photos with a Remove button. Removal saves immediately
-and keeps the photo in the main library, with its visibility unchanged. Photos
-without an album can be edited or assigned to another album. Before deploying
-this frontend, apply `supabase/migrations/20260928000000_allow_photos_without_album.sql`
-and redeploy `admin-photo-library`. The migration preserves all existing photos
-and album assignments.
+Photo management supports individual URL/file saves and a multi-file upload
+queue. A photo may have no album. Removing a photo from an album saves
+immediately without hiding or deleting it. There is no permanent photo/album
+delete action in this release.
 
-The public Photos app reads Supabase when it is configured. It uses the original
-static collection only when Supabase is not configured. An empty published
-library stays empty; failures display a retry message instead of restoring
-hidden seed photos. Favorites are a shared server-side property rather than
-browser storage. Everyone can view AJ's Favorites collection, but only the
-verified admin sees the heart control, and the photo function independently
-checks the admin secret before changing it. Apply
-`supabase/migrations/20260929000000_add_photo_favorites.sql` and redeploy
-`admin-photo-library` before deploying the updated frontend. Successful photo,
-album, and favorite saves notify open Photos windows; other tabs refresh on
-focus or the storage event.
+Hiding a photo removes it from public table reads and the Photos app, but the
+public storage URL remains reachable to anyone who already has it. Favorites are
+also public values; only the verified admin can change them.
+
+## Dog incident behavior
+
+The editor calls `admin-dog-incident` with the admin secret in a header. Saving
+replaces the single `latest` incident and increments the selected culprit's
+counter. Dog HQ refreshes in the same tab after post/focus changes and in other
+tabs through the incident storage revision.
+
+## Calendar behavior
+
+New events start as drafts. Timed values are entered in local time and converted
+to UTC for storage; all-day values stay as inclusive dates. Saving refreshes open
+Calendar windows and other tabs. Events are hidden by clearing Publish; there is
+no delete, recurrence, sync, or notification delivery.
+
+See [Calendar](calendar.md) for setup and live verification.
+
+## Guestbook behavior
+
+Mission Control has separate Messages and Conversations views. It can edit text,
+hide/show entries, permanently delete messages, delete non-primary conversations,
+and change the global submission state. Messages publish after automated checks;
+there is no pending approval queue.
+
+See [Guestbook](guestbook.md) before changing security, limits, policies,
+Turnstile, migrations, or submission state.
+
+## Backend requirements
+
+Mission Control requires all database migrations and these functions:
+
+- `admin-blog-post`
+- `admin-dog-incident`
+- `admin-photo-library`
+- `admin-calendar`
+- `guestbook`
+
+The photo library also depends on the admin-profile, nullable-album, and favorite
+follow-up migrations. Guestbook conversation moderation depends on the
+conversation, admin-author, and cascade-delete follow-ups.
+
+See [Admin and Supabase architecture](admin-and-supabase.md) for the complete
+order, environment variables, and public boundaries.
 
 ## Verification
 
-The following checks run without starting a server or connecting to production:
+Lightweight local tests that do not start a server include:
 
 ```sh
-CI=true node node_modules/react-scripts/scripts/test.js --watchAll=false --runInBand src/pages/MissionControl.test.jsx src/pages/Photos.test.jsx
-node --test supabase/functions/admin-photo-library/index.test.cjs
+CI=true node node_modules/react-scripts/scripts/test.js --watchAll=false --runInBand src/pages/MissionControl.test.jsx src/pages/AdminProfile.test.jsx src/pages/AdminPhotoUpload.test.jsx src/pages/AdminCalendar.test.jsx
+node --test supabase/functions/admin-photo-library/index.test.cjs supabase/functions/admin-calendar/index.test.cjs supabase/functions/guestbook/index.test.cjs
 ```
 
-The endpoint tests execute the TypeScript handler with mocked database/storage
-clients, not a live Deno/Supabase runtime. Verify the real migration, policies and
-uploads on the user-managed test deployment:
+The Edge Function tests use mocked database/storage clients. They do not verify a
+live Supabase project, migrations, RLS, storage, CORS, secrets, or Turnstile.
 
-1. Sign in as admin and open Mission Control. Guests must remain locked out.
-2. Create a draft post, edit it, publish it, and confirm the counts and blog update.
-3. Create an album, add a photo, edit its caption, and change its order.
-4. Hide the photo and verify that it disappears from Photos (including an open
-   viewer), then republish it. Empty albums should not appear publicly.
-5. Check that an anonymous photo query cannot return hidden rows or modify data.
-6. Check a rejected password, failed upload and unavailable photo endpoint.
-   Drafts should remain editable, and blog management should still work.
-7. Check desktop resizing and the phone layout, keyboard focus, and saving after
-   switching between dashboard sections.
-8. As a guest, confirm favorites are visible but no heart control is available.
-   As the admin, toggle a favorite and confirm it updates in another browser.
+Before production use, test rejected and accepted login, drafts/publishing,
+uploads/conversion, cross-tab refresh, calendar time zones, guestbook pause and
+moderation, public read restrictions, keyboard navigation, desktop window sizes,
+and phone layouts in an owner-managed environment.
 
 ## Main files
 
-- Dashboard: `src/pages/MissionControl.jsx`, `src/pages/MissionControl.css`.
-- Blog tools: `src/pages/Admin.jsx`, `src/pages/NewPost.jsx`, `src/lib/useAdminAccess.js`.
-- Photo tools: `src/pages/AdminPhotos.jsx`, `src/lib/adminPhotoLibrary.js`.
-- Public library: `src/data/photos.js`, `src/pages/Photos.jsx`, `src/pages/Photos.css`.
-- Public blog refresh: `src/pages/Blog.jsx`.
-- Routes and login copy: `src/App.jsx`, `src/components/AdminLogin.jsx`.
-- Backend: the new migration, `admin-photo-library`, the blog duplicate-title check,
-  and `supabase/config.toml`.
+- Shell session and access: `src/components/DeviceShell.jsx`,
+  `src/lib/useAdminAccess.js`
+- Workspace composition: `src/pages/MissionControl.jsx`
+- Posts/dogs: `src/pages/Admin.jsx`, `src/pages/NewPost.jsx`
+- Photos/profile: `src/pages/AdminPhotos.jsx`,
+  `src/pages/AdminPhotoUpload.jsx`, `src/pages/AdminProfile.jsx`
+- Calendar: `src/pages/AdminCalendar.jsx`
+- Guestbook: `src/pages/AdminGuestbook.jsx`
+- Browser service helpers: `src/lib/adminPostEditor.js`,
+  `src/lib/adminPhotoLibrary.js`, `src/lib/adminCalendar.js`,
+  `src/lib/guestbook.js`

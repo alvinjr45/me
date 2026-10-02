@@ -1,84 +1,97 @@
 # AJT3.me
 
-AJT3.me is a dark, code-flavored personal site for A.J. Thompson. The public experience is split into a home page, a blog, a music page, a dogs page, an admin blog manager, and a 404 screen. The app uses a single React router, a shared footer, a scroll-to-top helper, and a Supabase-backed blog system with a local fallback data set for offline or unconfigured development.
+AJT3.me is A.J. Thompson's personal site presented as an interactive desktop and
+phone. The React app includes movable desktop windows, a phone lock screen,
+system settings, an installable demo app catalog, a command terminal, public
+content apps, and a password-protected Mission Control workspace.
 
-## What lives on the site
+## Product overview
 
-- `/` Home landing page with animated glitch background and featured links
-- `/blog` Blog index with a featured entry and archive cards
-- `/blog/:slug` Long-form blog post reader with sections and optional media
-- `/music` Playlist, artist, and songs embeds with scroll cues
-- `/dogs` Dog-focused content page with a banner video and tag-filtered posts
-- `/admin` Protected blog editor for managing Supabase posts and uploads
-- `*` 404 page with the same visual language as the rest of the site
+The home screen exposes these built-in apps:
 
-## Docs
+- Photos, Blog, Guestbook, Calendar, Music, Mail, Dogs, Resume, and Instagram
+- App Store, Terminal, Settings, and Mission Control
 
-- [Site map and page behavior](docs/site-map.md)
-- [Content model and post data](docs/content-model.md)
-- [Admin workflow and Supabase setup](docs/admin-and-supabase.md)
-- [Design system and component notes](docs/design-system.md)
-- [Legacy and unused files](docs/legacy-components.md)
+The App Store can add four external projects to the current in-memory home
+screen: Build, New Trinity Missionary Baptist Church, Lattaco Welding, and
+Jazzed To Be Jones. Opening an external app shows a short redirect screen before
+leaving the site.
 
-## Runtime model
+Desktop-sized viewports use a window manager with focus order, dragging,
+keyboard-accessible resize handles, minimize, maximize, close, and a dock.
+Phone-sized viewports use a lock screen, one full-screen app at a time, local
+back gestures, a home gesture, and a four-app dock. See
+[Device shell and UI behavior](docs/device-shell.md) for the complete interaction
+model.
 
-The blog system resolves content in this order:
+## Application architecture
 
-1. If Supabase is configured in the browser, public blog pages read published posts from `ajt3_blog_posts`.
-2. If Supabase is not configured, the app falls back to the local post data in `src/data/blogPosts.js`.
-3. The admin page writes back through the `admin-blog-post` Supabase Edge Function, which checks a shared secret before listing, saving, or deleting posts.
+- `src/App.jsx` creates a `MemoryRouter`, captures the incoming path as the
+  initial in-app route, and resets the browser address to `/`.
+- `src/components/DeviceShell.jsx` owns the simulated device, app registry,
+  desktop windows, phone navigation, user session, settings, and system actions.
+- `src/pages/` contains the public apps and Mission Control screens.
+- `src/data/` contains local fallback content plus public Supabase readers.
+- `src/lib/` contains shared browser-side service clients and hooks.
+- `supabase/migrations/` defines the database, RLS, storage, and publishing RPCs.
+- `supabase/functions/` contains the five Edge Functions used by the site.
 
-This means the public site can render with local content during development, while production can use Supabase as the source of truth.
+The use of `MemoryRouter` is intentional: a direct request such as
+`/blog/example` opens that route inside the device, but subsequent navigation
+does not rewrite the browser address bar.
 
-## Local environment
+## Data behavior
 
-Create a `.env.local` file with:
+When browser Supabase configuration is absent:
 
-```bash
+- Blog and Photos use local fallback data.
+- Calendar displays an empty event list.
+- The dog incident monitor has no current incident.
+- Guestbook and Mission Control report that their services are unavailable.
+- The rest of the site remains usable because its content is local.
+
+When Supabase is configured, public readers only request published or otherwise
+public rows allowed by RLS. Administrative writes go through password-protected
+Edge Functions using the service role on the server.
+
+## Local configuration
+
+Create `.env.local` without committing it:
+
+```sh
 REACT_APP_SUPABASE_URL=https://your-project-ref.supabase.co
 REACT_APP_SUPABASE_ANON_KEY=your-public-anon-key
+REACT_APP_TURNSTILE_SITE_KEY=your-public-turnstile-site-key
 ```
 
-If these values are missing, the blog pages use the local data set instead of Supabase.
+The Turnstile key is only needed to complete guest participation in Guestbook.
+Production and local preview hostnames should use separate Turnstile widgets.
+Private Supabase, admin, and Turnstile secrets belong in the Edge Function
+environment, never in the frontend environment or repository.
 
-## Supabase setup
+## Available scripts
 
-The migration at `supabase/migrations/20260505000000_create_blog_posts.sql` creates:
+- `npm start` / `npm run dev` - start the Create React App development server
+- `npm test` - run the Jest/React Testing Library suite
+- `npm run build` - create a production bundle
 
-- `public.ajt3_blog_posts`
-- row-level security that exposes published posts to public clients
-- a public `blog-media` storage bucket for uploaded post assets
-- a public select policy for media objects in that bucket
+Repository builds, servers, deployments, and database changes are owner-managed.
 
-The admin edge function lives at `supabase/functions/admin-blog-post/index.ts`. It supports:
+## Documentation
 
-- `list` requests for the admin panel
-- `save` requests for creating or updating posts
-- `delete` requests for permanently removing posts
-- optional cover image uploads
-- optional media uploads for images and videos
+- [Device shell and UI behavior](docs/device-shell.md)
+- [Routes and app behavior](docs/site-map.md)
+- [Design system and active components](docs/design-system.md)
+- [Data and content model](docs/content-model.md)
+- [Mission Control](docs/mission-control.md)
+- [Admin and Supabase architecture](docs/admin-and-supabase.md)
+- [Calendar setup and behavior](docs/calendar.md)
+- [Guestbook security and operations](docs/guestbook.md)
+- [Legacy and unused files](docs/legacy-components.md)
 
-Deployment secrets used by the function:
+## Verification scope
 
-- `ADMIN_POST_SECRET`
-- `BLOG_MEDIA_PREFIX` `or` default path `ajt3/me/blog`
-- `BLOG_MEDIA_BUCKET` `or` default bucket `blog-media`
-- `ADMIN_CORS_ORIGINS` `or` `ADMIN_CORS_ORIGIN`
-
-Important security note:
-
-- The browser sends the shared admin secret to the edge function.
-- The function validates that secret server-side before touching the database or storage.
-- Public reads are limited to published posts by row-level security.
-
-## Content conventions
-
-- Blog posts use slugs generated from titles.
-- Cover images are displayed as 16:9 crops in cards and post headers.
-- Sections are stored as structured content with headings, paragraphs, and optional bullet lists.
-- Media items can be images or videos and support captions plus optional video posters.
-- The dogs section uses the `dogs` tag to filter posts from the main blog data.
-
-## Verification
-
-I did not run the app build or a browser server. The documentation and metadata updates were made by reading the source files directly.
+The documentation is maintained against the source tree, migrations, Edge
+Functions, and tests. A live browser check is still required for visual layout,
+real Supabase policies, uploads, Turnstile, cross-tab refresh, and deployment
+configuration.

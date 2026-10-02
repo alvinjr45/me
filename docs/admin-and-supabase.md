@@ -1,144 +1,200 @@
-# Admin and Supabase
+# Admin and Supabase Architecture
 
-The admin system is a small publishing pipeline built on top of Supabase.
+Supabase provides the public content store and the server-side publishing
+boundary. Public pages read through the anonymous client under RLS. Mission
+Control sends every management request to an Edge Function, which verifies the
+shared admin password and then uses the service role.
 
-## Mission Control app
+## Authentication model
 
-Mission Control opens from the desktop or mobile home screen at `/admin`. The
-post editor remains at `/admin/new` (with an optional `slug` query parameter).
-Both views now run inside the device shell. Switching to another desktop app
-or minimizing Mission Control keeps an open post draft in place. Closing the
-window unmounts it, so save work before closing it.
+The AJ Thompson account screen verifies a password by sending
+`{ action: "list", adminSecret }` to `admin-blog-post`. A successful response
+creates an in-memory React session containing the secret and current post list.
 
-The desktop's shared admin login uses the existing `ADMIN_POST_SECRET` password.
-`useAdminAccess` verifies it against the server's post-list endpoint and keeps the
-verified session in memory. Mission Control consumes that shared session, so its
-sections do not ask for separate logins. The edge functions authorize every read
-and write independently.
+- The secret is not written to `localStorage` or committed source.
+- Reload, logout, restart, and shutdown clear the session.
+- The UI session only controls access to screens. Every Edge Function verifies
+  `ADMIN_POST_SECRET` again before privileged work.
+- Guestbook administrator posts also require the secret and receive their trusted
+  `is_admin` value on the server.
+- Public RLS policies do not permit browser-side writes.
 
-The dashboard now has Overview, Blog posts, Photos, and Dog incident sections.
-See [Mission Control setup and verification](mission-control.md) before enabling
-the database-backed photo library.
+`supabase/config.toml` sets `verify_jwt = false` for all five functions because
+the application uses its own password or Turnstile/session checks. Do not remove
+those checks when changing a function.
 
-## Flow
-
-1. The admin page collects a shared secret.
-2. The page calls the `admin-blog-post` edge function.
-3. The edge function validates the secret against `ADMIN_POST_SECRET`.
-4. If the request is valid, the function reads or writes `ajt3_blog_posts`.
-5. If uploads are included, the function stores them in the `blog-media` bucket and writes public URLs into the post record.
-6. The same function also stores the latest dog incident used by the home page widget.
-
-## Browser Side
-
-`src/pages/Admin.jsx` handles:
-
-- unlocking the editor
-- listing posts
-- selecting a post to edit
-- creating a new post
-- confirming and deleting a post
-- building the request payload for save operations
-- uploading cover images and additional media
-
-The browser sends:
-
-- JSON for list and delete requests
-- `FormData` for save requests
-
-## Edge Function
-
-`supabase/functions/admin-blog-post/index.ts` handles:
-
-- CORS
-- secret validation
-- list requests
-- delete requests
-- incident list and save requests
-- save requests
-- file upload to Supabase Storage
-- slug conflict checks
-- post upserts
-- deletion of the old slug when a title change creates a new slug
-
-## Database Migration
-
-`supabase/migrations/20260505000000_create_blog_posts.sql` sets up:
-
-- the blog post table
-- the dog incidents table used by the home page widget
-- the `updated_at` trigger
-- row-level security
-- a public-read policy for published posts
-- the public `blog-media` bucket
-- a public-read storage policy for bucket objects
-
-## Environment Variables
-
-### Browser
+## Browser configuration
 
 - `REACT_APP_SUPABASE_URL`
 - `REACT_APP_SUPABASE_ANON_KEY`
+- `REACT_APP_TURNSTILE_SITE_KEY` for guest participation
 
-If either browser variable is missing, the public site uses the local blog data fallback.
+`src/lib/supabaseClient.js` creates no client unless both Supabase values exist.
+See [Data and content model](content-model.md) for per-feature fallback behavior.
 
-### Edge Function
+## Edge Functions
+
+### `admin-blog-post`
+
+Used for login verification and blog publishing.
+
+- `list`: returns all posts, including drafts, for Mission Control
+- `save`: validates and upserts a post, optional cover, and optional media
+- `delete`: permanently deletes the selected post row
+- rejects a new title-derived slug already owned by another post
+- removes the old row after a successful slug change
+- still contains compatible dog-incident actions, although the current UI uses
+  the dedicated dog function
+
+JSON is used for list/delete. Post saves use `FormData` so files can be included.
+On successful saves/deletes, the browser dispatches `ajt3-posts-updated`.
+
+### `admin-dog-incident`
+
+Used by Mission Control > Dog incident.
+
+- GET loads the `latest` incident and selected culprit's all-time count.
+- POST validates culprit, incident text, and date, then saves the latest incident
+  and increments the counter.
+- Prefers the transactional `save_dog_incident` RPC and includes compatibility
+  fallbacks for older deployments.
+
+Authentication uses the `x-admin-secret` header. Successful browser saves update
+the `ajt3_dog_incident_updated_at` storage key for other tabs.
+
+### `admin-photo-library`
+
+Used by Mission Control and the admin favorite control in Photos.
+
+- `list`
+- `save_photo`
+- `save_album`
+- `remove_from_album`
+- `set_favorite`
+- `save_profile`
+
+Photo and profile uploads accept JPG, PNG, WebP, or GIF up to 20 MB after any
+browser-side HEIC/HEIF conversion. A failed row save removes only the new upload.
+Replaced files are otherwise retained. Successful changes dispatch and persist
+the `ajt3-photos-updated` revision signal.
+
+### `admin-calendar`
+
+Used by Mission Control > Calendar.
+
+- `list` returns published and draft events.
+- `save` validates and upserts timed or all-day events.
+
+There is no delete action. Hiding an event means saving it with
+`is_published = false`. Successful changes dispatch and persist the
+`ajt3-calendar-updated` revision signal.
+
+### `guestbook`
+
+Used for guest verification/posting and administrator moderation.
+
+- Public verification exchanges Turnstile for a signed, one-hour posting session.
+- Public publishing validates declarations, session/token, text, limits,
+  duplicate rules, pause state, and conversation visibility.
+- Admin actions list hidden content, update visibility/text/title, delete
+  messages/conversations, and change the global submission state.
+- Admin publishing forces the trusted AJ author identity on the server.
+
+Guestbook uses stricter origin/hostname configuration and its own keyed hashing
+secret. See [Guestbook](guestbook.md) before deployment or moderation changes.
+
+## Server environment
+
+Shared admin-function values:
 
 - `SUPABASE_URL`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_POST_SECRET`
-- `BLOG_MEDIA_BUCKET`
-- `BLOG_MEDIA_PREFIX`
-- `ADMIN_CORS_ORIGINS`
-- `ADMIN_CORS_ORIGIN`
+- `ADMIN_CORS_ORIGINS`, falling back to `ADMIN_CORS_ORIGIN`
 
-The edge function uses Supabase-provided credentials on the server side and does not require a manually stored service role key in the repo.
+Optional media values used by blog/photo workflows:
 
-### Troubleshooting sign-in
+- `BLOG_MEDIA_BUCKET` (default `blog-media`)
+- `BLOG_MEDIA_PREFIX` (default `ajt3/me/blog`)
 
-`Load failed` or `Failed to fetch` means the browser could not read the login
-response; it does not establish that the password was rejected. Check the
-Network panel for the `admin-blog-post` OPTIONS and POST requests.
+Guestbook-specific values:
 
-- Confirm `REACT_APP_SUPABASE_URL` points to the project where `admin-blog-post`
-  is deployed.
-- Set the function secret `ADMIN_CORS_ORIGINS` to a comma-separated list of the
-  exact allowed site origins (scheme, hostname, and port, without a path or
-  trailing slash). Localhost, a LAN IP, and a deployed domain are different
-  origins. Include both `https://ajt3.me` and `https://www.ajt3.me` for the
-  production site, and preserve other allowed origins when adding either one.
-- Confirm the OPTIONS response allows the browser's origin, POST method, and
-  `authorization`, `apikey`, and `content-type` headers.
-- A readable 401/403 response indicates rejected access; 404 indicates a missing
-  endpoint, and 5xx requires checking function logs and server configuration.
-- The password is the secret's value, not the literal text `ADMIN_POST_SECRET`.
+- `TURNSTILE_SECRET_KEY`
+- `GUESTBOOK_HASH_SECRET`
+- `GUESTBOOK_ORIGINS`
+- `GUESTBOOK_HOSTNAMES`
+- `GUESTBOOK_TERMS_VERSION`
+- optional `GUESTBOOK_BLOCKED_WORDS`
 
-AJ Thompson and Guest are separate, keyboard-selectable profile tiles. Selecting
-Guest clears the password and login error without making an admin request.
+Supabase supplies `SUPABASE_URL` and service-role credentials in a deployed
+function environment, but the functions still fail closed if required values are
+missing. Never expose any server secret through a `REACT_APP_` variable.
 
-## Storage Rules
+## Migrations
 
-The migration configures `blog-media` as a public bucket with file type limits for common image and video formats. The edge function writes uploads under a namespaced prefix and then stores the public URL in the post row.
+Apply migrations in filename order:
 
-Default storage path pattern:
+| Migration | Purpose |
+| --- | --- |
+| `20260505000000_create_blog_posts.sql` | Blog posts, dog incidents/counters/RPCs, update trigger, RLS, and `blog-media` bucket |
+| `20260924000000_create_photo_library.sql` | Photo albums/photos, public policies, and seed library |
+| `20260925000000_create_admin_profile.sql` | Public admin profile image row |
+| `20260925000000_create_guestbook.sql` | Messages, settings, limits, RLS, and original publishing RPC |
+| `20260926000000_create_calendar_events.sql` | Calendar event table, range constraint, and published-read policy |
+| `20260927000000_guestbook_conversations.sql` | Conversation boards, preview view, and v2 publishing RPC |
+| `20260928000000_allow_photos_without_album.sql` | Nullable photo album assignment |
+| `20260928000000_guestbook_admin_author.sql` | Trusted administrator marker and v3 publishing RPC |
+| `20260929000000_add_photo_favorites.sql` | Shared admin-selected photo favorites |
+| `20261001000000_guestbook_conversation_delete.sql` | Cascading message deletion with non-primary conversations |
 
-```text
-blog-media/ajt3/me/blog/{slug}/...
-```
+The initial blog migration creates `public.set_updated_at()`, which later photo
+and calendar migrations reuse. Review the complete pending migration set before
+applying it to an existing project.
 
-If `BLOG_MEDIA_PREFIX` is changed, the same slug-based structure is still used below that prefix.
+Two migrations currently share the version prefix `20260928000000`. Before using
+an automated migration runner, confirm how the linked project's migration history
+records them. If the runner requires unique versions, resolve the filename/version
+collision in coordination with the already-applied production history; do not
+blindly rename or reapply a migration on a live database.
 
-## Publishing Notes
+## Public read boundaries
 
-- Covers display best at 16:9.
-- The admin page accepts either a cover upload or a remote cover URL.
-- The admin page also edits the latest dog incident shown on the home page.
-- Posts can be saved as published or draft.
-- The public blog and dogs pages only show published posts.
+- Blog: published posts only
+- Dogs: current incident and public counters
+- Photos: published photos and albums containing a published photo
+- Calendar: published events only
+- Guestbook: visible conversations and visible messages under visible parents
+- Admin profile: image URL only
+- Storage: public objects in `blog-media`
 
-## Failure Modes
+Because storage is public, hiding a database row is curation rather than file
+revocation. Use a private bucket and signed URLs if media confidentiality becomes
+a requirement.
 
-- If the browser is not configured for Supabase, the admin page cannot unlock.
-- If the shared secret is wrong, the edge function returns unauthorized.
-- If a slug already exists, the save is rejected instead of silently overwriting another post.
-- If uploads fail, the save fails rather than producing partial content.
+## CORS and sign-in troubleshooting
+
+`Load failed` or `Failed to fetch` means the browser could not read the response;
+it does not prove the password was rejected.
+
+- Confirm the frontend URL targets the Supabase project containing the functions.
+- Configure the exact scheme, hostname, and port for each allowed origin.
+- Include both `https://ajt3.me` and `https://www.ajt3.me` when both are served.
+- Preserve local/LAN origins separately; they are not equivalent.
+- Confirm OPTIONS permits POST (and GET for dog incident) plus `authorization`,
+  `apikey`, `content-type`, and `x-admin-secret` as needed.
+- A readable 401/403 means the secret was rejected. A 404 means the function is
+  missing. A 5xx requires checking configuration, migrations, and function logs.
+
+The login password is the value of `ADMIN_POST_SECRET`, not the variable name.
+
+## Deployment order
+
+For a new environment:
+
+1. Review and apply the migrations in order.
+2. Create/configure the required secrets and exact origins.
+3. Deploy all functions listed in `supabase/config.toml`.
+4. Configure the three public frontend variables.
+5. Build and deploy the frontend through the owner-managed workflow.
+6. Complete the live checks in the Calendar, Guestbook, and Mission Control docs
+   before publishing content or resuming guest submissions.

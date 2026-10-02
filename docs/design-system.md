@@ -1,93 +1,151 @@
-# Design System and Components
+# Design System and Active Components
 
-The site uses a small, consistent visual language:
+The current visual identity combines a room-scale device scene with app-specific
+interfaces. The shell carries the dark, code-inspired AJT3 identity; individual
+apps borrow familiar desktop and phone patterns while retaining shared accents,
+type, spacing, and interaction behavior.
 
-- dark background surfaces
-- orange primary accent
-- blue secondary accent
-- code-inspired typography and labels
-- thin rule-based panels with restrained glow
-- wide editorial layouts with intentional mobile compositions
+## Global tokens
 
-## Global Tokens
+`src/index.css` defines the base tokens:
 
-Defined in `src/index.css`:
+- `--color-main`: orange primary accent, configurable through Settings
+- `--color-accent`: blue secondary accent, configurable through Settings
+- `--color-background`, `--color-surface`, and `--color-surface-strong`
+- `--color-line` and `--color-line-strong`
+- `--color-text`, `--color-muted`, and `--color-muted-strong`
+- `--font-sans` and `--font-mono`
+- `--radius-sm`, `--radius-md`, and `--shadow-panel`
 
-- `--color-main` for the orange accent
-- `--color-accent` for the blue accent
-- `--color-background` for the page background
-- `--color-surface` for elevated surfaces
-- `--color-line` and `--color-line-strong` for interface rules
-- `--color-text` for primary text
-- `--color-muted` for secondary text
+The default Signal palette is orange and blue. Settings also provides Ocean,
+Mint, Violet, and Rose pairs. `DeviceShell` applies the selected values directly
+to the simulated screen, so app styles that use the shared tokens update without
+their own theme state.
 
-## Typography
+Light appearance replaces the main background, surface, line, muted, and text
+tokens inside the device. Apps with a deliberate fixed identity, such as Resume,
+Mail, App Store, and parts of Music, use their own scoped variables.
 
-- Body text uses the native sans-serif stack defined by `--font-sans`.
-- Code-flavored headings and technical labels often use `Source Code Pro`.
-- Main headings use oversized, tightly spaced sans-serif type; utility labels use the mono stack.
+## Typography and visual language
 
-## Shared Layout Rules
+- Body and application text use the native `Inter`/Helvetica/Arial stack.
+- Technical labels, paths, terminal output, and code-flavored annotations use
+  `Source Code Pro` and system monospace fallbacks.
+- The shell uses compact menu and dock UI, rounded app icons, dark glass/surface
+  treatments, and restrained accent glows.
+- Content apps use different native metaphors: Blogs resembles Notes, Guestbook
+  resembles Messages, Photos resembles a camera library, and Calendar resembles
+  a desktop calendar.
+- The outer scene supports nine room/window environments while the device screen
+  supports twenty wallpapers.
 
-- The app root keeps a full-height dark canvas.
-- Interactive elements keep a visible focus ring.
-- Most buttons and links are sized for touch targets.
-- Cards and surfaces use crisp borders, mostly square geometry, and low-opacity gradients.
+Avoid introducing another full visual system for shared shell controls. New apps
+may establish a focused internal identity but should continue to use the shell's
+spacing, accessibility, and responsive conventions.
 
-## Active Components
+## Layout layers
 
-### `SiteHeader`
+The visible product has four layers:
 
-- Provides persistent access to the four pillars.
-- Opens the site terminal from a button or the backtick key.
-- Collapses into a deliberate two-column menu on mobile.
+1. `SceneBackground` renders the room, window, desk, and themed landscape.
+2. `DeviceShell` renders the monitor/phone hardware, system screens, wallpaper,
+   menu/status bar, home screen, dock, and gestures.
+3. `DeviceWindow` frames each desktop app or the current phone app.
+4. Each page renders its own app workspace, generally using `.app-view` and
+   `.app-scroll` from `src/components/AppWorkspace.css`.
+
+The app root is fixed to the dynamic viewport. Scrollable content belongs inside
+the active window/app rather than on the document body.
+
+## Active shared components
+
+### `DeviceShell`
+
+The application frame and state owner. It provides windowing, phone lock/home
+navigation, the dock, accounts, settings context, installation, redirect, and
+system actions.
+
+### `SceneBackground`
+
+Renders desktop and mobile versions of Alpine Lake, Coastal Retreat, Desert
+Sunset, Forest Cabin, City After Dark, Snowbound, Northern Lights, and Spring
+Garden. Random resolves to one of those themes for the current visit.
+
+### `PhoneBackGesture` and `PhoneHomeIndicator`
+
+Provide edge-back and bottom-home interactions for the phone shell. App-local
+back handlers take priority over route history.
 
 ### `CommandTerminal`
 
-- Runs real commands such as `ls`, `whoami`, `open music`, and `cd /dogs`.
-- Navigates through React Router without reloading the page.
-- Appears inline on home and in a modal from other public routes.
-
-### `BlogPostCard`
-
-Used on the blog index and the dogs page.
-
-- Renders a linked cover image
-- Shows eyebrow, title, date, excerpt, and a read link
-- Can render as a featured card
+Implements site navigation, content lookup, settings, command completion,
+history, and system actions. `src/data/terminalCommands.js` owns the command and
+page definitions.
 
 ### `BlogPostArticle`
 
-Used for individual blog posts.
+Renders direct and embedded article views with a hero, cover, structured
+sections, image/video media, captions, and image enlargement. Embedded readers
+receive an app-local Back action.
 
-- Renders the hero block, cover image, sections, and media
-- Supports mixed paragraph and bullet content
-- Ends with a link back to `/blog`
+### Guestbook components
 
-### `Footer`
+- `GuestbookParticipation` owns name, declarations, policy readers, and
+  Turnstile verification.
+- `GuestbookConversation` owns message pagination, polling, drafts, and posting.
+- `GuestbookAuthor` renders the trusted administrator label.
 
-Rendered on every public route.
+### Photo and admin helpers
 
-- Shows the site name
-- Includes a short signoff line
-- Displays the current year
+- `PhotoImage` selects responsive local derivatives where available and keeps
+  remote URLs unchanged.
+- `AdminProfile` and the admin page components are composed by Mission Control.
 
-### `ScrollToTop`
+## Responsive model
 
-Runs on route changes and smooth-scrolls the viewport back to the top.
+The primary product breakpoint is `(max-width: 1024px), (max-height: 500px)`.
+That breakpoint selects phone behavior, not merely compressed desktop styling.
 
-## Page Styling Notes
+Desktop:
 
-- Home uses a responsive luminous signal ribbon with interactive pillar nodes and a working terminal.
-- Blog pages use an editorial archive layout with system-status details.
-- Music uses a focused console with collection tabs and one active player.
-- Admin uses stacked cards and form panels so content editing stays readable on smaller screens.
-- Dogs pairs editorial portraits with the live incident monitor and field notes.
+- Multiple persistent windows can overlap.
+- Apps commonly use two- or three-pane layouts.
+- The menu bar and full dock remain available.
+- Window size, not only browser size, drives many app-level responsive rules.
 
-## Responsive Behavior
+Phone:
 
-- Home's split hero stacks before tablet widths and the pillar grid becomes a single column on mobile.
-- Blog archive cards collapse to one column on narrower screens.
-- The blog post article media grid collapses to one column below tablet widths.
-- Music moves its sidebar above the player and reduces the iframe height on phones.
-- Admin form rows collapse to single-column sections on mobile.
+- The monitor becomes phone hardware with safe areas and status elements.
+- One app is visible at a time.
+- Sidebars become list/detail navigation or compact toolbars.
+- Home and back gestures replace desktop window controls.
+- App content owns vertical scrolling inside the available screen.
+
+Short landscape viewports use a side-positioned phone and separate scene sizing.
+iOS non-standalone entry applies a decorative scroll offset so browser chrome
+does not obscure the phone.
+
+## Motion and accessibility
+
+- `prefers-reduced-motion: reduce` shortens global animations and smooth scroll.
+- The Interface motion setting also disables shell and wallpaper motion.
+- Window resize handles are keyboard operable and named by corner.
+- Nested readers restore focus to their originating item where implemented.
+- Covered, launching, or inactive surfaces use `inert` and `aria-hidden`.
+- Dynamic loading, opening, and error states use status/alert semantics.
+- Touch targets and layouts are specifically restyled for coarse pointers.
+
+`src/index.css` removes the default `:focus` outline. Every new interactive
+control must therefore receive a clear app-appropriate `:focus-visible` style;
+do not rely on color alone for selected, error, or published states.
+
+## Styling ownership
+
+- Global foundations: `src/index.css` and `src/App.css`
+- Device and window chrome: `src/components/DeviceShell.css`
+- Shared app workspace rules: `src/components/AppWorkspace.css`
+- Room/landscape scene: `src/components/SceneBackground.css`
+- App-specific UI: the CSS file beside each page/component
+
+Keep app-specific rules in the existing page stylesheet. Reuse shared tokens and
+context before adding global selectors or new dependencies.

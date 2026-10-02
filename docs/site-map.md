@@ -1,76 +1,128 @@
 # Site Map
 
-This site is a single-page React app with route-based views. The router is defined in `src/App.jsx`. Inner public routes render the shared navigation and footer; the home and admin routes use focused layouts.
+AJT3.me is a single React application whose routes render inside the simulated
+device in `src/components/DeviceShell.jsx`. `src/App.jsx` defines the route table.
+See [Device shell and UI behavior](device-shell.md) for windowing, phone
+navigation, account, and address-bar behavior.
 
-## Routes
+## Public routes
 
-| Path | Component | Purpose | Data source |
+| Path | Main component | Purpose | Primary data |
 | --- | --- | --- | --- |
-| `/` | `src/pages/Home.jsx` | Personal-system home with interactive terminal and four pillars | Static component data and dog incident data |
-| `/tech` | `src/pages/Tech.jsx` | Technical interests, focus areas, and external portfolio link | Static component data |
-| `/resume` | `src/pages/LinkedIn.jsx` | LinkedIn-inspired professional profile and resume | Static component data |
-| `/blog` | `src/pages/Blog.jsx` | Blog index with featured post and archive grid | `src/data/blogPosts.js` or Supabase |
-| `/blog/:slug` | `src/pages/BlogPost.jsx` | Full blog post reader | `src/data/blogPosts.js` or Supabase |
-| `/music` | `src/pages/Music.jsx` | Tabbed Apple Music library for playlists, artists, and songs | Static component data |
-| `/dogs` | `src/pages/Dogs.jsx` | Drake and Josh portraits, live incident monitor, and dog posts | `src/data/blogPosts.js`, dog incident data, or Supabase |
-| `/admin` | `src/pages/Admin.jsx` | Protected blog manager for creating and editing posts | Supabase edge function |
-| `*` | `src/pages/NotFound.jsx` | 404 screen using the same visual language as the home page | Static component data |
+| `/` | `Home.jsx` | Paginated home screen for built-in and installed apps | `desktopApps` plus in-memory installs |
+| `/tech` | `Tech.jsx` | Product engineering, creative systems, and experiments | Local component data |
+| `/blog` | `Blog.jsx` | Searchable folder-style blog browser with embedded reader | Published Supabase posts or local fallback |
+| `/blog/:slug` | `BlogPost.jsx` | Direct-link article reader | Published Supabase post or local fallback |
+| `/dogs` | `Dogs.jsx` | Drake and Josh profiles, incident counter, and dog-tagged field notes | Supabase/local posts and Supabase incident data |
+| `/music` | `Music.jsx` | Playlist collection and Apple Music links | `src/data/musicPlaylists.js` |
+| `/photos` | `Photos.jsx` | Photo library, albums, favorites, search, and viewer | Published Supabase library or local fallback |
+| `/calendar` | `Calendar.jsx` | Day, week, month, year, agenda, filters, and event details | Published Supabase events |
+| `/guestbook` | `Guestbook.jsx` | Public conversation boards and participation flow | Supabase plus the `guestbook` Edge Function |
+| `/mail` | `Mail.jsx` | Editable prefilled email that opens the visitor's mail client | Local defaults |
+| `/resume` | `LinkedIn.jsx` | Professional profile, experience, projects, and skills | Local component data and public profile image |
+| `/app-store` | `AppStore.jsx` | Catalog and in-memory installation of external projects | Local catalog and shell install state |
+| `/terminal` | `Terminal.jsx` | Full interactive site terminal | Route, settings, and public content helpers |
+| `/settings` | `Settings.jsx` | Appearance, scene, wallpaper, device, clock, motion, and power settings | Shell context and `localStorage` |
+| `/terms` | `Policy.jsx` | Guestbook terms and conditions | `src/data/guestbookTerms.js` |
+| `/privacy` | `Policy.jsx` | Privacy policy and provider links | `src/data/privacyPolicy.js` |
+| `*` | `NotFound.jsx` | Glitch-styled 404 page | Local component data |
 
-## Page Behavior
+`/tech` is a reachable internal overview, primarily through Terminal. The home
+screen's downloadable Build app instead opens `https://ajt3.website`.
 
-### Home
+Instagram and installed catalog projects are external destinations rather than
+React routes.
 
-- Presents Tech, Music, Dogs, and Blog as interactive nodes on one animated signal ribbon.
-- Includes a working command terminal that accepts navigation and utility commands.
-- Reflows the horizontal desktop signal into a vertical mobile path and bottom-sheet terminal.
+## Mission Control routes
 
-### Tech
+All `/admin/*` routes render `MissionControl.jsx`. Guests see an administrator
+access dialog; a verified AJ Thompson session opens the workspace.
 
-- Introduces A.J.'s technical focus areas.
-- Links to the external AJT3 website and relevant build notes.
-- Uses the existing Tech Week photography as its primary visual.
+| Path | View | Behavior |
+| --- | --- | --- |
+| `/admin` | Overview | Profile photo, destinations, recent posts, and photo-service status |
+| `/admin/posts` | Blog posts | Search/filter posts, open the editor, and confirm permanent deletion |
+| `/admin/new` | New post | Create a draft or published post |
+| `/admin/new?slug=:slug` | Post editor | Edit the selected existing post |
+| `/admin/photos` | Photos | Manage photos, albums, favorites, order, visibility, and uploads |
+| `/admin/dogs` | Dog incident | Load and publish the latest incident and increment the culprit counter |
+| `/admin/guestbook` | Guestbook | Moderate messages/conversations and pause/resume submissions |
+| `/admin/calendar` | Calendar | Create, edit, publish, or hide calendar events |
 
-### Blog index
+The post, photo, and calendar editors are intentionally kept mounted while their
+Mission Control window remains open, so switching sections or desktop apps does
+not immediately discard the current draft.
 
-- Loads all posts, then removes any post tagged with `dogs`.
-- Treats the first returned post as the featured entry.
-- Renders the rest of the posts in an archive grid using `BlogPostCard`.
-- Shows loading, ready, and error states without blocking the rest of the app.
+## App behavior
 
-### Blog post reader
+### Home and App Store
 
-- Pulls the slug from the route and fetches one post.
-- Shows a loading shell first, then either the post or a fallback error/not-found message.
-- Uses `BlogPostArticle` to render the hero, post sections, and optional media gallery.
+Home shows up to 12 apps per page. Desktop supports pagination buttons, arrow
+keys, and pointer dragging between pages; phone uses a horizontally paged app
+grid. App Store has Discover, Apps, Games, and Library sections, category filters,
+product detail pages, and simulated installation for four external projects.
 
-### Music
+### Blog and direct articles
 
-- Organizes playlists, artists, and songs into one compact library interface.
-- Keeps one Apple Music embed active at a time.
-- Preserves a specific selection for each collection while visitors browse.
+Blog excludes posts tagged `dogs`, derives folders from remaining tags, and
+searches title, excerpt, and tags. Selecting a row opens an embedded article in
+the third pane; narrow windows show it as a nested reader with local back
+behavior. `/blog/:slug` supports direct article entry and not-found/error states.
 
 ### Dogs
 
-- Introduces Drake and Josh with their supplied portraits.
-- Displays the current dog incident record when Supabase is configured.
-- Loads only posts tagged `dogs`.
-- Reuses the blog card component so dog posts look like the rest of the blog archive.
+Dog HQ loads dog-tagged posts and the current incident independently. It shows
+Drake and Josh, days since the incident, the selected culprit's all-time incident
+count, searchable field notes, retry states, and an embedded article reader.
 
-### Admin
+### Music
 
-- Starts behind a secret gate.
-- Loads existing posts from the edge function after successful unlock.
-- Supports editing title, excerpt, category, publish date, cover image, sections, and media.
-- Can upload cover images plus image or video media.
+Desktop uses an interactive solar-system collection and one playlist player.
+Phone uses a playlist grid followed by a dedicated player screen. Playlist
+actions leave the site for Apple Music; audio is not played directly by this app.
 
-### 404
+### Photos
 
-- Uses the same glitch backdrop pattern as the home page.
-- Gives a simple link back to `/`.
+Photos supports All Photos, Favorites, albums, title/album search, thumbnail
+density, album cards, and a full viewer with keyboard arrows, touch swipes,
+filmstrip navigation, captions, and optional metadata. Only a verified admin sees
+the favorite toggle. The displayed library is shuffled once per app instance and
+keeps that order through refreshes.
 
-## Shared UI Rules
+### Calendar
 
-- `ScrollToTop` resets the scroll position on route changes.
-- `SiteHeader` provides direct pillar links and opens the terminal from inner public routes.
-- `Footer` is rendered by `AppShell` on inner public routes.
-- The app uses `react-router-dom` for navigation instead of a nested layout system.
+Calendar filters Personal, Work, and Events calendars and provides day, week,
+month, and year views. It includes Today/previous/next navigation, a mini month,
+local-time display for timed events, inclusive date display for all-day events,
+event details, and a selected-day agenda.
+
+### Guestbook
+
+Guests complete the terms/age/Turnstile entry screen before conversation data is
+requested. The app provides searchable public boards, per-conversation drafts,
+new topics, replies, polling, manual refresh, pagination, and mobile list/chat
+navigation. Verified admins bypass the guest entry screen and post with a
+server-trusted administrator marker.
+
+### Settings and Terminal
+
+Settings is the graphical interface for shared device preferences and system
+actions. Terminal exposes the same settings plus navigation and read-only content
+commands. Both operate through `DeviceSettingsContext`.
+
+### Mail and Resume
+
+Mail edits a subject and body, then opens a `mailto:` link for
+`alvinjr15@gmail.com`. Resume presents local professional content and reuses the
+public admin profile image when one is available.
+
+## Cross-app refresh events
+
+- `ajt3-posts-updated` refreshes Blog and dog field notes after post changes.
+- `ajt3-photos-updated` plus the `ajt3-photos-updated` storage key refreshes open
+  Photos views in the same tab and other tabs.
+- `ajt3-calendar-updated` plus the `ajt3-calendar-updated` storage key refreshes
+  open Calendar views.
+- `ajt3-guestbook-updated` refreshes guestbook conversation data.
+- `ajt3_dog_incident_updated_at` is a storage key used to refresh Dog HQ across
+  tabs; focus also refreshes incident data.

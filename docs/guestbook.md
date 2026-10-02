@@ -67,7 +67,7 @@ both checkboxes and locks the composer while preserving unsent drafts.
 The Terms and Conditions are in `src/data/guestbookTerms.js`; the Privacy Policy
 is in `src/data/privacyPolicy.js`. Both use version `2026-09-25` and are available
 at `/terms` and `/privacy`, in dropdowns before joining, and through links in
-Settings > System. Policy links open a separate tab to
+Settings > General. Policy links open a separate tab to
 preserve guestbook drafts and declarations on phones as well as desktop.
 The policy pages currently use the site's existing public Instagram contact.
 Confirm the contact method and the deployed host's logging, backups, and any
@@ -100,8 +100,8 @@ message storage remains unchanged. Do not describe the checkbox as verified age.
    A new conversation requires an 80-character-max title; a reply requires an
    existing conversation ID. Providing both or neither is rejected.
 4. Validate Turnstile at entry, including success, action `guestbook`, and an
-   allowed hostname, before issuing the signed posting session. Every post must
-   from a guest must present a valid session or a fresh Turnstile token from a legacy frontend.
+   allowed hostname, before issuing the signed posting session. Every guest post
+   must present a valid session or a fresh Turnstile token from a legacy frontend.
    Invalid or expired verification never permits a post.
 5. Normalize and scrub names, messages, and new conversation titles; matching
    words become `***`. Only the
@@ -128,41 +128,13 @@ budget as a reply. The chat-like layout does not relax the existing spam limits.
 
 ## Setup (user-owned)
 
-The guestbook Edge Function was updated through the Supabase dashboard on
-September 25, 2026 to use `ajt3_guestbook_submit_v2` and enforce the current
-participation requirements. A follow-up deployment added the `verify` action and
-signed one-hour posting sessions. The older deployed function called the retired RPC,
-whose `upgrade_required` response was incorrectly displayed as a posting limit.
-Only an explicit `limited` result now produces a rate-limit response. A Vercel
-frontend deployment does not deploy this Supabase function.
-
-The administrator author migration and v3 function update were applied through
-the Supabase dashboard on September 25, 2026. Frontend publishing remains
-user-owned. The administrator label and entry bypass need that frontend update.
-Mission Control editing and conversation deletion additionally require the
-October 1 cascade migration and a redeploy of the guestbook Edge Function.
-
-The session format was subsequently updated to carry its signed limiter identity
-instead of comparing it to each request's forwarded network address. An audit
-showed that consecutive requests had different network hashes. The redundant
-upper expiry bound was also removed so slight clock skew between servers cannot
-reject a newly issued session; the signed expiration time remains enforced.
-
-On September 25, 2026, browser setup created the managed "AJT3 Guestbook"
-Turnstile widget for `ajt3.me`, saved its private `TURNSTILE_SECRET_KEY` in the
-AJT3 Supabase project, and saved `REACT_APP_TURNSTILE_SITE_KEY` in the Vercel
-`me` project's **Production** environment. `GUESTBOOK_TERMS_VERSION=2026-09-25`
-was also saved in Supabase. Existing guestbook origin, hostname, and hash-secret
-settings were present. No private key is stored in this repository.
-The database's `submissions_open` setting was verified as `false` and left paused
-until the updated frontend is deployed and live submission checks are complete.
-
-The live frontend still showed pending terms at the time of setup. A new
-frontend build/deployment is required to include the policies, entry screen,
-and public site key. Production keys are not configured for local preview
-origins. Use a separate development widget if testing real submissions locally.
-Frontend builds, repository operations, and server management remain user-owned.
-New installations start with submissions **paused** until setup is verified.
+Repository state does not establish which migrations, secrets, functions, or
+frontend version are currently deployed. Verify each item in the target project
+rather than relying on a historical setup note. A frontend deployment does not
+deploy the Supabase function, and production Turnstile keys normally do not work
+for unlisted local-preview origins. Use a separate development widget for real
+local challenges. New database installations start with submissions **paused**
+until the checks below are complete.
 
 1. Create a Cloudflare Turnstile widget for your actual site hostnames. Keep
    production and development widgets separate. Do not use testing keys in

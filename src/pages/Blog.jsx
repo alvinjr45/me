@@ -51,7 +51,7 @@ function Blog() {
     };
   }, []);
 
-  const blogPosts = posts.filter((post) => !post.tags.includes('dogs'));
+  const blogPosts = posts;
   const folders = [...new Set(blogPosts.flatMap((post) => post.tags))].sort();
   const activeFolder = folders.includes(folder) ? folder : '';
   const matchingPosts = blogPosts.filter((post) =>

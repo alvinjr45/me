@@ -106,8 +106,8 @@ Mission Control requires all database migrations and these functions:
 - `admin-calendar`
 - `guestbook`
 
-The photo library also depends on the admin-profile, required-album, and favorite
-follow-up migrations. Guestbook conversation moderation depends on the
+The photo library also depends on the admin-profile and favorite follow-up
+migrations. Guestbook conversation moderation depends on the
 conversation, admin-author, and cascade-delete follow-ups.
 
 See [Admin and Supabase architecture](admin-and-supabase.md) for the complete

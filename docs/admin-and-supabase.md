@@ -142,21 +142,13 @@ Apply migrations in filename order:
 | `20260925000000_create_guestbook.sql` | Messages, settings, limits, RLS, and original publishing RPC |
 | `20260926000000_create_calendar_events.sql` | Calendar event table, range constraint, and published-read policy |
 | `20260927000000_guestbook_conversations.sql` | Conversation boards, preview view, and v2 publishing RPC |
-| `20260928000000_allow_photos_without_album.sql` | Nullable photo album assignment |
 | `20260928000000_guestbook_admin_author.sql` | Trusted administrator marker and v3 publishing RPC |
 | `20260929000000_add_photo_favorites.sql` | Shared admin-selected photo favorites |
 | `20261001000000_guestbook_conversation_delete.sql` | Cascading message deletion with non-primary conversations |
-| `20261002000000_require_photo_albums.sql` | Remove legacy unassigned photos and require an album for every photo |
 
 The initial blog migration creates `public.set_updated_at()`, which later photo
 and calendar migrations reuse. Review the complete pending migration set before
 applying it to an existing project.
-
-Two migrations currently share the version prefix `20260928000000`. Before using
-an automated migration runner, confirm how the linked project's migration history
-records them. If the runner requires unique versions, resolve the filename/version
-collision in coordination with the already-applied production history; do not
-blindly rename or reapply a migration on a live database.
 
 ## Public read boundaries
 

@@ -41,9 +41,16 @@
 
 .mail-compose__done {
   justify-self: start;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--mail-blue);
+  font-family: inherit;
   font-size: 16px;
 }
+
+button.mail-compose__done { cursor: pointer; }
+button.mail-compose__done:focus-visible { outline: 3px solid rgba(10, 132, 255, 0.35); outline-offset: 3px; }
 
 .mail-compose__send {
   width: 34px;

@@ -1,4 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useContext, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { DeviceSettingsContext } from '../components/deviceSettings';
 import './Mail.css';
 
 export const MAIL_RECIPIENT = 'alvinjr15@gmail.com';
@@ -10,6 +12,8 @@ I came across your website and would love to connect. It would be great to learn
 Best,`;
 
 function Mail() {
+  const navigate = useNavigate();
+  const isPhone = useContext(DeviceSettingsContext)?.isPhone;
   const [subject, setSubject] = useState(DEFAULT_MAIL_SUBJECT);
   const [body, setBody] = useState(DEFAULT_MAIL_BODY);
   const mailto = useMemo(() => (
@@ -19,7 +23,11 @@ function Mail() {
   return (
     <main className="mail-app">
       <header className="mail-compose__toolbar">
-        <span className="mail-compose__done" aria-hidden="true">Cancel</span>
+        {isPhone ? (
+          <button type="button" className="mail-compose__done" onClick={() => navigate('/')}>Cancel</button>
+        ) : (
+          <span className="mail-compose__done" aria-hidden="true">Cancel</span>
+        )}
         <h1>New Message</h1>
         <a className="mail-compose__send" href={mailto} aria-label={`Send email to ${MAIL_RECIPIENT}`} title="Open in your mail app">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

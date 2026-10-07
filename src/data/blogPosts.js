@@ -151,7 +151,7 @@ function normalizeSupabasePost(post) {
     eyebrow: post.eyebrow,
     excerpt: post.excerpt,
     date: formatPostDate(post.published_at),
-    image: post.cover_image_url || '/images/Home Banner.png',
+    image: post.cover_image_url || '',
     imageAlt: post.cover_image_alt || post.title,
     tags: post.tags || [],
     sections: post.sections || [],

@@ -75,9 +75,16 @@
   .youtube-banner { min-height: 56px; }
 }
 @container (max-width: 430px) {
+  .youtube-page .youtube-scroll { overflow-x: hidden; }
   .youtube-channel__identity { align-items: flex-start; gap: 12px; }
-  .youtube-avatar { width: 80px; height: 80px; }
-  .youtube-grid { grid-template-columns: 1fr; }
+  .youtube-page .youtube-channel h1 { font-size: 22px; line-height: 1.2; white-space: normal; overflow-wrap: anywhere; }
+  .youtube-page .youtube-watch h1 { font-size: 22px; line-height: 1.35; }
+  .youtube-meta, .youtube-video__channel, .youtube-notice { overflow-wrap: anywhere; }
+  .youtube-avatar { width: 64px; height: 64px; }
+  .youtube-channel { padding: 20px 0 8px; }
+  .youtube-channel__link { margin: 16px 0 0; }
+  .youtube-channel-tabs { padding-top: 16px; }
+  .youtube-grid { grid-template-columns: minmax(0, 1fr); }
   .youtube-feed .youtube-grid { margin-inline: -16px; gap: 26px; }
   .youtube-feed .youtube-video__image { border-radius: 0; }
   .youtube-video__details { padding: 12px 16px 0; }

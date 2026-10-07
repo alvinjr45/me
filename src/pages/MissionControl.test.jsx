@@ -41,6 +41,7 @@ async function signIn(password = 'test-password') {
 }
 
 beforeEach(() => {
+  window.localStorage.clear();
   window.sessionStorage.clear();
   process.env.REACT_APP_SUPABASE_URL = 'https://example.test';
   URL.createObjectURL = jest.fn(() => 'blob:test-photo');
@@ -82,6 +83,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
+  window.localStorage.clear();
   global.fetch = savedFetch;
   URL.createObjectURL = savedCreateObjectURL;
   URL.revokeObjectURL = savedRevokeObjectURL;
@@ -110,6 +112,27 @@ test('keeps the dashboard locked until the server accepts the password, and sign
   expect(screen.getByLabelText('Admin password')).toHaveValue('');
   expect(screen.queryByRole('heading', { name: 'Posts' })).not.toBeInTheDocument();
   expect(window.sessionStorage.getItem('ajt3_admin_secret')).toBeNull();
+});
+
+test('restores a saved admin login after remounting and clears it on logout', async () => {
+  const app = openApp();
+  await signIn();
+  await screen.findByRole('heading', { name: 'Recent posts' });
+  expect(window.localStorage.getItem('ajt3_admin_secret')).toBe('test-password');
+  app.unmount();
+  openApp();
+  expect(screen.queryByRole('heading', { name: 'Recent posts' })).not.toBeInTheDocument();
+  await screen.findByRole('heading', { name: 'Recent posts' });
+  fireEvent.click(screen.getByRole('button', { name: 'Log out of desktop' }));
+  expect(window.localStorage.getItem('ajt3_admin_secret')).toBeNull();
+});
+
+test('rejects an invalid persistent password before opening the dashboard', async () => {
+  window.localStorage.setItem('ajt3_admin_secret', 'unverified-value');
+  openApp();
+  expect(screen.queryByRole('heading', { name: 'Recent posts' })).not.toBeInTheDocument();
+  expect(await screen.findByRole('alert')).toHaveTextContent('That password was not accepted');
+  expect(window.localStorage.getItem('ajt3_admin_secret')).toBeNull();
 });
 
 test('rejects an invalid stored password on a direct editor link', async () => {

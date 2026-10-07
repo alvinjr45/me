@@ -17,6 +17,7 @@ import Settings from './pages/Settings';
 import AppStore from './pages/AppStore';
 import LinkedIn from './pages/LinkedIn';
 import Mail from './pages/Mail';
+import YouTube from './pages/YouTube';
 import NotFound from './pages/NotFound';
 import DeviceShell from './components/DeviceShell';
 import './App.css';
@@ -86,6 +87,7 @@ function AppShell() {
       <Route path="/app-store" element={<AppStore />} />
       <Route path="/resume" element={<LinkedIn />} />
       <Route path="/mail" element={<Mail />} />
+      <Route path="/youtube" element={<YouTube />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

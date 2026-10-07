@@ -15,6 +15,7 @@ import {
   usePhoneBack
 } from '../components/deviceSettings';
 import { SceneWindow } from '../components/SceneBackground';
+import { emulatorVersion } from '../data/emulatorVersion';
 import './Settings.css';
 
 const settingsCategories = [
@@ -96,6 +97,7 @@ function Settings() {
           ))}
           {visibleCategories.length === 0 && <p className="settings-page__empty" role="status">No matching settings.</p>}
         </nav>
+        <p className="settings-page__version">Version {emulatorVersion}</p>
       </aside>
       <div className="settings-page__detail">
         <header className="settings-page__toolbar">

@@ -37,11 +37,23 @@ export default function useAdminAccess() {
       }
       if (controller.signal.aborted) return;
       if (response.status === 404 || response.status >= 500) throw new Error('Admin sign-in is temporarily unavailable. Please try again later.');
-      if (response.status === 401 || response.status === 403) throw new Error('That password was not accepted. Please try again.');
+      if (response.status === 401 || response.status === 403) {
+        try {
+          window.localStorage.removeItem(SESSION_KEY);
+        } catch {
+          // Access remains locked if browser storage is unavailable.
+        }
+        throw new Error('That password was not accepted. Please try again.');
+      }
       if (!response.ok || !Array.isArray(payload.data?.posts)) throw new Error("We couldn't complete sign-in. Please try again.");
 
       setSession({ secret, posts: payload.data.posts });
       setPassword('');
+      try {
+        window.localStorage.setItem(SESSION_KEY, secret);
+      } catch {
+        // Sign-in still works when browser storage is unavailable.
+      }
     } catch (failure) {
       if (controller.signal.aborted) return;
       setSession(null);
@@ -58,6 +70,16 @@ export default function useAdminAccess() {
 
   useEffect(() => () => requestRef.current?.abort(), []);
 
+  useEffect(() => {
+    let secret;
+    try {
+      secret = window.localStorage.getItem(SESSION_KEY);
+    } catch {
+      return;
+    }
+    if (secret) authenticate(secret);
+  }, [authenticate]);
+
   function login(event) {
     event.preventDefault();
     authenticate(password);
@@ -70,6 +92,7 @@ export default function useAdminAccess() {
     setError('');
     setIsChecking(false);
     try {
+      window.localStorage.removeItem(SESSION_KEY);
       window.sessionStorage.removeItem(SESSION_KEY);
     } catch {
       // The current app is locked even if browser storage is unavailable.

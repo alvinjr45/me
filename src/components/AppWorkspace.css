@@ -99,7 +99,7 @@
   text-align: center;
 }
 
-.device-scene--phone .device-screen--app :is(.music-page, .settings-page, .terminal-page, .dogs-app, .blog-page, .calendar-app, .mail-app, .store-page, .linkedin-page, .mission-control, .guestbook-messages:not(.guestbook-messages--welcome)) {
+.device-scene--phone .device-screen--app :is(.music-page, .settings-page, .terminal-page, .dogs-app, .blog-page, .calendar-app, .mail-app, .store-page, .linkedin-page, .youtube-page, .mission-control, .guestbook-messages:not(.guestbook-messages--welcome)) {
     --app-safe-top: 0px;
     --app-safe-bottom: 0px;
   }

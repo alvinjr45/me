@@ -555,6 +555,7 @@
 .device-app-icon--jazzed img { padding: 3px; }
 .device-app-icon--store { background: linear-gradient(#30b9ff, #0964ee); }
 .device-app-icon--music { background: linear-gradient(#ff6176, #ee254b); }
+.device-app-icon--youtube { background: #e62117; }
 .device-app-icon--dogs { background: linear-gradient(#ffbd62, #ee8332); }
 .device-app-icon--blog { background: linear-gradient(#ffe477, #ffd33e 33%, #fffef9 33%, #f4f1e9); }
 .device-app-icon--photos { background: linear-gradient(#fff, #fafafa); }

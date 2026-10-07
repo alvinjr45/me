@@ -86,6 +86,7 @@ Repository builds, servers, deployments, and database changes are owner-managed.
 - [Mission Control](docs/mission-control.md)
 - [Admin and Supabase architecture](docs/admin-and-supabase.md)
 - [Calendar setup and behavior](docs/calendar.md)
+- [YouTube app and API setup](docs/youtube.md)
 - [Guestbook security and operations](docs/guestbook.md)
 - [Legacy and unused files](docs/legacy-components.md)
 

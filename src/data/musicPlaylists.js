@@ -1,5 +1,5 @@
 // Profile-visible playlists verified in Music; public Apple Music metadata snapshot.
-// Captured 2026-09-24. Tracks contain the first 15 public entries (or all when fewer).
+// Captured 2026-10-06. Tracks contain the first 15 public entries (or all when fewer).
 const musicPlaylists = [
   {
     "key": "michael",
@@ -227,8 +227,16 @@ const musicPlaylists = [
     "color": "#cf6274",
     "size": 68,
     "src": "https://embed.music.apple.com/us/playlist/thug/pl.u-A4Jmulm28oZ",
-    "artwork": "https://is1-ssl.mzstatic.com/image/thumb/SG-MQ-US-001-Image000001/v4/a5/68/cb/a568cbf8-627f-981b-2c0e-57f4ca946e46/image/400x400bb.jpg",
+    "artwork": "https://is1-ssl.mzstatic.com/image/thumb/SG-MQ-US-001-Image000001/v4/ef/2b/b5/ef2bb593-dd0d-74ae-d09f-323036b7eb5e/image/400x400bb.jpg",
     "tracks": [
+      {
+        "id": "1842255390",
+        "title": "Revenge (feat. Lil Gotit & 1300SAINT)",
+        "artist": "Young Thug",
+        "album": "UY SCUTI",
+        "duration": "3:25",
+        "url": "https://music.apple.com/us/album/revenge-feat-lil-gotit-1300saint/1842255351?i=1842255390"
+      },
       {
         "id": "1564367310",
         "title": "Take It to Trial (feat. Yak Gotti)",
@@ -340,14 +348,6 @@ const musicPlaylists = [
         "album": "SUPER SLIMEY",
         "duration": "2:39",
         "url": "https://music.apple.com/us/album/three/1298483081?i=1298483096"
-      },
-      {
-        "id": "1492389440",
-        "title": "Die Today",
-        "artist": "Young Thug",
-        "album": "So Much Fun (Deluxe)",
-        "duration": "3:00",
-        "url": "https://music.apple.com/us/album/die-today/1492389435?i=1492389440"
       }
     ]
   },
@@ -366,14 +366,6 @@ const musicPlaylists = [
         "album": "That! Feels Good!",
         "duration": "4:03",
         "url": "https://music.apple.com/us/album/pearls/1668868373?i=1668868380"
-      },
-      {
-        "id": "697669247",
-        "title": "Devil Woman",
-        "artist": "Cliff Richard",
-        "album": "I'm Nearly Famous (Remastered)",
-        "duration": "3:35",
-        "url": "https://music.apple.com/us/album/devil-woman/697669239?i=697669247"
       },
       {
         "id": "1842897454",
@@ -472,6 +464,14 @@ const musicPlaylists = [
         "url": "https://music.apple.com/us/album/sacrifice/1603171516?i=1603171533"
       },
       {
+        "id": "1869414366",
+        "title": "Mon Amour",
+        "artist": "Jessie Ware",
+        "album": "Superbloom",
+        "duration": "3:45",
+        "url": "https://music.apple.com/us/album/mon-amour/1869414259?i=1869414366"
+      },
+      {
         "id": "1792667018",
         "title": "LoveDrug",
         "artist": "Lady Gaga",
@@ -487,16 +487,8 @@ const musicPlaylists = [
     "color": "#729ddb",
     "size": 64,
     "src": "https://embed.music.apple.com/us/playlist/the-weeknd/pl.u-BpJesRv1kPN",
-    "artwork": "https://is1-ssl.mzstatic.com/image/thumb/SG-MQ-US-035-Image000001/v4/b6/94/2e/b6942e9a-ef94-b36d-fbfb-b8c000b90897/image/400x400bb.jpg",
+    "artwork": "https://is1-ssl.mzstatic.com/image/thumb/SG-MQ-US-035-Image000001/v4/33/9b/8b/339b8b48-aae5-5c0f-df44-9f9b3e39ad5e/image/400x400bb.jpg",
     "tracks": [
-      {
-        "id": "1603171893",
-        "title": "Is There Someone Else?",
-        "artist": "The Weeknd",
-        "album": "Dawn FM",
-        "duration": "3:19",
-        "url": "https://music.apple.com/us/album/is-there-someone-else/1603171516?i=1603171893"
-      },
       {
         "id": "1714909006",
         "title": "The Zone (feat. Drake)",
@@ -504,6 +496,14 @@ const musicPlaylists = [
         "album": "Trilogy",
         "duration": "6:58",
         "url": "https://music.apple.com/us/album/the-zone-feat-drake/1714908584?i=1714909006"
+      },
+      {
+        "id": "1603171893",
+        "title": "Is There Someone Else?",
+        "artist": "The Weeknd",
+        "album": "Dawn FM",
+        "duration": "3:19",
+        "url": "https://music.apple.com/us/album/is-there-someone-else/1603171516?i=1603171893"
       },
       {
         "id": "1579255925",
@@ -538,12 +538,12 @@ const musicPlaylists = [
         "url": "https://music.apple.com/us/album/die-for-you-remix/1673432330?i=1673432343"
       },
       {
-        "id": "1714908982",
-        "title": "House Of Balloons / Glass Table Girls",
+        "id": "1558942156",
+        "title": "House of Balloons / Glass Table Girls (Original)",
         "artist": "The Weeknd",
-        "album": "Trilogy",
+        "album": "House of Balloons (Original)",
         "duration": "6:47",
-        "url": "https://music.apple.com/us/album/house-of-balloons-glass-table-girls/1714908584?i=1714908982"
+        "url": "https://music.apple.com/us/album/house-of-balloons-glass-table-girls-original/1558941834?i=1558942156"
       },
       {
         "id": "1440826588",
@@ -2428,6 +2428,136 @@ const musicPlaylists = [
         "album": "ASTROWORLD",
         "duration": "2:30",
         "url": "https://music.apple.com/us/album/yosemite/1421241217?i=1421243212"
+      }
+    ]
+  },
+  {
+    "key": "cornrow-kenny",
+    "color": "#4b7bec",
+    "size": 44,
+    "title": "Cornrow Kenny",
+    "src": "https://embed.music.apple.com/us/playlist/cornrow-kenny/pl.u-PJxDIyKL02E",
+    "artwork": "https://is1-ssl.mzstatic.com/image/thumb/SG-MQ-US-037-Image000001/v4/9d/1d/2e/9d1d2ee7-9193-0536-f6e4-b159b94e762d/image/400x400bb.jpg",
+    "tracks": [
+      {
+        "id": "1471264138",
+        "title": "Compton (feat. Dr. Dre)",
+        "artist": "Kendrick Lamar",
+        "album": "good kid, m.A.A.d city (Deluxe)",
+        "duration": "4:08",
+        "url": "https://music.apple.com/us/album/compton-feat-dr-dre/1471264092?i=1471264138"
+      },
+      {
+        "id": "1440829895",
+        "title": "i",
+        "artist": "Kendrick Lamar",
+        "album": "To Pimp a Butterfly",
+        "duration": "5:36",
+        "url": "https://music.apple.com/us/album/i/1440828886?i=1440829895"
+      },
+      {
+        "id": "1440845054",
+        "title": "untitled 08 l 09.06.2014.",
+        "artist": "Kendrick Lamar",
+        "album": "untitled unmastered.",
+        "duration": "3:55",
+        "url": "https://music.apple.com/us/album/untitled-08-l-09-06-2014/1440844834?i=1440845054"
+      },
+      {
+        "id": "1744776350",
+        "title": "meet the grahams",
+        "artist": "Kendrick Lamar",
+        "album": "meet the grahams - Single",
+        "duration": "6:32",
+        "url": "https://music.apple.com/us/album/meet-the-grahams/1744776349?i=1744776350"
+      },
+      {
+        "id": "1440828906",
+        "title": "Wesley's Theory (feat. George Clinton & Thundercat)",
+        "artist": "Kendrick Lamar",
+        "album": "To Pimp a Butterfly",
+        "duration": "4:47",
+        "url": "https://music.apple.com/us/album/wesleys-theory-feat-george-clinton-thundercat/1440828886?i=1440828906"
+      },
+      {
+        "id": "1440881805",
+        "title": "FEAR.",
+        "artist": "Kendrick Lamar",
+        "album": "DAMN.",
+        "duration": "7:40",
+        "url": "https://music.apple.com/us/album/fear/1440881047?i=1440881805"
+      },
+      {
+        "id": "1443063993",
+        "title": "No More Parties in LA",
+        "artist": "Kanye West",
+        "album": "The Life of Pablo",
+        "duration": "6:14",
+        "url": "https://music.apple.com/us/album/no-more-parties-in-la/1443063578?i=1443063993"
+      },
+      {
+        "id": "1471264101",
+        "title": "Poetic Justice (feat. Drake)",
+        "artist": "Kendrick Lamar",
+        "album": "good kid, m.A.A.d city (Deluxe)",
+        "duration": "5:00",
+        "url": "https://music.apple.com/us/album/poetic-justice-feat-drake/1471264092?i=1471264101"
+      },
+      {
+        "id": "1744024751",
+        "title": "euphoria",
+        "artist": "Kendrick Lamar",
+        "album": "euphoria - Single",
+        "duration": "6:23",
+        "url": "https://music.apple.com/us/album/euphoria/1744024729?i=1744024751"
+      },
+      {
+        "id": "1440906939",
+        "title": "All The Stars",
+        "artist": "Kendrick Lamar, SZA",
+        "album": "Black Panther: The Album",
+        "duration": "3:52",
+        "url": "https://music.apple.com/us/album/all-the-stars/1440906927?i=1440906939"
+      },
+      {
+        "id": "1440881693",
+        "title": "LUST.",
+        "artist": "Kendrick Lamar",
+        "album": "DAMN.",
+        "duration": "5:07",
+        "url": "https://music.apple.com/us/album/lust/1440881047?i=1440881693"
+      },
+      {
+        "id": "1781270549",
+        "title": "heart pt. 6",
+        "artist": "Kendrick Lamar",
+        "album": "GNX",
+        "duration": "4:52",
+        "url": "https://music.apple.com/us/album/heart-pt-6/1781270319?i=1781270549"
+      },
+      {
+        "id": "1316706682",
+        "title": "Dedication (feat. Kendrick Lamar)",
+        "artist": "Nipsey Hussle",
+        "album": "Victory Lap",
+        "duration": "4:05",
+        "url": "https://music.apple.com/us/album/dedication-feat-kendrick-lamar/1316706552?i=1316706682"
+      },
+      {
+        "id": "1440829879",
+        "title": "The Blacker the Berry",
+        "artist": "Kendrick Lamar",
+        "album": "To Pimp a Butterfly",
+        "duration": "5:28",
+        "url": "https://music.apple.com/us/album/the-blacker-the-berry/1440828886?i=1440829879"
+      },
+      {
+        "id": "1440844989",
+        "title": "untitled 07 l 2014 - 2016",
+        "artist": "Kendrick Lamar",
+        "album": "untitled unmastered.",
+        "duration": "8:16",
+        "url": "https://music.apple.com/us/album/untitled-07-l-2014-2016/1440844834?i=1440844989"
       }
     ]
   }

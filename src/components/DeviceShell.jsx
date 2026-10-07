@@ -12,6 +12,7 @@ import Settings from '../pages/Settings';
 import AppStore from '../pages/AppStore';
 import LinkedIn from '../pages/LinkedIn';
 import Mail from '../pages/Mail';
+import YouTube from '../pages/YouTube';
 import MissionControl from '../pages/MissionControl';
 import SceneBackground from './SceneBackground';
 import PhoneBackGesture from './PhoneBackGesture';
@@ -45,13 +46,14 @@ export const desktopApps = [
   { key: 'admin', label: 'Mission Control', path: '/admin', description: 'Behind the scenes', utility: true },
   { key: 'settings', label: 'Settings', path: '/settings', description: 'Make it yours', utility: true },
   { key: 'instagram', label: 'Instagram', path: 'https://www.instagram.com/_ajt3_/', description: 'Follow me on Instagram', external: true },
+  { key: 'youtube', label: 'YouTube', path: '/youtube', description: 'Latest from AJT3 Tech' },
   { key: 'tech', label: 'Build', path: 'https://ajt3.website', description: 'Projects & experiments', external: true, downloadable: true },
   { key: 'newtrinity', label: 'New Trinity Missionary Baptist Church', homeLabel: 'NTMBC', path: 'https://www.newtrinity.org', description: 'Faith, community & connection', external: true, downloadable: true },
   { key: 'lattaco', label: 'Lattaco Welding', path: 'https://lattacowelding.com', description: 'Precision metalwork', external: true, downloadable: true },
   { key: 'jazzed', label: 'Jazzed To Be Jones', path: 'https://www.jazzedtobejones.com', description: 'Jazmine & Tyler', external: true, downloadable: true }
 ];
 
-const appPages = { tech: Tech, music: Music, dogs: Dogs, blog: Blog, resume: LinkedIn, photos: Photos, calendar: Calendar, mail: Mail, guestbook: Guestbook, store: AppStore, admin: MissionControl, terminal: Terminal, settings: Settings };
+const appPages = { youtube: YouTube, tech: Tech, music: Music, dogs: Dogs, blog: Blog, resume: LinkedIn, photos: Photos, calendar: Calendar, mail: Mail, guestbook: Guestbook, store: AppStore, admin: MissionControl, terminal: Terminal, settings: Settings };
 const phoneMediaQuery = '(max-width: 1024px), (max-height: 500px)';
 const phoneDockApps = desktopApps.slice(0, 4);
 
@@ -132,6 +134,7 @@ export function AppIcon({ name }) {
   }
 
   const paths = {
+    youtube: <><rect x="9" y="17" width="46" height="30" rx="9" fill="#fff" /><path d="m28 24 13 8-13 8Z" fill="#e62117" /></>,
     calendar: <>
       <rect width="64" height="64" rx="13" fill="#f8f8f5" />
       <path d="M0 13C0 6 6 0 13 0h38c7 0 13 6 13 13v8H0Z" fill="#ee654b" />
@@ -736,7 +739,7 @@ function DeviceShell({ children, home }) {
   const [pendingInstall, setPendingInstall] = useState(null);
   const canChooseDeviceView = !viewportIsPhone;
   const isPhone = viewportIsPhone || deviceView === 'mobile';
-  const [systemState, setSystemState] = useState(() => isPhone ? 'locked' : 'running');
+  const [systemState, setSystemState] = useState('locked');
   const [buildRedirect, setBuildRedirect] = useState(null);
   const isHome = pathname === '/';
   const activeApp = desktopApps.find((app) => pathname === app.path || pathname.startsWith(`${app.path}/`)) || (!isHome ? { key: 'page', label: 'Page', path: pathname } : null);

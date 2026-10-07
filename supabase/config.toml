@@ -12,3 +12,6 @@ verify_jwt = false
 
 [functions.admin-calendar]
 verify_jwt = false
+
+[functions.youtube-channel]
+verify_jwt = true

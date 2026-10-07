@@ -26,6 +26,7 @@
 .settings-page__account strong { display: block; font-size: 0.86rem; overflow-wrap: anywhere; }
 .settings-page__account div > span { display: block; margin-top: 3px; color: var(--color-muted-strong); font-size: 0.7rem; }
 .settings-page__navigation { display: grid; gap: 4px; }
+.settings-page__version { margin: 20px 8px 0; color: var(--color-muted-strong); font: 0.7rem var(--font-mono); line-height: 1.5; overflow-wrap: anywhere; }
 .settings-page__navigation button { display: flex; align-items: center; gap: 9px; min-width: 0; min-height: 38px; padding: 5px 8px; border: 0; border-radius: 6px; background: transparent; color: inherit; text-align: left; }
 .settings-page__navigation button:hover { background: var(--settings-control); }
 .settings-page__navigation button[aria-current='page'] { background: var(--color-main); color: #111; font-weight: 600; }

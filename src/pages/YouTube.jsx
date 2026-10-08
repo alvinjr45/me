@@ -78,7 +78,7 @@ function YouTube() {
     return (
       <main className="youtube-page app-view" aria-label="YouTube channel" aria-busy="true">
         <div className="youtube-scroll app-scroll">
-          <div className="youtube-banner"><span className="youtube-brand"><YouTubeIcon name="play" /><span>YouTube</span></span></div>
+          <header className="youtube-banner"><span className="youtube-brand"><YouTubeIcon name="play" /><span>YouTube</span></span><span className="youtube-banner__label">AJT3 / TECH</span></header>
           <p className="youtube-meta" role="status">Loading channel from YouTube...</p>
           <div className="youtube-loading" aria-hidden="true">
             <div className="youtube-channel__identity">
@@ -134,17 +134,22 @@ function YouTube() {
         <div className="youtube-sidebar__channel"><span>YOUR CHANNEL</span><p>@ajt3-tech</p></div>
       </nav>
       <div className="youtube-scroll app-scroll" aria-busy={loading}>
-        <div className="youtube-banner"><span className="youtube-brand"><YouTubeIcon name="play" /><span>YouTube</span></span></div>
+        <header className="youtube-banner"><span className="youtube-brand"><YouTubeIcon name="play" /><span>YouTube</span></span><span className="youtube-banner__label">AJT3 / TECH</span></header>
         <section className="youtube-channel">
           <div className="youtube-channel__identity">
             {channel?.thumbnail ? <img src={channel.thumbnail} alt="" className="youtube-avatar" /> : <span className="youtube-avatar youtube-avatar--fallback" aria-hidden="true">AJ</span>}
             <div>
+              <p className="youtube-channel__eyebrow">THE CHANNEL</p>
               <h1>{channel?.title || 'AJT3 Tech'}</h1>
-              <p className="youtube-meta">@ajt3-tech{channel?.subscriberCount != null && ` / ${count(channel.subscriberCount)} subscribers`}{channel?.videoCount != null && ` / ${count(channel.videoCount)} videos`}</p>
+              <div className="youtube-channel__stats">
+                <span className="youtube-channel__handle">@ajt3-tech</span>
+                {channel?.subscriberCount != null && <span><strong>{count(channel.subscriberCount)}</strong> subscribers</span>}
+                {channel?.videoCount != null && <span><strong>{count(channel.videoCount)}</strong> videos</span>}
+              </div>
               {channel?.description && <p className="youtube-channel__summary">{channel.description}</p>}
             </div>
           </div>
-          <a className="youtube-channel__link" href={`${youtubeChannelUrl}?sub_confirmation=1`} target="_blank" rel="noopener noreferrer" aria-label="Subscribe to this channel on YouTube">Subscribe</a>
+          <a className="youtube-channel__link" href={`${youtubeChannelUrl}?sub_confirmation=1`} target="_blank" rel="noopener noreferrer" aria-label="Subscribe to this channel on YouTube">Subscribe<YouTubeIcon name="external" /></a>
         </section>
         <nav className="youtube-channel-tabs" aria-label="Channel sections">
           <button aria-pressed={section === 'videos'} onClick={() => showSection('videos')}>Videos</button>

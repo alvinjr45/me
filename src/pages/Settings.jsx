@@ -11,7 +11,6 @@ import {
   backgroundChoices,
   deviceViewChoices,
   wallpaperChoices,
-  wallpaperSpeedChoices,
   usePhoneBack
 } from '../components/deviceSettings';
 import { SceneWindow } from '../components/SceneBackground';
@@ -20,9 +19,9 @@ import './Settings.css';
 
 const settingsCategories = [
   { key: 'system', label: 'General', keywords: 'clock time format account logout restart shutdown power', icon: SettingsRounded },
-  { key: 'appearance', label: 'Appearance', keywords: 'theme light dark auto accent color motion animation speed brightness intensity', icon: ContrastRounded },
-  { key: 'background', label: 'Background', keywords: 'scene alpine lake coastal retreat desert forest cabin city winter snowbound northern lights garden', icon: LandscapeRounded },
-  { key: 'wallpaper', label: 'Wallpaper', keywords: `desktop ${wallpaperChoices.map((choice) => `${choice.label} ${choice.description}`).join(' ')}`, icon: WallpaperRounded }
+  { key: 'appearance', label: 'Appearance', keywords: 'theme light dark auto accent color', icon: ContrastRounded },
+  { key: 'background', label: 'Background', keywords: `scene ${backgroundChoices.map((choice) => `${choice.label} ${choice.description}`).join(' ')}`, icon: LandscapeRounded },
+  { key: 'wallpaper', label: 'Wallpaper', keywords: `desktop motion animation speed brightness intensity ${wallpaperChoices.map((choice) => `${choice.label} ${choice.description}`).join(' ')}`, icon: WallpaperRounded }
 ];
 
 function SettingsIcon({ category }) {
@@ -138,14 +137,16 @@ function Settings() {
           </div>
         </div>
 
-        <div className="settings-page__preference">
-          <div><strong>Wallpaper speed</strong><p>Set the pace of animated wallpaper movement.</p></div>
-          <div className="settings-page__segments" role="group" aria-label="Wallpaper animation speed">
-            {wallpaperSpeedChoices.map((choice) => (
-              <button key={choice.key} type="button" aria-pressed={wallpaperSpeed === choice.key} onClick={() => setWallpaperSpeed(choice.key)}>{choice.label}</button>
-            ))}
-          </div>
+      </section>
+
+      <section className="settings-page__section" aria-labelledby="wallpaper-controls-title" hidden={activeCategory !== 'wallpaper'}>
+        <div className="settings-page__section-heading">
+          <h2 id="wallpaper-controls-title">Wallpaper &amp; Motion</h2>
         </div>
+        <label className="settings-page__range">
+          <span><strong>Motion speed</strong><small>{wallpaperSpeed}x</small></span>
+          <input type="range" min="0.25" max="4" step="0.05" value={wallpaperSpeed} disabled={!motion} aria-valuetext={`${wallpaperSpeed} times speed`} onChange={(event) => setWallpaperSpeed(Number(event.target.value))} />
+        </label>
 
         <label className="settings-page__range">
           <span><strong>Wallpaper brightness</strong><small>{100 - wallpaperDim}%</small></span>
@@ -158,7 +159,7 @@ function Settings() {
         </label>
 
         <div className="settings-page__preference">
-          <div><strong>Interface motion</strong><p>Turn window and wallpaper animations on or off.</p></div>
+          <div><strong>Interface motion</strong><p>Turn window, scene, and wallpaper animations on or off.</p></div>
           <button className="settings-page__switch" type="button" role="switch" aria-label="Enable interface motion" aria-checked={motion} onClick={() => setMotion((current) => !current)}><span /></button>
         </div>
       </section>

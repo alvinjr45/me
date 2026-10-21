@@ -20,7 +20,13 @@ export const wallpaperChoices = [
   { key: 'rain', label: 'Rain', description: 'Silver rain at midnight' },
   { key: 'horizon', label: 'Horizon', description: 'A still blue distance' },
   { key: 'ink', label: 'Ink', description: 'Indigo drifting into black' },
-  { key: 'solstice', label: 'Solstice', description: 'Golden rays through dusk' }
+  { key: 'solstice', label: 'Solstice', description: 'Golden rays through dusk' },
+  { key: 'plasma', label: 'Plasma', description: 'Electric orange and blue currents' },
+  { key: 'starlight', label: 'Starlight', description: 'An orbit through a field of stars' },
+  { key: 'coral', label: 'Coral', description: 'Warm coral over deep ocean blue' },
+  { key: 'contour', label: 'Contour', description: 'Luminous topographic rings' },
+  { key: 'moonstone', label: 'Moonstone', description: 'Pearlescent blue and violet' },
+  { key: 'ember', label: 'Ember', description: 'Slow sparks in volcanic darkness' }
 ];
 
 export const DeviceSettingsContext = createContext(null);
@@ -73,5 +79,8 @@ export const backgroundChoices = [
   { key: 'city', label: 'City After Dark', description: 'Floor-to-ceiling loft glass' },
   { key: 'winter', label: 'Snowbound', description: 'Frosted chalet windows' },
   { key: 'aurora', label: 'Northern Lights', description: 'A curved observatory canopy' },
-  { key: 'garden', label: 'Spring Garden', description: 'Open shoji garden doors' }
+  { key: 'garden', label: 'Spring Garden', description: 'Open shoji garden doors' },
+  { key: 'volcano', label: 'Volcanic Night', description: 'Ember-lit peaks through dark steel' },
+  { key: 'islands', label: 'Island Sunrise', description: 'A warm teak ocean pavilion' },
+  { key: 'moon', label: 'Lunar Observatory', description: 'A porthole above a silent crater field' }
 ];

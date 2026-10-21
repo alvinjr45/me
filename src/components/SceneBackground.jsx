@@ -1,6 +1,39 @@
 import React, { useId } from 'react';
 import './SceneBackground.css';
 
+function ObservatoryLandscape({ background, mobile = false }) {
+  return (
+    <svg className={`scene-background__landscape${mobile ? ' scene-background__landscape--mobile' : ''}`} viewBox={mobile ? '420 0 760 900' : '0 0 1600 900'} preserveAspectRatio="xMidYMid slice" focusable="false">
+      <path d="M0 0h1600v900H0z" fill="var(--scene-sky-top)" />
+      <g className="scene-background__stars" fill="#c8e2f2">
+        {[90, 230, 410, 580, 760, 930, 1100, 1290, 1480].map((x, index) => <circle key={x} cx={x} cy={60 + index % 4 * 63} r={index % 2 ? 2 : 3} />)}
+      </g>
+      {background === 'moon' && <>
+        <circle cx="1030" cy="220" r="94" fill="#497fa3" />
+        <path d="M955 200q70-80 128-12l-30 49-60-8-20 43" fill="#8dbdb7" />
+        <path d="M0 550 220 420 420 530 640 390 910 560 1250 420 1600 540v360H0Z" fill="#495565" />
+        <path d="M0 730q400-190 800-20t800-20v210H0Z" fill="#808b98" />
+        <g fill="#505e70" stroke="#a6b1bb" strokeWidth="6"><ellipse cx="700" cy="740" rx="155" ry="37" /><ellipse cx="1180" cy="855" rx="210" ry="45" /><ellipse cx="260" cy="800" rx="95" ry="24" /></g>
+      </>}
+      {background === 'volcano' && <>
+        <circle cx="1060" cy="190" r="48" fill="#e0c4ac" />
+        <path d="M0 690 370 360 650 650 880 300 1190 640 1410 430 1600 650v250H0Z" fill="#342b3a" />
+        <path d="m0 900 700-530h180l720 530Z" fill="#191e2b" />
+        <path className="scene-background__lava" d="m700 370 55 38 42-18 83-20-46 66 32 97-90 120 44 115-110 132h-62l105-158-24-110 82-115-25-72Z" fill="#f28b4b" />
+        <path d="M0 850q400-110 650 10t950-10v50H0Z" fill="#2c2530" />
+      </>}
+      {background === 'islands' && <>
+        <circle cx="1030" cy="260" r="76" fill="#ffd8a0" />
+        <path d="M0 430h1600v470H0Z" fill="#246b7b" />
+        <path d="m0 600 210-180 150 210 310-110 180 170H0Zm980 40 190-235 180 180 250-80v195H980Z" fill="#234d4d" />
+        <path d="m100 595 112-150 134 175Zm1000 38 70-200 105 169Z" fill="#426f59" />
+        <g className="scene-background__water" stroke="#b3d9c7" strokeWidth="5" opacity="0.5"><path d="M530 570h450m-390 65h350m-500 98h600m-380 90h300" /></g>
+        <path d="M0 840q370-90 700 60H0Z" fill="#b8a17c" />
+      </>}
+    </svg>
+  );
+}
+
 export function SceneLandscape({ background = 'alpine' }) {
   const id = useId();
   const skyId = `${id}-sky`;
@@ -9,6 +42,8 @@ export function SceneLandscape({ background = 'alpine' }) {
   const pineId = `${id}-pine`;
   const windowsId = `${id}-windows`;
   const auroraId = `${id}-aurora`;
+
+  if (['moon', 'volcano', 'islands'].includes(background)) return <ObservatoryLandscape background={background} />;
 
   return (
         <svg className="scene-background__landscape" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" focusable="false">
@@ -166,6 +201,8 @@ export function MobileSceneLandscape({ background = 'alpine' }) {
   const skyId = `${id}-mobile-sky`;
   const waterId = `${id}-mobile-water`;
   const auroraId = `${id}-mobile-aurora`;
+
+  if (['moon', 'volcano', 'islands'].includes(background)) return <ObservatoryLandscape background={background} mobile />;
 
   return (
     <svg className="scene-background__landscape scene-background__landscape--mobile" viewBox="0 0 430 760" preserveAspectRatio="xMidYMid slice" focusable="false">

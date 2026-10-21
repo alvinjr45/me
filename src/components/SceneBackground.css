@@ -493,3 +493,46 @@
   .device-scene--phone .scene-background__plant { left: 3%; }
   .device-scene--phone .scene-background__mug { right: 2%; }
 }
+.scene-theme--moon {
+  --scene-sky-top: #080f22;
+  --scene-wall-light: #394859;
+  --scene-wall-dark: #111923;
+  --scene-frame: #667786;
+  --scene-frame-rim: #afbdc5;
+  --scene-window-radius: 45%;
+  --scene-window-bars: none;
+  --scene-desk-light: #52616c;
+  --scene-desk-dark: #252e3a;
+}
+.scene-theme--volcano {
+  --scene-sky-top: #20182c;
+  --scene-wall-light: #51403f;
+  --scene-wall-dark: #1d1822;
+  --scene-frame: #292c36;
+  --scene-frame-rim: #8c6f60;
+  --scene-window-radius: 28px 28px 2px 2px;
+  --scene-desk-light: #76503f;
+  --scene-desk-dark: #34232a;
+}
+.scene-theme--islands {
+  --scene-sky-top: #849ca6;
+  --scene-wall-light: #63776a;
+  --scene-wall-dark: #213b3d;
+  --scene-frame: #735640;
+  --scene-frame-rim: #ba9871;
+  --scene-window-bars: none;
+  --scene-window-radius: 60px 60px 0 0;
+  --scene-desk-light: #a07c52;
+  --scene-desk-dark: #4b392b;
+}
+
+.scene-background__water { animation: scene-water var(--scene-motion-duration, 18s) ease-in-out infinite alternate; }
+.scene-background__stars, .scene-background__lava { animation: scene-shimmer var(--scene-motion-duration, 18s) ease-in-out infinite alternate; }
+@keyframes scene-water { to { transform: translateX(24px); opacity: 0.25; } }
+@keyframes scene-shimmer { to { opacity: 0.55; } }
+.device-scene[data-motion='off'] .scene-background *,
+.device-scene[data-motion='off'] .settings-page__background-preview * { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .scene-background__landscape, .scene-background__landscape * { animation: none !important; }
+}
+

@@ -250,6 +250,21 @@ body.blog-post-page--modal-open {
   line-height: 1.5;
 }
 
+@container app-viewport (min-width: 681px) {
+  .blog-post-page .blog-post-page__image-button .blog-post-page__image {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: 360px;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+
+  .blog-post-page .blog-post-page__image-button--media img {
+    max-height: 300px;
+  }
+}
+
 .blog-post-page__footer a {
   display: inline-flex;
   align-items: center;

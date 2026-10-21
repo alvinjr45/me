@@ -33,15 +33,15 @@ import './DeviceShell.css';
 import './AppWorkspace.css';
 
 export const desktopApps = [
+  { key: 'resume', label: 'Resume', path: '/resume', description: 'Professional profile & selected work' },
   { key: 'photos', label: 'Photos', path: '/photos', description: 'A little of my world' },
   { key: 'blog', label: 'Blog', path: '/blog', description: 'Notes from the build' },
   { key: 'guestbook', label: 'Guestbook', path: '/guestbook', description: 'Leave a little note' },
-  { key: 'calendar', label: 'Calendar', path: '/calendar', description: 'Make time for what matters', utility: true },
   { key: 'music', label: 'Music', path: '/music', description: 'The current rotation' },
-  { key: 'mail', label: 'Mail', path: '/mail', description: 'Start a conversation', utility: true },
   { key: 'dogs', label: 'Dogs', path: '/dogs', description: 'Drake & Josh' },
+  { key: 'mail', label: 'Mail', path: '/mail', description: 'Start a conversation', utility: true },
+  { key: 'calendar', label: 'Calendar', path: '/calendar', description: 'Make time for what matters', utility: true },
   { key: 'store', label: 'App Store', path: '/app-store', description: 'Find your next favorite', utility: true },
-  { key: 'resume', label: 'Resume', path: '/resume', description: 'Professional profile & selected work' },
   { key: 'terminal', label: 'Terminal', path: '/terminal', description: 'Command center', utility: true },
   { key: 'admin', label: 'Mission Control', path: '/admin', description: 'Behind the scenes', utility: true },
   { key: 'settings', label: 'Settings', path: '/settings', description: 'Make it yours', utility: true },
@@ -729,7 +729,10 @@ function DeviceShell({ children, home }) {
   const [appearance, setAppearance] = useState(() => getSavedChoice('ajt3-appearance', appearanceChoices, 'system'));
   const [deviceView, setDeviceView] = useState(() => getSavedChoice('ajt3-device-view', deviceViewChoices, 'auto'));
   const [accent, setAccent] = useState(() => getSavedChoice('ajt3-accent', accentChoices, 'signal'));
-  const [wallpaperSpeed, setWallpaperSpeed] = useState(() => getSavedChoice('ajt3-wallpaper-speed', wallpaperSpeedChoices, 'normal'));
+  const [wallpaperSpeed, setWallpaperSpeed] = useState(() => {
+    const previousSpeed = getSavedChoice('ajt3-wallpaper-speed', wallpaperSpeedChoices, 'normal');
+    return getSavedNumber('ajt3-motion-speed', { slow: 0.75, normal: 1.5, fast: 3 }[previousSpeed], 0.25, 4);
+  });
   const [wallpaperDim, setWallpaperDim] = useState(() => getSavedNumber('ajt3-wallpaper-dim', 18, 0, 65));
   const [wallpaperIntensity, setWallpaperIntensity] = useState(() => getSavedNumber('ajt3-wallpaper-intensity', 100, 60, 140));
   const [clock24, setClock24] = useState(() => getSavedBoolean('ajt3-clock24', false));
@@ -906,7 +909,7 @@ function DeviceShell({ children, home }) {
       window.localStorage.setItem('ajt3-appearance', appearance);
       window.localStorage.setItem('ajt3-device-view', deviceView);
       window.localStorage.setItem('ajt3-accent', accent);
-      window.localStorage.setItem('ajt3-wallpaper-speed', wallpaperSpeed);
+      window.localStorage.setItem('ajt3-motion-speed', String(wallpaperSpeed));
       window.localStorage.setItem('ajt3-wallpaper-dim', String(wallpaperDim));
       window.localStorage.setItem('ajt3-wallpaper-intensity', String(wallpaperIntensity));
       window.localStorage.setItem('ajt3-clock24', String(clock24));
@@ -1182,7 +1185,12 @@ function DeviceShell({ children, home }) {
       runSystemAction,
       registerPhoneBack
     }}>
-    <div data-testid="device-scene" className={`device-scene device-scene--${isPhone ? 'phone' : 'desktop'}`}>
+    <div data-testid="device-scene" data-motion={motion ? 'on' : 'off'} style={{
+      '--wallpaper-duration-one': `${17 / wallpaperSpeed}s`,
+      '--wallpaper-duration-two': `${23 / wallpaperSpeed}s`,
+      '--wallpaper-preview-duration': `${8 / wallpaperSpeed}s`,
+      '--scene-motion-duration': `${18 / wallpaperSpeed}s`
+    }} className={`device-scene device-scene--${isPhone ? 'phone' : 'desktop'}`}>
       <SceneBackground background={resolvedBackground} />
       <div className="device-scene__ambient" aria-hidden="true" />
       <div className="device-scene__monitor">
@@ -1217,7 +1225,7 @@ function DeviceShell({ children, home }) {
               <Link to="/" className="device-screen__brand" aria-label="AJ Thompson desktop home" onClick={showDesktop}>A/3</Link>
               <span className="device-screen__menu-title">{accountName}</span>
               <button type="button" className="device-screen__menu-action" onClick={() => { showDesktop(); navigate('/'); }}>Show desktop</button>
-              <Link to="/terminal" className="device-screen__menu-action">Terminal</Link>
+              <Link to="/resume" className="device-screen__menu-action">Resume</Link>
               <Link to="/settings" className="device-screen__menu-action">Settings</Link>
               <span className="device-screen__menu-spacer" />
               <span className="device-screen__online"><i /> online</span>

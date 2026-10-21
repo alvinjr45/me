@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useId, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Tech from '../pages/Tech';
 import Music from '../pages/Music';
@@ -122,8 +122,26 @@ const brandedAppIcons = {
   jazzed: '/images/app-store/jazzed-logo.png'
 };
 
+const appIconGradients = {
+  store: ['#30b9ff', '#0964ee'],
+  music: ['#ff6176', '#ee254b'],
+  dogs: ['#ffbd62', '#ee8332'],
+  blog: ['#ffe477', ['#ffd33e', '33%'], ['#fffef9', '33%'], '#f4f1e9'],
+  photos: ['#fff', '#fafafa'],
+  mail: ['#5fc8ff', '#087cf0'],
+  instagram: ['#ffd776', ['#f77737', '25%'], ['#e1306c', '50%'], ['#833ab4', '80%'], '#405de6'],
+  resume: ['#1686d9', '#075c9e'],
+  guestbook: ['#65dc68', '#20b942'],
+  terminal: ['#d1d5dc', '#8d95a1'],
+  settings: ['#e3e6eb', '#a6aeba'],
+  admin: ['#414957', '#222833']
+};
+
 export function AppIcon({ name }) {
+  const gradientId = `app-icon-${useId().replace(/:/g, '')}`;
   const brandedIcon = brandedAppIcons[name];
+  const gradient = appIconGradients[name];
+  const Gradient = name === 'instagram' ? 'radialGradient' : 'linearGradient';
 
   if (brandedIcon) {
     return (
@@ -228,6 +246,18 @@ export function AppIcon({ name }) {
   return (
     <span className={`device-app-icon device-app-icon--${name}`} aria-hidden="true">
       <svg viewBox="0 0 64 64" fill="none" strokeLinecap="round" strokeLinejoin="round" focusable="false">
+        {gradient && <>
+          <defs>
+            <Gradient id={gradientId} {...(name === 'instagram'
+              ? { cx: '25%', cy: '100%', r: '100%' }
+              : { x1: '0%', y1: '0%', x2: '0%', y2: '100%' })}>
+              {gradient.map((stop, index) => (
+                <stop key={index} offset={Array.isArray(stop) ? stop[1] : `${index / (gradient.length - 1) * 100}%`} stopColor={Array.isArray(stop) ? stop[0] : stop} />
+              ))}
+            </Gradient>
+          </defs>
+          <rect width="64" height="64" rx="13" fill={`url(#${gradientId})`} />
+        </>}
         {paths[name]}
       </svg>
     </span>

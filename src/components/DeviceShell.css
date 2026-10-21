@@ -549,20 +549,8 @@
 .device-app-icon--lattaco img { transform: scale(1.05); }
 .device-app-icon--jazzed { background: #fff; }
 .device-app-icon--jazzed img { padding: 3px; }
-.device-app-icon--store { background: linear-gradient(#30b9ff, #0964ee); }
-.device-app-icon--music { background: linear-gradient(#ff6176, #ee254b); }
 .device-app-icon--youtube { background: #e62117; }
-.device-app-icon--dogs { background: linear-gradient(#ffbd62, #ee8332); }
-.device-app-icon--blog { background: linear-gradient(#ffe477, #ffd33e 33%, #fffef9 33%, #f4f1e9); }
-.device-app-icon--photos { background: linear-gradient(#fff, #fafafa); }
 .device-app-icon--calendar { background: #f8f8f5; }
-.device-app-icon--mail { background: linear-gradient(#5fc8ff, #087cf0); }
-.device-app-icon--instagram { background: radial-gradient(circle at 25% 100%, #ffd776, #f77737 25%, #e1306c 50%, #833ab4 80%, #405de6); }
-.device-app-icon--resume { background: linear-gradient(#1686d9, #075c9e); }
-.device-app-icon--guestbook { background: linear-gradient(#65dc68, #20b942); }
-.device-app-icon--terminal { background: linear-gradient(#d1d5dc, #8d95a1); }
-.device-app-icon--settings { background: linear-gradient(#e3e6eb, #a6aeba); }
-.device-app-icon--admin { background: linear-gradient(#414957, #222833); }
 
 .device-screen__dock {
   position: absolute;

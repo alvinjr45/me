@@ -32,7 +32,6 @@ test.each([false, true])('opens policy entry links and navigates between policie
   }));
   window.history.replaceState(null, '', '/terms');
   render(<App />);
-  if (isPhone) fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
   expect(screen.getByRole('heading', { name: 'Terms and Conditions', level: 1 })).toBeInTheDocument();
   fireEvent.click(screen.getByRole('link', { name: 'Privacy Policy' }));
   expect(screen.getByRole('heading', { name: 'Privacy Policy', level: 1 })).toBeInTheDocument();
@@ -358,7 +357,8 @@ test.each([false, true])('opens a direct article link and keeps subsequent navig
   window.history.replaceState(null, '', '/blog/first-post?source=shared#details');
   const historyLength = window.history.length;
   render(<React.StrictMode><App /></React.StrictMode>);
-  if (isPhone) fireEvent.click(screen.getByRole('button', { name: 'Unlock as Guest' }));
+  expect(screen.queryByRole('button', { name: 'Unlock as Guest' })).not.toBeInTheDocument();
+  expect(screen.queryByRole('region', { name: 'Logged out' })).not.toBeInTheDocument();
   expect(screen.getByRole('region', { name: 'Blog app' })).toBeInTheDocument();
   expect(screen.getByRole('heading', { name: 'first-post?source=shared#details' })).toBeInTheDocument();
   if (!isPhone) expect(screen.getByRole('navigation', { name: 'Open a site app' })).toBeInTheDocument();
@@ -367,9 +367,22 @@ test.each([false, true])('opens a direct article link and keeps subsequent navig
   fireEvent.click(screen.getByRole('link', { name: 'Read first post' }));
   expect(screen.getByRole('heading', { name: 'first-post' })).toBeInTheDocument();
   expectHomeUrl(historyLength);
-  fireEvent.click(screen.getByRole('link', { name: 'Return to phone home screen' }));
+  fireEvent.click(screen.getAllByRole('link', { name: 'Return to phone home screen' })[0]);
   expect(screen.getByRole('navigation', { name: 'Open a site app' })).toBeInTheDocument();
   expectHomeUrl(historyLength);
+});
+
+test.each([false, true])('opens a direct Music link without login (phone: %s)', (isPhone) => {
+  window.matchMedia.mockImplementation((query) => ({
+    matches: isPhone && query.includes('max-width'),
+    addEventListener: jest.fn(), removeEventListener: jest.fn()
+  }));
+  window.history.replaceState(null, '', '/music');
+  render(<App />);
+  expect(screen.getByRole('region', { name: 'Music app' })).toBeInTheDocument();
+  expect(screen.getByRole('heading', { name: 'Music content' })).toBeInTheDocument();
+  expect(screen.queryByRole('region', { name: 'Logged out' })).not.toBeInTheDocument();
+  expect(window.location.pathname).toBe('/');
 });
 
 test('terminal navigation opens an app without changing the home URL', async () => {

@@ -106,15 +106,12 @@ function YouTube() {
         </nav>
         <div className="youtube-scroll app-scroll" key={selected.id}>
           <article className="youtube-watch youtube-watch--page">
-            {selected.embeddable ? <iframe
-              src={`https://www.youtube-nocookie.com/embed/${selected.id}`}
-              title={selected.title}
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            /> : <p>This video is available to watch on YouTube.</p>}
+            <a className="youtube-watch__video" href={`https://www.youtube.com/watch?v=${selected.id}`} target="_blank" rel="noopener noreferrer" aria-label={`Watch ${selected.title} on YouTube (opens in a new tab)`}>
+              <img src={selected.thumbnail} alt="" />
+              <span className="youtube-watch__play"><YouTubeIcon name="play" /></span>
+            </a>
             <h1 ref={watchTitleRef} tabIndex={-1}>{selected.title}</h1>
             <p className="youtube-meta">{channel?.title}{selected.viewCount != null && ` / ${count(selected.viewCount)} views`} / <time dateTime={selected.publishedAt}>{new Date(selected.publishedAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</time></p>
-            <a className="youtube-watch__external" href={`https://www.youtube.com/watch?v=${selected.id}`} target="_blank" rel="noopener noreferrer">Watch on YouTube</a>
             <section className="youtube-watch__description" aria-labelledby="youtube-description-heading">
               <h2 id="youtube-description-heading">Description</h2>
               <p>{selected.description || 'No description provided.'}</p>

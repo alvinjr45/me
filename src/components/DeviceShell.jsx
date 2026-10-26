@@ -772,7 +772,12 @@ function DeviceShell({ children, home }) {
   const [pendingInstall, setPendingInstall] = useState(null);
   const canChooseDeviceView = !viewportIsPhone;
   const isPhone = viewportIsPhone || deviceView === 'mobile';
-  const [systemState, setSystemState] = useState('locked');
+  const [systemState, setSystemState] = useState(() => {
+    const isPublicAppEntry = desktopApps.some((app) => !app.external && app.key !== 'admin'
+      && (pathname === app.path || pathname.startsWith(`${app.path}/`)))
+      || ['/tech', '/terms', '/privacy'].includes(pathname);
+    return isPublicAppEntry ? 'running' : 'locked';
+  });
   const [buildRedirect, setBuildRedirect] = useState(null);
   const isHome = pathname === '/';
   const activeApp = desktopApps.find((app) => pathname === app.path || pathname.startsWith(`${app.path}/`)) || (!isHome ? { key: 'page', label: 'Page', path: pathname } : null);

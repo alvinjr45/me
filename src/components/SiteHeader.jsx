@@ -39,11 +39,7 @@ function SiteHeader() {
     <>
       <header className="site-header">
         <NavLink className="site-header__brand" to="/" aria-label="AJT3 home">
-          <span className="site-header__brand-mark" aria-hidden="true">A/3</span>
-          <span className="site-header__brand-copy">
-            <strong>AJT3</strong>
-            <small>personal.system</small>
-          </span>
+          <img className="site-header__brand-logo" src={`${process.env.PUBLIC_URL}/images/brand/ajt3-logo.png`} width="160" height="42" alt="" />
         </NavLink>
 
         <nav id="primary-navigation" className={`site-header__nav${isMenuOpen ? ' site-header__nav--open' : ''}`} aria-label="Primary navigation">

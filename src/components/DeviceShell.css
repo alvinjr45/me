@@ -461,6 +461,9 @@
   font-weight: 900;
 }
 
+.device-screen__brand img { display: block; width: 80px; height: 21px; object-fit: contain; }
+.device-screen__dock-home img { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: inherit; }
+
 .device-screen__menu-title { font-weight: 700; }
 .device-screen__menu-action {
   padding: 3px 5px;
@@ -1170,7 +1173,7 @@
 .device-system-screen--off { background: #010203; }
 .device-system-screen--boot { align-content: center; gap: 1rem; }
 .device-system-screen--boot p { margin: 0; color: #9ba8b3; font: 0.7rem var(--font-mono); }
-.device-system-screen__logo { border: 0; border-radius: 20%; background: #0e1822; color: var(--color-main); box-shadow: none; }
+.device-system-screen__logo { width: min(240px, 65%); height: auto; aspect-ratio: auto; object-fit: contain; border: 0; border-radius: 0; background: transparent; box-shadow: none; }
 .device-system-screen__spinner { width: 78px; height: 3px; overflow: hidden; border-radius: 99px; background: #202932; }
 .device-system-screen__spinner::after {
   content: '';

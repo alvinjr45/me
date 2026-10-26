@@ -581,7 +581,7 @@ function SystemScreen({ state, isPhone, time, date, access, profileImage, onGues
   if (state === 'restarting' || state === 'booting') {
     return (
       <section className="device-system-screen device-system-screen--boot" role="status" aria-live="polite">
-        <span className="device-system-screen__logo" aria-hidden="true">A/3</span>
+        <img className="device-system-screen__logo" src={`${process.env.PUBLIC_URL}/images/brand/ajt3-logo.png`} alt="AJT3" />
         <span className="device-system-screen__spinner" aria-hidden="true" />
         <p>{state === 'restarting' ? 'Restarting' : 'Starting up'}</p>
       </section>
@@ -1252,7 +1252,7 @@ function DeviceShell({ children, home }) {
               inert={phoneLocked || buildRedirect || guestDenied ? '' : undefined}
             >
             <header className="device-screen__menu">
-              <Link to="/" className="device-screen__brand" aria-label="AJ Thompson desktop home" onClick={showDesktop}>A/3</Link>
+              <Link to="/" className="device-screen__brand" aria-label="AJ Thompson desktop home" onClick={showDesktop}><img src={`${process.env.PUBLIC_URL}/images/brand/ajt3-logo.png`} width="100" height="26" alt="" /></Link>
               <span className="device-screen__menu-title">{accountName}</span>
               <button type="button" className="device-screen__menu-action" onClick={() => { showDesktop(); navigate('/'); }}>Show desktop</button>
               <Link to="/resume" className="device-screen__menu-action">Resume</Link>
@@ -1331,7 +1331,7 @@ function DeviceShell({ children, home }) {
 
             <DeviceDock isPhone={isPhone} motion={motion} inactive={isPhone && !isHome}>
               {!isPhone && <>
-              <Link className={`device-screen__dock-home${isHome ? ' device-screen__dock-home--active' : ''}`} to="/" aria-label="Show desktop" onClick={showDesktop}>A/3</Link>
+              <Link className={`device-screen__dock-home${isHome ? ' device-screen__dock-home--active' : ''}`} to="/" aria-label="Show desktop" onClick={showDesktop}><img src={`${process.env.PUBLIC_URL}/images/brand/ajt3-icon-192.png`} width="38" height="38" alt="" /></Link>
               <span className="device-screen__dock-divider" aria-hidden="true" />
               </>}
               {(isPhone ? phoneDockApps : desktopApps.filter((app) => !app.downloadable)).map((app) => (

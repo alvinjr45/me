@@ -28,6 +28,7 @@ function YouTube() {
   const [section, setSection] = useState('videos');
   const requestRef = useRef(null);
   const watchTitleRef = useRef(null);
+  const featuredVideo = videos[0];
   usePhoneBack(() => setSelected(null), Boolean(selected), 'Back to channel');
 
   useEffect(() => {
@@ -163,16 +164,33 @@ function YouTube() {
           {channel?.videoCount != null && <p className="youtube-meta">{count(channel.videoCount)} public videos</p>}
         </section>}
 
+        {section === 'videos' && featuredVideo && <section className="youtube-featured" aria-labelledby="youtube-featured-heading">
+          <div className="youtube-feed__heading">
+            <h2 id="youtube-featured-heading">Featured</h2>
+            <span className="youtube-feed__chip">Latest upload</span>
+          </div>
+          <button className="youtube-video youtube-featured__video" onClick={() => setSelected(featuredVideo)} aria-label={`Watch ${featuredVideo.title}`}>
+            <div className="youtube-video__image"><img src={featuredVideo.thumbnail} alt="" /></div>
+            <div className="youtube-featured__details">
+              <span className="youtube-video__channel">{channel?.title || 'AJT3 Tech'}</span>
+              <h3>{featuredVideo.title}</h3>
+              <p>{featuredVideo.viewCount != null && `${count(featuredVideo.viewCount)} views / `}<time dateTime={featuredVideo.publishedAt}>{new Date(featuredVideo.publishedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</time></p>
+              {featuredVideo.description && <p className="youtube-featured__description">{featuredVideo.description}</p>}
+              <span className="youtube-featured__action">Watch video</span>
+            </div>
+          </button>
+        </section>}
+
         {section === 'videos' && <section className="youtube-feed" aria-labelledby="youtube-videos-heading">
           <div className="youtube-feed__heading">
-            <h2 id="youtube-videos-heading">Latest uploads</h2>
+            <h2 id="youtube-videos-heading">{featuredVideo ? 'More uploads' : 'Latest uploads'}</h2>
             <span className="youtube-feed__chip">Newest first</span>
           </div>
           {error && <div className="youtube-notice" role="alert"><p>{error}</p><button className="app-control" disabled={loading} onClick={() => nextPage && videos.length ? loadMore() : setRetry((value) => value + 1)}>Try again</button></div>}
           {loading && <p className="youtube-meta" role="status">Loading videos from YouTube...</p>}
           {!loading && !error && !videos.length && <p className="youtube-meta">No public uploads yet.</p>}
           <div className="youtube-grid">
-            {videos.map((video) => <button className="youtube-video" key={video.id} onClick={() => setSelected(video)} aria-label={`Watch ${video.title}`}>
+            {videos.slice(1).map((video) => <button className="youtube-video" key={video.id} onClick={() => setSelected(video)} aria-label={`Watch ${video.title}`}>
               <div className="youtube-video__image"><img src={video.thumbnail} alt="" loading="lazy" /></div>
               <div className="youtube-video__details">
                 {channel?.thumbnail && <img className="youtube-video__avatar" src={channel.thumbnail} alt="" loading="lazy" />}

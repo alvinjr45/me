@@ -4,7 +4,7 @@ import './FullWidhtImg.css'
 
 
 function FullWidhtImg() {
-    const heroImage = `${process.env.PUBLIC_URL}/images/logos/aj-thompson-high-resolution-logo.png`;
+    const heroImage = `${process.env.PUBLIC_URL}/images/brand/ajt3-logo.png`;
 
     return (
         <div

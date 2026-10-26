@@ -21,6 +21,13 @@
   width: fit-content;
 }
 
+.site-header__brand-logo {
+  display: block;
+  width: clamp(110px, 18vw, 160px);
+  height: auto;
+  object-fit: contain;
+}
+
 .site-header__brand-mark {
   display: grid;
   place-items: center;
